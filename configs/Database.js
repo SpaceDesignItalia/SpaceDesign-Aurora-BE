@@ -1,11 +1,11 @@
 // db.js
-const mysql = require("mysql");
+const { Pool } = require("pg");
 
-const db = mysql.createPool({
+const db = new Pool({
+  user: "postgres",
   host: "localhost",
-  user: "root",
-  password: "",
-  database: "tenutefarina",
+  database: "SpaceDesignAurora",
+  password: "1234",
 });
 
 module.exports = db;
