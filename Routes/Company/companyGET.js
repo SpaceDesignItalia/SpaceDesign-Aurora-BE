@@ -17,6 +17,10 @@ const companyGET = (db) => {
   router.get("/SearchCompanyByName", (req, res) => {
     CompanyController.searchCompanyByName(req, res, db);
   });
+
+  router.get("/GetCompanyMembersById", (req, res) => {
+    CompanyController.getCompanyMembersById(req, res, db);
+  });
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

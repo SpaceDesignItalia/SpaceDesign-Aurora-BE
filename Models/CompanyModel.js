@@ -42,6 +42,24 @@ class CompanyModel {
     });
   }
 
+  static getCompanyMembersById(db, CompanyId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "CustomerId", CONCAT("CustomerName",' ',"CustomerSurname") CustomerFullName, "CustomerEmail", "CustomerPhone"
+      FROM public."Customer"
+      INNER JOIN public."CustomerCompany" USING("CustomerId")
+      INNER JOIN public."Company" USING("CompanyId") 
+      WHERE "CompanyId" = $1 `;
+
+      db.query(query, [CompanyId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static addCompany(companyData, db) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Company"("CompanyName", "CompanyAddress", "CompanyEmail", "CompanyPhone")

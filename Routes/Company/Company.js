@@ -6,7 +6,7 @@ const companyPOST = require("./companyPOST");
 const companyUPDATE = require("./companyUPDATE");
 const companyDELETE = require("./companyDELETE");
 
-const Staffer = (db) => {
+const Company = (db) => {
   router.use("/GET", companyGET(db)); // Passa il database a stafferGET
   router.use("/POST", companyPOST(db)); // Passa il database a stafferPOST
   router.use("/UPDATE", companyUPDATE(db)); // Passa il database a stafferUPDATE
@@ -14,4 +14,4 @@ const Staffer = (db) => {
   return router;
 };
 
-module.exports = Staffer;
+module.exports = Company;

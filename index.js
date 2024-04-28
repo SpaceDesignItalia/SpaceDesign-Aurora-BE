@@ -9,6 +9,7 @@ const http = require("http");
 const createStafferRoutes = require("./Routes/Staffer/Staffer");
 const createPermissionRoutes = require("./Routes/Permission/Permission");
 const createCompanyRoutes = require("./Routes/Company/Company");
+const createCustomerRoutes = require("./Routes/Customer/Customer");
 
 const app = express();
 app.use(express.static("public"));
@@ -43,6 +44,7 @@ const server = http.createServer(app);
 app.use(PREFIX + "/Staffer", createStafferRoutes(db));
 app.use(PREFIX + "/Permission", createPermissionRoutes(db));
 app.use(PREFIX + "/Company", createCompanyRoutes(db));
+app.use(PREFIX + "/Customer", createCustomerRoutes(db));
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);

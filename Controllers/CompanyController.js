@@ -39,6 +39,17 @@ class CompanyController {
     }
   }
 
+  static async getCompanyMembersById(req, res, db) {
+    try {
+      const CompanyId = req.query.CompanyId;
+      const companyMembers = await Company.getCompanyMembersById(db, CompanyId);
+      res.status(200).json(companyMembers);
+    } catch (error) {
+      console.error("Errore nel recupero dei membri:", error);
+      res.status(500).send("Recupero dei membri fallita");
+    }
+  }
+
   static async addCompany(req, res, db) {
     try {
       const companyData = req.body;
@@ -65,10 +76,10 @@ class CompanyController {
     try {
       const CompanyId = req.query.CompanyId;
       await Company.deleteCompany(db, CompanyId);
-      res.status(200).send("Azienda modificata con successo.");
+      res.status(200).send("Azienda eliminata con successo.");
     } catch (error) {
-      console.error("Errore nel'aggiornamento dell'azienda:", error);
-      res.status(500).send("Aggiornamento dell'azienda fallita");
+      console.error("Errore nell'eliminazione dell'azienda:", error);
+      res.status(500).send("Eliminazione dell'azienda fallita");
     }
   }
 }
