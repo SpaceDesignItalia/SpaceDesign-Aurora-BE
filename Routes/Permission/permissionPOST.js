@@ -3,17 +3,14 @@ const express = require("express");
 const router = express.Router();
 const PermissionController = require("../../Controllers/PermissionController");
 
-const permissionGET = (db) => {
+const permissionPOST = (db) => {
   // Definisci le route GET qui
-  router.get("/GetPermissionGroups", (req, res) => {
-    PermissionController.getAllPermissionsGroups(req, res, db);
-  });
 
-  router.get("/GetAllPermissions", (req, res) => {
-    PermissionController.getAllPermissions(req, res, db);
+  router.post("/AddRole", (req, res) => {
+    PermissionController.addRole(req, res, db);
   });
 
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
-module.exports = permissionGET;
+module.exports = permissionPOST;
