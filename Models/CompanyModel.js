@@ -103,13 +103,11 @@ class CompanyModel {
     });
   }
 
-  static deleteCompany(db, CompanyId) {
+  static deleteCompany(db, CompanyData) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."Company" WHERE "CompanyId" = $1`;
 
-      const values = [CompanyId];
-
-      db.query(query, values, (error, result) => {
+      db.query(query, [CompanyData.CompanyId], (error, result) => {
         if (error) {
           reject(error);
         } else {

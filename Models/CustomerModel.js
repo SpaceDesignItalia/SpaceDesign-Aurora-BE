@@ -20,7 +20,7 @@ class CustomerModel {
     return new Promise((resolve, reject) => {
       const query = `SELECT "CustomerId", "CustomerName", "CustomerSurname", "CustomerEmail", "CustomerPhone", "CompanyId"
       FROM public."Customer"
-      INNER JOIN public."CustomerCompany" USING("CustomerId")
+      LEFT JOIN public."CustomerCompany" USING("CustomerId")
       WHERE "CustomerId" = $1;`;
 
       db.query(query, [CustomerId], (error, result) => {
@@ -132,17 +132,40 @@ class CustomerModel {
         if (error) {
           reject(error);
         } else {
-          const query = `UPDATE public."CustomerCompany" SET "CompanyId" = $1 WHERE "CustomerId" = $2 AND "CompanyId" = $3`;
-          const values = [
-            CustomerData.CompanyId,
-            CustomerData.CustomerId,
-            OldCompanyId,
-          ];
-          db.query(query, values, (error, result) => {
+          const query = `SELECT "CompanyId" FROM public."CustomerCompany" WHERE "CustomerId" = $1`;
+          db.query(query, [CustomerData.CustomerId], (error, result) => {
             if (error) {
               reject(error);
             } else {
-              resolve(result.rows);
+              if (result.CompanyId) {
+                const query = `UPDATE public."CustomerCompany" SET "CompanyId" = $1 WHERE "CustomerId" = $2 AND "CompanyId" = $3`;
+                const values = [
+                  CustomerData.CompanyId,
+                  CustomerData.CustomerId,
+                  OldCompanyId,
+                ];
+                db.query(query, values, (error, result) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(result.rows);
+                  }
+                });
+              } else {
+                const query = `INSERT INTO public."CustomerCompany"("CustomerId", "CompanyId")
+                VALUES ($1, $2)`;
+                const values = [
+                  CustomerData.CustomerId,
+                  CustomerData.CompanyId,
+                ];
+                db.query(query, values, (error, result) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(result.rows);
+                  }
+                });
+              }
             }
           });
         }
@@ -150,13 +173,11 @@ class CustomerModel {
     });
   }
 
-  static deleteCustomer(db, CustomerId) {
+  static deleteCustomer(db, CustomerData) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."Customer" WHERE "CustomerId" = $1`;
 
-      const values = [CustomerId];
-
-      db.query(query, values, (error, result) => {
+      db.query(query, [CustomerData.CustomerId], (error, result) => {
         if (error) {
           reject(error);
         } else {
