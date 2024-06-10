@@ -1,10 +1,14 @@
 // stafferGET.js
 const express = require("express");
 const router = express.Router();
+const StafferController = require("../../Controllers/StafferController");
 
 const stafferDELETE = (db) => {
   // Definisci le route DELETE qui
 
+  router.delete("/DeleteStaffer", (req, res) => {
+    StafferController.deleteStaffer(req, res, db);
+  });
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
