@@ -74,5 +74,39 @@ class EmailService {
       console.log("Message sent: %s", info.messageId);
     });
   }
+
+  static sendCustomerWelcomeMail(email, name, surname, password) {
+    const emailTemplatePath = path.join(
+      __dirname,
+      "EmailTemplate/WelcomeCustomerModel.html"
+    );
+    const emailTemplate = fs.readFileSync(emailTemplatePath, "utf-8");
+
+    let htmlContent = emailTemplate
+      .replace("${name}", name)
+      .replace("${surname}", surname)
+      .replace("${email}", email)
+      .replace("${password}", password);
+
+    const sendCustomerWelcomeMail = {
+      from: `Space Design Italia <${mailData.mail}>`,
+      to: email,
+      subject: "Benvenuto nel mondo di Space Design Italia!",
+      text:
+        "Caro/a " +
+        name +
+        " " +
+        surname +
+        ",\n\nSiamo entusiasti di darti il benvenuto nel fantastico mondo di Space Design Italia! Non vediamo l'ora di iniziare questa avventura insieme e creare qualcosa di straordinario! 🚀✨",
+      html: htmlContent,
+    };
+
+    transporter.sendMail(sendCustomerWelcomeMail, (error, info) => {
+      if (error) {
+        return console.log(error);
+      }
+      console.log("Message sent: %s", info.messageId);
+    });
+  }
 }
 module.exports = EmailService;

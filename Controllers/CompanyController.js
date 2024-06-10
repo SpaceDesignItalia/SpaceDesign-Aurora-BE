@@ -74,8 +74,8 @@ class CompanyController {
 
   static async deleteCompany(req, res, db) {
     try {
-      const CompanyId = req.query.CompanyId;
-      await Company.deleteCompany(db, CompanyId);
+      const CompanyData = req.query.CompanyData;
+      await Company.deleteCompany(db, CompanyData);
       res.status(200).send("Azienda eliminata con successo.");
     } catch (error) {
       console.error("Errore nell'eliminazione dell'azienda:", error);

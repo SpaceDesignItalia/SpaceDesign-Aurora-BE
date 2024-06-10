@@ -1,4 +1,5 @@
 // controller/PermissionController.js
+const EmailService = require("../middlewares/EmailService/EmailService");
 const Customer = require("../Models/CustomerModel");
 
 class CustomerController {
@@ -15,8 +16,8 @@ class CustomerController {
   static async getCustomerById(req, res, db) {
     try {
       const CustomerId = req.query.CustomerId;
-      const companies = await Customer.getCustomerById(db, CustomerId);
-      res.status(200).json(companies);
+      const customer = await Customer.getCustomerById(db, CustomerId);
+      res.status(200).json(customer);
     } catch (error) {
       console.error("Errore nel recupero del cliente:", error);
       res.status(500).send("Recupero del cliente fallita");
@@ -50,8 +51,14 @@ class CustomerController {
 
   static async addCustomer(req, res, db) {
     try {
-      const customerData = req.body;
+      const customerData = req.body.customerData;
       await Customer.addCustomer(db, customerData);
+      EmailService.sendCustomerWelcomeMail(
+        customerData.CustomerEmail,
+        customerData.CustomerName,
+        customerData.CustomerSurname,
+        customerData.CustomerPassword
+      );
       res.status(200).send("Cliente aggiunto con successo.");
     } catch (error) {
       console.error("Error nell'aggiungere il cliente:", error);
@@ -73,8 +80,8 @@ class CustomerController {
 
   static async deleteCustomer(req, res, db) {
     try {
-      const CustomerId = req.query.CustomerId;
-      await Customer.deleteCustomer(db, CustomerId);
+      const CustomerData = req.query.CustomerData;
+      await Customer.deleteCustomer(db, CustomerData);
       res.status(200).send("Cliente eliminato con successo.");
     } catch (error) {
       console.error("Errore nell'eliminazione del cliente:", error);
