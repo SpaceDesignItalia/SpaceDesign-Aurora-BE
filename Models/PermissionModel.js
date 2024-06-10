@@ -31,6 +31,20 @@ class PermissionModel {
 
   static async getAllRoles(db) {
     return new Promise((resolve, reject) => {
+      const query = `SELECT "RoleId","RoleName","RoleDescription" FROM public."Role"`;
+
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async addRole(db, RoleData, RolePermissionData) {
+    return new Promise((resolve, reject) => {
       const query = `SELECT "RoleId", "RoleName", "RoleDescription" FROM "Role" ORDER BY "RoleId"`;
 
       db.query(query, (error, result) => {

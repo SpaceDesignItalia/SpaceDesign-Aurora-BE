@@ -9,6 +9,18 @@ const stafferGET = (db) => {
   router.get("/GetAllStaffers", (req, res) => {
     StafferController.getAllStaffers(res, db);
   });
+
+  router.get("/GetStafferById", (req, res) => {
+    StafferController.getStafferById(req, res, db);
+  });
+
+  router.get("/GetStafferRoleById", (req, res) => {
+    StafferController.getStafferRoleById(req, res, db);
+  });
+
+  router.get("/SearchStafferByEmail", (req, res) => {
+    StafferController.searchStafferByEmail(req, res, db);
+  });
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
