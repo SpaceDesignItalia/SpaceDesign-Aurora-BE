@@ -25,6 +25,10 @@ const permissionGET = (db) => {
     PermissionController.searchRoleByName(req, res, db);
   });
 
+  router.get("/GetPermissionsByUserRole", (req, res) => {
+    PermissionController.getPermissionsByUserRole(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

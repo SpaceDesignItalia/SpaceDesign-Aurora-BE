@@ -25,11 +25,20 @@ class AuthenticationController {
 
       res.status(200).json({
         message: "Login avvenuto con successo",
-        groups: account.groups,
       });
     } catch (error) {
       console.error("Errore nel login:", error);
       res.status(500).send("Recupero dell'account fallito");
+    }
+  }
+
+  static async GetSessionData(req, res) {
+    // Verifica se la sessione è stata creata
+    if (req.session.account) {
+      // Verifica se l'utente è autenticato
+      return res.status(200).json(req.session.account);
+    } else {
+      return res.status(401).json({ error: "Non autorizzato" });
     }
   }
 

@@ -20,7 +20,7 @@ class StafferModel {
               reject(false);
             }
           } else {
-            resolve(true);
+            resolve(false);
           }
         }
       });

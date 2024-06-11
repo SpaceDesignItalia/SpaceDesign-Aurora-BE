@@ -43,6 +43,17 @@ class PermissionController {
     }
   }
 
+  static async getPermissionsByUserRole(req, res, db) {
+    try {
+      const StafferId = req.query.StafferId;
+      const roles = await Permission.getPermissionsByUserRole(db, StafferId);
+      res.status(200).json(roles);
+    } catch (error) {
+      console.error("Errore nel recupero dei permessi:", error);
+      res.status(500).send("Recupero dei permessi fallita");
+    }
+  }
+
   static async searchRoleByName(req, res, db) {
     try {
       const RoleName = req.query.RoleName;

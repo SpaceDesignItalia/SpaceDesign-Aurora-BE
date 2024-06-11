@@ -43,6 +43,25 @@ class PermissionModel {
     });
   }
 
+  static async getPermissionsByUserRole(db, StafferId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "PermissionAction" FROM public."Permission"
+      INNER JOIN "RolePermission" USING("PermissionId")
+      INNER JOIN "Role" USING("RoleId")
+      INNER JOIN "StafferRole" USING("RoleId")
+      INNER JOIN "Staffer" USING("StafferId")
+      WHERE "StafferId" = $1`;
+
+      db.query(query, [StafferId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static async addRole(db, RoleData, RolePermissionData) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "RoleId", "RoleName", "RoleDescription" FROM "Role" ORDER BY "RoleId"`;
