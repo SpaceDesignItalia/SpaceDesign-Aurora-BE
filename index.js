@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const http = require("http");
 
 //Main Routes declaration
+const createAuthenticationRoutes = require("./Routes/Authentication/Authentication");
 const createStafferRoutes = require("./Routes/Staffer/Staffer");
 const createPermissionRoutes = require("./Routes/Permission/Permission");
 const createCompanyRoutes = require("./Routes/Company/Company");
@@ -32,7 +33,7 @@ app.use(
     saveUninitialized: false,
     resave: false,
     cookie: {
-      maxAge: 1080000,
+      maxAge: 60 * 60 * 1000,
     },
   })
 );
@@ -41,6 +42,7 @@ app.use(cookieParser());
 const server = http.createServer(app);
 
 //Main routes
+app.use(PREFIX + "/Authentication", createAuthenticationRoutes(db));
 app.use(PREFIX + "/Staffer", createStafferRoutes(db));
 app.use(PREFIX + "/Permission", createPermissionRoutes(db));
 app.use(PREFIX + "/Company", createCompanyRoutes(db));
