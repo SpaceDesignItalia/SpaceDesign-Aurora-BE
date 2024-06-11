@@ -80,10 +80,11 @@ class PermissionController {
 
   static async updateRole(req, res, db) {
     try {
+      const RoleId = req.body.RoleId;
       const RoleData = req.body.RoleData;
       const RolePermissionData = req.body.RolePermissionData;
 
-      await Permission.updateRole(db, RoleData, RolePermissionData);
+      await Permission.updateRole(db, RoleId, RoleData, RolePermissionData);
       res.status(200).send("Ruolo aggiornato con successo.");
     } catch (error) {
       console.error("Error nell'aggiornare il ruolo:", error);

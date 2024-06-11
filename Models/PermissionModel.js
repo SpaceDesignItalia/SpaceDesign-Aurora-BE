@@ -163,89 +163,60 @@ class PermissionModel {
       });
     });
   }
-
   static async updateRole(db, RoleId, RoleData, RolePermissionData) {
     return new Promise((resolve, reject) => {
-      // Inizio della transazione
-      db.query("BEGIN", (beginError) => {
-        if (beginError) {
-          return reject(beginError);
+      const updateRoleQuery = `
+        UPDATE public."Role"
+        SET "RoleName" = $1, "RoleDescription" = $2
+        WHERE "RoleId" = $3;
+      `;
+
+      const roleValues = [RoleData.RoleName, RoleData.RoleDescription, RoleId];
+
+      db.query(updateRoleQuery, roleValues, (roleError) => {
+        if (roleError) {
+          return reject(roleError);
         }
 
-        // Aggiorna i dati del ruolo nella tabella Role
-        const updateRoleQuery = `
-          UPDATE public."Role"
-          SET "RoleName" = $1, "RoleDescription" = $2
-          WHERE "RoleId" = $3;
+        const deleteRolePermissionsQuery = `
+          DELETE FROM public."RolePermission"
+          WHERE "RoleId" = $1;
         `;
 
-        const roleValues = [
-          RoleData.RoleName,
-          RoleData.RoleDescription,
-          RoleId,
-        ];
-
-        db.query(updateRoleQuery, roleValues, (updateError) => {
-          if (updateError) {
-            return db.query("ROLLBACK", () => {
-              reject(updateError);
-            });
+        db.query(deleteRolePermissionsQuery, [RoleId], (deleteError) => {
+          if (deleteError) {
+            return reject(deleteError);
           }
 
-          // Rimuovi i permessi esistenti nella tabella RolePermission
-          const deleteRolePermissionQuery = `
-            DELETE FROM public."RolePermission"
-            WHERE "RoleId" = $1;
+          const insertRolePermissionQuery = `
+            INSERT INTO public."RolePermission" ("RoleId", "PermissionId")
+            VALUES ($1, $2);
           `;
 
-          db.query(deleteRolePermissionQuery, [RoleId], (deleteError) => {
-            if (deleteError) {
-              return db.query("ROLLBACK", () => {
-                reject(deleteError);
+          const rolePermissionPromises = RolePermissionData.map(
+            (permission) => {
+              return new Promise((resolve, reject) => {
+                db.query(
+                  insertRolePermissionQuery,
+                  [RoleId, permission.PermissionId],
+                  (permissionError) => {
+                    if (permissionError) {
+                      return reject(permissionError);
+                    }
+                    resolve();
+                  }
+                );
               });
             }
+          );
 
-            // Prepara le query di inserimento per i nuovi permessi
-            const insertRolePermissionQuery = `
-              INSERT INTO public."RolePermission" ("RoleId", "PermissionId")
-              VALUES ($1, $2);
-            `;
-
-            const rolePermissionPromises = RolePermissionData.map(
-              (permission) => {
-                return new Promise((resolve, reject) => {
-                  db.query(
-                    insertRolePermissionQuery,
-                    [RoleId, permission.PermissionId],
-                    (permissionError) => {
-                      if (permissionError) {
-                        return reject(permissionError);
-                      }
-                      resolve();
-                    }
-                  );
-                });
-              }
-            );
-
-            // Esegui tutte le query di inserimento per i nuovi permessi
-            Promise.all(rolePermissionPromises)
-              .then(() => {
-                // Commit della transazione se tutte le query hanno avuto successo
-                db.query("COMMIT", (commitError) => {
-                  if (commitError) {
-                    return reject(commitError);
-                  }
-                  resolve({ RoleId });
-                });
-              })
-              .catch((permissionError) => {
-                // Rollback della transazione in caso di errore
-                db.query("ROLLBACK", () => {
-                  reject(permissionError);
-                });
-              });
-          });
+          Promise.all(rolePermissionPromises)
+            .then(() => {
+              resolve({ RoleId: RoleId });
+            })
+            .catch((permissionError) => {
+              reject(permissionError);
+            });
         });
       });
     });
