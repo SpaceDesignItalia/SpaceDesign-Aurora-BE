@@ -5,23 +5,24 @@ class AuthenticationController {
   static async login(req, res, db) {
     try {
       const LoginData = req.body.LoginData;
-
-      console.log(LoginData);
-      const account = await Authentication.loginStaffer(db, LoginData);
-      if (!account)
-        return res.status(404).json({ error: "Credenziali non valide" });
-
-      if (LoginData.rememberMe) {
-        // Imposta la durata del cookie di sessione a 30 giorni
-        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 giorni in millisecondi
-      } else {
-        // Imposta la durata del cookie di sessione alla durata di default (es. 1 ora)
-        req.session.cookie.maxAge = 60 * 60 * 1000; // 1 ora in millisecondi
+      let account = await Authentication.loginStaffer(db, LoginData);
+      if (!account) {
+        account = await Authentication.loginCustomer(db, LoginData);
+        delete account.CustomerPassword;
+        if (!account) {
+          return res.status(404).json({ error: "Credenziali non valide" });
+        }
       }
+
+      // Imposta la durata del cookie di sessione
+      req.session.cookie.maxAge = LoginData.rememberMe
+        ? 30 * 24 * 60 * 60 * 1000 // 30 giorni in millisecondi
+        : 60 * 60 * 1000; // 1 ora in millisecondi
 
       delete account.StafferPassword; // Elimina la password dall'oggetto account prima di salvare nella sessione
 
       req.session.account = account;
+
       res.status(200).json({
         message: "Login avvenuto con successo",
         groups: account.groups,
