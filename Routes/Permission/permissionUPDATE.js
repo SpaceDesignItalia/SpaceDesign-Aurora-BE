@@ -6,8 +6,8 @@ const PermissionController = require("../../Controllers/PermissionController");
 const permissionUPDATE = (db) => {
   // Definisci le route UPDATE qui
 
-  router.put("/UpdateRoleData", (req, res) => {
-    PermissionController.updateCustomerData(req, res, db);
+  router.put("/UpdateRole", (req, res) => {
+    PermissionController.updateRole(req, res, db);
   });
 
   return router;
