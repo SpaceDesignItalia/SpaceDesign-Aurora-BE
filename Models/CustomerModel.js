@@ -119,13 +119,14 @@ class CustomerModel {
 
   static updateCustomerData(db, CustomerData, OldCompanyId) {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE public."Customer" SET "CustomerName" = $1, "CustomerSurname" = $2, "CustomerEmail" = $3, "CustomerPhone" = $4`;
+      const query = `UPDATE public."Customer" SET "CustomerName" = $1, "CustomerSurname" = $2, "CustomerEmail" = $3, "CustomerPhone" = $4 WHERE "CustomerId" = $5`;
 
       const values = [
         CustomerData.CustomerName,
         CustomerData.CustomerSurname,
         CustomerData.CustomerEmail,
         CustomerData.CustomerPhone,
+        CustomerData.CustomerId,
       ];
 
       db.query(query, values, (error, result) => {
@@ -137,7 +138,7 @@ class CustomerModel {
             if (error) {
               reject(error);
             } else {
-              if (result.CompanyId) {
+              if (result.rows[0].CompanyId) {
                 const query = `UPDATE public."CustomerCompany" SET "CompanyId" = $1 WHERE "CustomerId" = $2 AND "CompanyId" = $3`;
                 const values = [
                   CustomerData.CompanyId,
