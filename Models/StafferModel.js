@@ -136,14 +136,13 @@ class StafferModel {
               reject(error);
             } else {
               if (result !== selectedRole) {
-                const query2 = `UPDATE public."StafferRole" SET "StafferId"= $1, "RoleId"= $2
-                WHERE "StafferId"= $3`;
+                const query = `UPDATE public."StafferRole" SET "RoleId"= $1
+                WHERE "StafferId"= $2`;
                 const values = [
-                  newEmployeeData.EmployeeId,
                   selectedRole.RoleId,
                   newEmployeeData.EmployeeId,
                 ];
-                db.query(query2, values, (result, error) => {
+                db.query(query, values, (error, result) => {
                   if (error) {
                     reject(error);
                   } else {

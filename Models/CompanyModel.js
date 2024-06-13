@@ -84,13 +84,14 @@ class CompanyModel {
 
   static updateCompanyData(db, CompanyData) {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE public."Company" SET "CompanyName" = $1, "CompanyAddress" = $2, "CompanyEmail" = $3, "CompanyPhone" = $4`;
+      const query = `UPDATE public."Company" SET "CompanyName" = $1, "CompanyAddress" = $2, "CompanyEmail" = $3, "CompanyPhone" = $4 WHERE "CompanyId =  $5`;
 
       const values = [
         CompanyData.CompanyName,
         CompanyData.CompanyAddress,
         CompanyData.CompanyEmail,
         CompanyData.CompanyPhone,
+        CompanyData.CompanyId,
       ];
 
       db.query(query, values, (error, result) => {
