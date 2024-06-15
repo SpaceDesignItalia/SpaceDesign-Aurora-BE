@@ -14,6 +14,10 @@ const companyGET = (db) => {
     CompanyController.getCompanyByIdAndName(req, res, db);
   });
 
+  router.get("/GetCompanyById", (req, res) => {
+    CompanyController.getCompanyById(req, res, db);
+  });
+
   router.get("/SearchCompanyByName", (req, res) => {
     CompanyController.searchCompanyByName(req, res, db);
   });

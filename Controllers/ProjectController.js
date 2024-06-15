@@ -21,6 +21,102 @@ class ProjectController {
       res.status(500).send("Recupero degi banners fallito");
     }
   }
+
+  static async getAllManagers(req, res, db) {
+    try {
+      const managers = await Project.getAllManagers(db);
+      res.status(200).json(managers);
+    } catch (error) {
+      console.error("Errore nel recupero dei managers:", error);
+      res.status(500).send("Recupero dei managers fallito");
+    }
+  }
+
+  static async getAllProjects(req, res, db) {
+    try {
+      const projects = await Project.getAllProjects(db);
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Errore nel recupero dei progetti:", error);
+      res.status(500).send("Recupero dei progetti fallito");
+    }
+  }
+
+  static async getProjectByIdAndName(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      const ProjectName = req.query.ProjectName;
+
+      const project = await Project.getProjectByIdAndName(
+        db,
+        ProjectId,
+        ProjectName
+      );
+      res.status(200).json(project);
+    } catch (error) {
+      console.error("Errore nel recupero del progetto:", error);
+      res.status(500).send("Recupero del progetto fallito");
+    }
+  }
+
+  static async getAllLinkByProjectId(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      console.log(ProjectId);
+      const links = await Project.getAllLinkByProjectId(db, ProjectId);
+      res.status(200).json(links);
+    } catch (error) {
+      console.error("Errore nel recupero dei collegamenti:", error);
+      res.status(500).send("Recupero dei collegamenti fallito");
+    }
+  }
+
+  static async getAllLinkTypes(req, res, db) {
+    try {
+      const linkTypes = await Project.getAllLinkTypes(db);
+      res.status(200).json(linkTypes);
+    } catch (error) {
+      console.error("Errore nel recupero dei tipi di collegamenti:", error);
+      res.status(500).send("Recupero dei tipi di collegamenti fallito");
+    }
+  }
+
+  static async addProject(req, res, db) {
+    try {
+      const ProjectData = req.body.ProjectData;
+
+      await Project.addProject(db, ProjectData);
+      res.status(200).send("Progetto creato con successo.");
+    } catch (error) {
+      console.error("Errore nella creazione del progetto:", error);
+      res.status(500).send("Creazione del progetto fallito");
+    }
+  }
+
+  static async addProjectLink(req, res, db) {
+    try {
+      const ProjectLinkData = req.body.ProjectLinkData;
+
+      await Project.addProjectLink(db, ProjectLinkData);
+      res.status(200).send("Collegamento creato con successo.");
+    } catch (error) {
+      console.error("Errore nella creazione del collegamento:", error);
+      res.status(500).send("Creazione del progetto fallito");
+    }
+  }
+
+  static async updateProjectTheme(req, res, db) {
+    try {
+      const ProjectId = req.body.ProjectId;
+      const ProjectBannerId = req.body.ProjectBannerId;
+
+      await Project.updateProjectTheme(db, ProjectId, ProjectBannerId);
+      res.status(200).send("Tema del progetto aggiornato con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiornamento del tema:", error);
+      res.status(500).send("Aggiornamento del tema fallito");
+    }
+  }
 }
 
 module.exports = ProjectController;

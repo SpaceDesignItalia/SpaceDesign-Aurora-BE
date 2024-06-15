@@ -28,6 +28,21 @@ class CompanyModel {
     });
   }
 
+  static getCompanyById(db, CompanyId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."Company" WHERE "CompanyId" = $1`;
+
+      const values = [CompanyId];
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static searchCompanyByName(db, CompanyName) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."Company" WHERE "CompanyName" LIKE '%${CompanyName}%'`;

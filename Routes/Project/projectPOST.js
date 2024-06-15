@@ -6,6 +6,14 @@ const ProjectController = require("../../Controllers/ProjectController");
 const projectPOST = (db) => {
   // Definisci le route GET qui
 
+  router.post("/AddProject", (req, res) => {
+    ProjectController.addProject(req, res, db);
+  });
+
+  router.post("/AddProjectLink", (req, res) => {
+    ProjectController.addProjectLink(req, res, db);
+  });
+
   return router;
 };
 

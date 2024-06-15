@@ -28,6 +28,17 @@ class CompanyController {
     }
   }
 
+  static async getCompanyById(req, res, db) {
+    try {
+      const CompanyId = req.query.CompanyId;
+      const companies = await Company.getCompanyById(db, CompanyId);
+      res.status(200).json(companies);
+    } catch (error) {
+      console.error("Errore nel recupero delle aziende:", error);
+      res.status(500).send("Recupero delle aziende fallita");
+    }
+  }
+
   static async searchCompanyByName(req, res, db) {
     try {
       const CompanyName = req.query.CompanyName;
