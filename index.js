@@ -64,18 +64,13 @@ const io = new Server(server, {
 });
 
 io.on("connection", async (socket) => {
-  console.log("User connected");
-
   socket.on("join", async (conversationId) => {
     socket.join(conversationId);
-    console.log("user joined conversation: ", conversationId);
   });
 
   socket.on("message", async (conversationId) => {
-    io.to(conversationId).emit("message-update");
+    io.to(conversationId).emit("message-update", conversationId);
   });
 
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
-  });
+  socket.on("disconnect", () => {});
 });

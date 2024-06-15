@@ -9,6 +9,11 @@ const chatPOST = (db) => {
   router.post("/sendMessage", (req, res) => {
     ChatController.sendMessage(req, res, db);
   });
+
+  router.post("/createConversation", (req, res) => {
+    ChatController.createConversation(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

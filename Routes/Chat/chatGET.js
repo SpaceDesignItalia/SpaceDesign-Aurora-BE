@@ -14,6 +14,10 @@ const chatGET = (db) => {
     ChatController.getMessagesByConversationId(req, res, db);
   });
 
+  router.get("/getConversationByStaffersId", (req, res) => {
+    ChatController.getConversationByStaffersId(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
