@@ -85,8 +85,8 @@ class ProjectController {
     try {
       const ProjectData = req.body.ProjectData;
 
-      await Project.addProject(db, ProjectData);
-      res.status(200).send("Progetto creato con successo.");
+      const ProjectId = await Project.addProject(db, ProjectData);
+      res.status(200).send(ProjectId);
     } catch (error) {
       console.error("Errore nella creazione del progetto:", error);
       res.status(500).send("Creazione del progetto fallito");
@@ -115,6 +115,46 @@ class ProjectController {
     } catch (error) {
       console.error("Errore nell'aggiornamento del tema:", error);
       res.status(500).send("Aggiornamento del tema fallito");
+    }
+  }
+
+  static async getConversationByProjectId(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      console.log("ProjectId", ProjectId);
+      const conversation = await Project.getConversationByProjectId(
+        db,
+        ProjectId
+      );
+      res.status(200).json(conversation);
+    } catch (error) {
+      console.error("Errore nel recupero della conversazione", error);
+      res.status(500).send("Recupero della conversazione fallita");
+    }
+  }
+
+  static async createProjectConversation(req, res, db) {
+    try {
+      const ProjectId = req.body.ProjectId;
+      await Project.createProjectConversation(db, ProjectId);
+      res.status(200).send("Conversazione creata con successo.");
+    } catch (error) {
+      console.error("Errore nella creazione della conversazione", error);
+      res.status(500).send("Creazione della conversazione fallita");
+    }
+  }
+
+  static async getMessagesByConversationId(req, res, db) {
+    try {
+      const ConversationId = req.query.ConversationId;
+      const messages = await Project.getMessagesByConversationId(
+        db,
+        ConversationId
+      );
+      res.status(200).json(messages);
+    } catch (error) {
+      console.error("Errore nel recupero dei messaggi", error);
+      res.status(500).send("Recupero dei messaggi fallito");
     }
   }
 }

@@ -14,6 +14,10 @@ const projectPOST = (db) => {
     ProjectController.addProjectLink(req, res, db);
   });
 
+  router.post("/CreateProjectConversation", (req, res) => {
+    ProjectController.createProjectConversation(req, res, db);
+  });
+
   return router;
 };
 

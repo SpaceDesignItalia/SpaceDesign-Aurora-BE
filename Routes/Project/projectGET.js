@@ -33,6 +33,15 @@ const projectGET = (db) => {
   router.get("/GetAllLinkType", (req, res) => {
     ProjectController.getAllLinkTypes(req, res, db);
   });
+
+  router.get("/GetConversationByProjectId", (req, res) => {
+    ProjectController.getConversationByProjectId(req, res, db);
+  });
+
+  router.get("/GetMessagesByConversationId", (req, res) => {
+    ProjectController.getMessagesByConversationId(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

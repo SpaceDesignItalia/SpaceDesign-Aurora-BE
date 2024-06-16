@@ -29,8 +29,8 @@ class ProjectModel {
 
   static getAllManagers(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "RoleName" FROM public."Staffer"
-      INNER JOIN public."StafferRole" USING("StafferId")
+      const query = `SELECT "ProjectId", CONCAT("ProjectName",' ',"ProjectSurname") AS "ProjectFullName", "ProjectEmail", "RoleName" FROM public."Project"
+      INNER JOIN public."ProjectRole" USING("ProjectId")
       INNER JOIN public."Role" USING("RoleId")
       WHERE "RoleName" = 'CEO' OR "RoleName" = 'Project Manager'`;
 
@@ -61,11 +61,11 @@ class ProjectModel {
   static getProjectByIdAndName(db, ProjectId, ProjectName) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "CompanyId", "ProjectBannerId", "ProjectBannerPath", 
-      "StatusName", "ProjectManagerId", CONCAT("StafferName", ' ', "StafferSurname") AS "ProjectManagerFullName", "StafferEmail" AS "ProjectManagerEmail", "RoleName" FROM public."Project" 
+      "StatusName", "ProjectManagerId", CONCAT("ProjectName", ' ', "ProjectSurname") AS "ProjectManagerFullName", "ProjectEmail" AS "ProjectManagerEmail", "RoleName" FROM public."Project" 
       INNER JOIN public."ProjectBanner" USING("ProjectBannerId")
 		  INNER JOIN public."Status" USING("StatusId")
-			INNER JOIN public."Staffer" ON "ProjectManagerId" = "StafferId"
-      INNER JOIN public."StafferRole" USING("StafferId")
+			INNER JOIN public."Project" ON "ProjectManagerId" = "ProjectId"
+      INNER JOIN public."ProjectRole" USING("ProjectId")
       INNER JOIN public."Role" USING("RoleId")
       WHERE "ProjectId" = $1 AND "ProjectName" = $2`;
 
@@ -125,7 +125,7 @@ class ProjectModel {
         if (error) {
           reject(error);
         } else {
-          resolve(result.rows);
+          resolve(result.rows[0].ProjectId);
         }
       });
     });
@@ -160,6 +160,54 @@ class ProjectModel {
       const values = [ProjectBannerId, ProjectId];
 
       db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getConversationByProjectId(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT public."Conversation"."ConversationId" FROM public."Conversation"WHERE "ProjectId" = $1`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static createProjectConversation(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."Conversation"("ProjectId") VALUES ($1);`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getMessagesByConversationId(db, ConversationId) {
+    console.log("ConversationId", ConversationId);
+    return new Promise((resolve, reject) => {
+      const query = `SELECT public."Message"."MessageId", public."Message"."StafferSenderId", public."Message"."ConversationId", public."Message"."Date", public."Message"."Text", 
+                        CONCAT(public."Staffer"."StafferName", ' ', public."Staffer"."StafferSurname") AS "StafferSenderFullName"
+                      FROM public."Message" 
+                      INNER JOIN public."Staffer" 
+                        ON public."Staffer"."StafferId" = public."Message"."StafferSenderId"
+                      WHERE "ConversationId" = $1 
+                      ORDER BY "Date" ASC`;
+      db.query(query, [ConversationId], (error, result) => {
         if (error) {
           reject(error);
         } else {
