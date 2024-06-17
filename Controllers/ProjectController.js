@@ -62,7 +62,6 @@ class ProjectController {
   static async getAllLinkByProjectId(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
-      console.log(ProjectId);
       const links = await Project.getAllLinkByProjectId(db, ProjectId);
       res.status(200).json(links);
     } catch (error) {
@@ -78,6 +77,31 @@ class ProjectController {
     } catch (error) {
       console.error("Errore nel recupero dei tipi di collegamenti:", error);
       res.status(500).send("Recupero dei tipi di collegamenti fallito");
+    }
+  }
+
+  static async getProjectTeamMembers(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      const members = await Project.getProjectTeamMembers(db, ProjectId);
+      res.status(200).json(members);
+    } catch (error) {
+      console.error("Errore nel recupero dei membri del team:", error);
+      res.status(500).send("Recupero dei membri fallito");
+    }
+  }
+
+  static async getMembersNotInProjectTeam(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      console.log(ProjectId);
+
+      const members = await Project.getMembersNotInProjectTeam(db, ProjectId);
+      res.status(200).json(members);
+    } catch (error) {
+      console.error("Errore nel recupero dei membri del team:", error);
+      res.status(500).send("Recupero dei membri fallito");
     }
   }
 

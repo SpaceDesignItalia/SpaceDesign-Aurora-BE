@@ -107,6 +107,41 @@ class ProjectModel {
     });
   }
 
+  static getProjectTeamMembers(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName", "StafferEmail" FROM public."ProjectTeam" INNER JOIN public."Staffer" USING("StafferId") WHERE "ProjectId" = $1`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getMembersNotInProjectTeam(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "RoleName" FROM public."Staffer" 
+      INNER JOIN public."StafferRole" USING("StafferId")
+      INNER JOIN public."Role" USING("RoleId") 
+      WHERE "StafferId" NOT IN (
+          SELECT "StafferId"
+          FROM public."ProjectTeam"
+          WHERE "ProjectId" = $1);
+      `;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static addProject(db, ProjectData) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Project"("ProjectName", "ProjectDescription", "ProjectEndDate", "ProjectManagerId", "ProjectBanner", "CompanyId")
