@@ -64,8 +64,8 @@ class ProjectModel {
       "StatusName", "ProjectManagerId", "StafferImageUrl", CONCAT("StafferName", ' ', "StafferSurname") AS "ProjectManagerFullName", "StafferEmail" AS "ProjectManagerEmail", "RoleName" FROM public."Project" 
       INNER JOIN public."ProjectBanner" USING("ProjectBannerId")
 		  INNER JOIN public."Status" USING("StatusId")
-			INNER JOIN public."Project" ON "ProjectManagerId" = "ProjectId"
-      INNER JOIN public."ProjectRole" USING("ProjectId")
+			INNER JOIN public."Staffer" ON "ProjectManagerId" = "StafferId"
+      INNER JOIN public."StafferRole" USING("StafferId")
       INNER JOIN public."Role" USING("RoleId")
       WHERE "ProjectId" = $1 AND "ProjectName" = $2`;
 
@@ -254,7 +254,6 @@ class ProjectModel {
   }
 
   static getMessagesByConversationId(db, ConversationId) {
-    console.log("ConversationId", ConversationId);
     return new Promise((resolve, reject) => {
       const query = `SELECT public."Message"."MessageId", public."Message"."StafferSenderId", public."Message"."ConversationId", public."Message"."Date", public."Message"."Text", 
                         CONCAT(public."Staffer"."StafferName", ' ', public."Staffer"."StafferSurname") AS "StafferSenderFullName"

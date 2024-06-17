@@ -95,7 +95,6 @@ class ProjectController {
   static async getMembersNotInProjectTeam(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
-      console.log(ProjectId);
 
       const members = await Project.getMembersNotInProjectTeam(db, ProjectId);
       res.status(200).json(members);
@@ -158,7 +157,7 @@ class ProjectController {
   static async getConversationByProjectId(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
-      console.log("ProjectId", ProjectId);
+
       const conversation = await Project.getConversationByProjectId(
         db,
         ProjectId
