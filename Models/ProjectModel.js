@@ -61,7 +61,7 @@ class ProjectModel {
   static getProjectByIdAndName(db, ProjectId, ProjectName) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "CompanyId", "ProjectBannerId", "ProjectBannerPath", 
-      "StatusName", "ProjectManagerId", CONCAT("StafferName", ' ', "StafferSurname") AS "ProjectManagerFullName", "StafferEmail" AS "ProjectManagerEmail", "RoleName" FROM public."Project" 
+      "StatusName", "ProjectManagerId", "StafferImageUrl", CONCAT("StafferName", ' ', "StafferSurname") AS "ProjectManagerFullName", "StafferEmail" AS "ProjectManagerEmail", "RoleName" FROM public."Project" 
       INNER JOIN public."ProjectBanner" USING("ProjectBannerId")
 		  INNER JOIN public."Status" USING("StatusId")
 			INNER JOIN public."Staffer" ON "ProjectManagerId" = "StafferId"
@@ -109,7 +109,11 @@ class ProjectModel {
 
   static getProjectTeamMembers(db, ProjectId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName", "StafferEmail" FROM public."ProjectTeam" INNER JOIN public."Staffer" USING("StafferId") WHERE "ProjectId" = $1`;
+      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName", "StafferImageUrl", "StafferEmail", "RoleName" FROM public."ProjectTeam" 
+      INNER JOIN public."Staffer" USING("StafferId")
+      INNER JOIN public."StafferRole" USING("StafferId")
+      INNER JOIN public."Role" USING("RoleId")
+      WHERE "ProjectId" = $1`;
 
       db.query(query, [ProjectId], (error, result) => {
         if (error) {
@@ -123,7 +127,7 @@ class ProjectModel {
 
   static getMembersNotInProjectTeam(db, ProjectId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "RoleName" FROM public."Staffer" 
+      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "StafferImageUrl", "RoleName" FROM public."Staffer" 
       INNER JOIN public."StafferRole" USING("StafferId")
       INNER JOIN public."Role" USING("RoleId") 
       WHERE "StafferId" NOT IN (
@@ -188,11 +192,44 @@ class ProjectModel {
     });
   }
 
+  static addProjectTeamMember(db, ProjectId, ProjectMemberId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTeam"("ProjectId", "StafferId")
+	    VALUES ($1, $2);`;
+
+      const values = [ProjectId, ProjectMemberId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static updateProjectTheme(db, ProjectId, ProjectBannerId) {
     return new Promise((resolve, reject) => {
       const query = `UPDATE public."Project" SET "ProjectBannerId" = $1 WHERE "ProjectId" = $2`;
 
       const values = [ProjectBannerId, ProjectId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static removeMemberFromProjectById(db, StafferId, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTeam" WHERE "StafferId" = $1 AND "ProjectId" = $2`;
+
+      const values = [StafferId, ProjectId];
 
       db.query(query, values, (error, result) => {
         if (error) {

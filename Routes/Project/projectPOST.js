@@ -14,6 +14,10 @@ const projectPOST = (db) => {
     ProjectController.addProjectLink(req, res, db);
   });
 
+  router.post("/AddProjectTeamMember", (req, res) => {
+    ProjectController.addProjectTeamMember(req, res, db);
+  });
+
   return router;
 };
 

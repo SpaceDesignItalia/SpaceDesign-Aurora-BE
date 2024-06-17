@@ -129,6 +129,19 @@ class ProjectController {
     }
   }
 
+  static async addProjectTeamMember(req, res, db) {
+    try {
+      const ProjectMemberId = req.body.ProjectMemberId;
+      const ProjectId = req.body.ProjectId;
+
+      await Project.addProjectTeamMember(db, ProjectId, ProjectMemberId);
+      res.status(200).send("Membro aggiunto con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiunta del membro al progetto:", error);
+      res.status(500).send("Aggiunta del membro al progetto fallita");
+    }
+  }
+
   static async updateProjectTheme(req, res, db) {
     try {
       const ProjectId = req.body.ProjectId;
@@ -139,6 +152,19 @@ class ProjectController {
     } catch (error) {
       console.error("Errore nell'aggiornamento del tema:", error);
       res.status(500).send("Aggiornamento del tema fallito");
+    }
+  }
+
+  static async removeMemberFromProjectById(req, res, db) {
+    try {
+      const StafferId = req.query.StafferId;
+      const ProjectId = req.query.ProjectId;
+
+      await Project.removeMemberFromProjectById(db, StafferId, ProjectId);
+      res.status(200).send("Membro eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del membro dal team:", error);
+      res.status(500).send("Eliminazione del membro fallita");
     }
   }
 }
