@@ -61,7 +61,7 @@ class ProjectModel {
   static getProjectByIdAndName(db, ProjectId, ProjectName) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "CompanyId", "ProjectBannerId", "ProjectBannerPath", 
-      "StatusName", "ProjectManagerId", CONCAT("ProjectName", ' ', "ProjectSurname") AS "ProjectManagerFullName", "ProjectEmail" AS "ProjectManagerEmail", "RoleName" FROM public."Project" 
+      "StatusName", "ProjectManagerId", "StafferImageUrl", CONCAT("StafferName", ' ', "StafferSurname") AS "ProjectManagerFullName", "StafferEmail" AS "ProjectManagerEmail", "RoleName" FROM public."Project" 
       INNER JOIN public."ProjectBanner" USING("ProjectBannerId")
 		  INNER JOIN public."Status" USING("StatusId")
 			INNER JOIN public."Project" ON "ProjectManagerId" = "ProjectId"
@@ -107,6 +107,45 @@ class ProjectModel {
     });
   }
 
+  static getProjectTeamMembers(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName", "StafferImageUrl", "StafferEmail", "RoleName" FROM public."ProjectTeam" 
+      INNER JOIN public."Staffer" USING("StafferId")
+      INNER JOIN public."StafferRole" USING("StafferId")
+      INNER JOIN public."Role" USING("RoleId")
+      WHERE "ProjectId" = $1`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getMembersNotInProjectTeam(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "StafferImageUrl", "RoleName" FROM public."Staffer" 
+      INNER JOIN public."StafferRole" USING("StafferId")
+      INNER JOIN public."Role" USING("RoleId") 
+      WHERE "StafferId" NOT IN (
+          SELECT "StafferId"
+          FROM public."ProjectTeam"
+          WHERE "ProjectId" = $1);
+      `;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static addProject(db, ProjectData) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Project"("ProjectName", "ProjectDescription", "ProjectEndDate", "ProjectManagerId", "ProjectBanner", "CompanyId")
@@ -142,6 +181,23 @@ class ProjectModel {
         ProjectLinkData.ProjectLinkUrl,
         ProjectLinkData.ProjectLinkTypeId,
       ];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static addProjectTeamMember(db, ProjectId, ProjectMemberId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTeam"("ProjectId", "StafferId")
+	    VALUES ($1, $2);`;
+
+      const values = [ProjectId, ProjectMemberId];
 
       db.query(query, values, (error, result) => {
         if (error) {
@@ -208,6 +264,22 @@ class ProjectModel {
                       WHERE "ConversationId" = $1 
                       ORDER BY "Date" ASC`;
       db.query(query, [ConversationId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static removeMemberFromProjectById(db, StafferId, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTeam" WHERE "StafferId" = $1 AND "ProjectId" = $2`;
+
+      const values = [StafferId, ProjectId];
+
+      db.query(query, values, (error, result) => {
         if (error) {
           reject(error);
         } else {
