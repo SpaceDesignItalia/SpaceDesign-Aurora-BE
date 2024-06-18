@@ -43,6 +43,17 @@ class PermissionController {
     }
   }
 
+  static async getPermissionById(req, res, db) {
+    try {
+      const PermissionId = req.query.PermissionId;
+      const permissions = await Permission.getPermissionById(db, PermissionId);
+      res.status(200).json(permissions);
+    } catch (error) {
+      console.error("Errore nel recupero dei permessi:", error);
+      res.status(500).send("Recupero dei permessi fallita");
+    }
+  }
+
   static async getPermissionsByUserRole(req, res, db) {
     try {
       const StafferId = req.query.StafferId;
@@ -65,6 +76,20 @@ class PermissionController {
     }
   }
 
+  static async searchPermissionByName(req, res, db) {
+    try {
+      const PermissionName = req.query.PermissionName;
+      const permissions = await Permission.searchPermissionByName(
+        db,
+        PermissionName
+      );
+      res.status(200).json(permissions);
+    } catch (error) {
+      console.error("Errore nel recupero dei permessi:", error);
+      res.status(500).send("Recupero dei permessi fallita");
+    }
+  }
+
   static async addRole(req, res, db) {
     try {
       const RoleData = req.body.RoleData;
@@ -78,6 +103,29 @@ class PermissionController {
     }
   }
 
+  static async addPermission(req, res, db) {
+    try {
+      const PermissionData = req.body.PermissionData;
+      await Permission.addPermission(db, PermissionData);
+      res.status(200).send("Permesso aggiunto con successo.");
+    } catch (error) {
+      console.error("Error nell'aggiungere il permesso:", error);
+      res.status(500).send("Aggiunta del permesso fallita.");
+    }
+  }
+
+  static async updatePermission(req, res, db) {
+    try {
+      const PermissionId = req.body.PermissionId;
+      const PermissionData = req.body.PermissionData;
+      await Permission.updatePermission(db, PermissionId, PermissionData);
+      res.status(200).send("Permesso aggiornato con successo.");
+    } catch (error) {
+      console.error("Error nell'aggiornare il permesso:", error);
+      res.status(500).send("Aggiunta del permesso fallita.");
+    }
+  }
+
   static async deleteRole(req, res, db) {
     try {
       const RoleId = req.query.RoleId;
@@ -86,6 +134,17 @@ class PermissionController {
     } catch (error) {
       console.error("Error nell'eliminare il ruolo:", error);
       res.status(500).send("Aggiunta del ruolo fallita.");
+    }
+  }
+
+  static async deletePermission(req, res, db) {
+    try {
+      const PermissionId = req.query.PermissionId;
+      await Permission.deletePermission(db, PermissionId);
+      res.status(200).send("Permesso eliminato con successo.");
+    } catch (error) {
+      console.error("Error nell'eliminare il permesso:", error);
+      res.status(500).send("Aggiunta del permesso fallita.");
     }
   }
 

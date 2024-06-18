@@ -10,6 +10,10 @@ const permissionPOST = (db) => {
     PermissionController.addRole(req, res, db);
   });
 
+  router.post("/AddPermission", (req, res) => {
+    PermissionController.addPermission(req, res, db);
+  });
+
   return router;
 };
 

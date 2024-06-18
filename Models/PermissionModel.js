@@ -1,7 +1,7 @@
 class PermissionModel {
   static async getAllPermissionsGroups(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "GroupName" FROM public."Group"`;
+      const query = `SELECT "PermissionGroupId", "GroupName" FROM public."Group"`;
 
       db.query(query, (error, result) => {
         if (error) {
@@ -15,7 +15,7 @@ class PermissionModel {
 
   static async getAllPermissions(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "PermissionId","PermissionName","GroupName" FROM public."Permission"
+      const query = `SELECT "PermissionId","PermissionName", "PermissionDescription","GroupName" FROM public."Permission"
       INNER JOIN "PermissionGroup" USING("PermissionId")
       INNER JOIN "Group" USING("PermissionGroupId") ORDER BY "PermissionGroupId"`;
 
@@ -76,6 +76,50 @@ class PermissionModel {
     });
   }
 
+  static async addPermission(db, PermissionData) {
+    try {
+      // Check if the permission already exists and get its ID if it does
+      const getPermissionIdQuery = `SELECT "PermissionId" FROM "Permission" WHERE "PermissionName" = $1`;
+      const permissionResult = await db.query(getPermissionIdQuery, [
+        PermissionData.PermissionName,
+      ]);
+
+      let permissionId;
+      if (permissionResult.rows.length > 0) {
+        // Permission exists, get its ID
+        permissionId = permissionResult.rows[0].PermissionId;
+      } else {
+        // Permission does not exist, insert a new permission
+        const insertPermissionQuery = `INSERT INTO "Permission" ("PermissionName", "PermissionDescription", "PermissionAction") VALUES ($1, $2, $3) RETURNING "PermissionId"`;
+        const insertPermissionValues = [
+          PermissionData.PermissionName,
+          PermissionData.PermissionDescription,
+          PermissionData.PermissionAction,
+        ];
+        const insertPermissionResult = await db.query(
+          insertPermissionQuery,
+          insertPermissionValues
+        );
+        permissionId = insertPermissionResult.rows[0].PermissionId;
+      }
+
+      // Insert into PermissionGroup using the permissionId
+      const insertPermissionGroupQuery = `INSERT INTO "PermissionGroup" ("PermissionId", "PermissionGroupId") VALUES ($1, $2) RETURNING "PermissionId"`;
+      const insertPermissionGroupValues = [
+        permissionId,
+        PermissionData.PermissionGroupId,
+      ];
+      const insertPermissionGroupResult = await db.query(
+        insertPermissionGroupQuery,
+        insertPermissionGroupValues
+      );
+
+      return insertPermissionGroupResult.rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async getRoleById(db, RoleId) {
     return new Promise((resolve, reject) => {
       const query = `
@@ -106,9 +150,52 @@ class PermissionModel {
     });
   }
 
+  static async getPermissionById(db, PermissionId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          p."PermissionId", 
+          p."PermissionName", 
+          p."PermissionDescription", 
+          p."PermissionAction", 
+          pg."PermissionGroupId", 
+          g."GroupName"
+        FROM 
+          "Permission" p
+        LEFT JOIN 
+          "PermissionGroup" pg ON p."PermissionId" = pg."PermissionId"
+        LEFT JOIN 
+          "Group" g ON pg."PermissionGroupId" = g."PermissionGroupId"
+        WHERE 
+          p."PermissionId" = $1;
+      `;
+      const values = [PermissionId];
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static async searchRoleByName(db, RoleName) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "RoleId", "RoleName", "RoleDescription" FROM "Role" WHERE "RoleName" LIKE '%${RoleName}%' ORDER BY "RoleId"`;
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async searchPermissionByName(db, PermissionName) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."Permission" WHERE "PermissionName" LIKE '%${PermissionName}%'`;
       db.query(query, (error, result) => {
         if (error) {
           reject(error);
@@ -169,6 +256,85 @@ class PermissionModel {
     });
   }
 
+  static async updateRole(db, RoleId, RoleData, RolePermissionData) {
+    return new Promise((resolve, reject) => {
+      const updateRoleQuery = `
+        UPDATE public."Role"
+        SET "RoleName" = $1, "RoleDescription" = $2
+        WHERE "RoleId" = $3;
+      `;
+      const roleValues = [RoleData.RoleName, RoleData.RoleDescription, RoleId];
+      db.query(updateRoleQuery, roleValues, (roleError, roleResult) => {
+        if (roleError) {
+          return reject(roleError);
+        }
+        // Prepara le query di inserimento per RolePermission
+        const insertRolePermissionQuery = `
+          INSERT INTO public."RolePermission" ("RoleId", "PermissionId")
+          VALUES ($1, $2);
+        `;
+        const rolePermissionPromises = RolePermissionData.map((permission) => {
+          return new Promise((resolve, reject) => {
+            db.query(
+              insertRolePermissionQuery,
+              [RoleId, permission.PermissionId],
+              (permissionError) => {
+                if (permissionError) {
+                  return reject(permissionError);
+                }
+                resolve();
+              }
+            );
+          });
+        });
+        // Esegui tutte le query di inserimento per RolePermission
+        Promise.all(rolePermissionPromises)
+          .then(() => {
+            resolve({ RoleId });
+          })
+          .catch((permissionError) => {
+            reject(permissionError);
+          });
+      });
+    });
+  }
+
+  static async updatePermission(db, PermissionId, PermissionData) {
+    try {
+      // Check if the permission exists
+      const getPermissionQuery = `SELECT "PermissionId" FROM "Permission" WHERE "PermissionId" = $1`;
+      const permissionResult = await db.query(getPermissionQuery, [
+        PermissionId,
+      ]);
+
+      if (permissionResult.rows.length === 0) {
+        throw new Error("Permission not found");
+      }
+
+      // Update the permission information
+      const updatePermissionQuery = `UPDATE "Permission" SET "PermissionName" = $1, "PermissionDescription" = $2, "PermissionAction" = $3 WHERE "PermissionId" = $4`;
+      const updatePermissionValues = [
+        PermissionData.PermissionName,
+        PermissionData.PermissionDescription,
+        PermissionData.PermissionAction,
+        PermissionData.PermissionId,
+      ];
+      await db.query(updatePermissionQuery, updatePermissionValues);
+
+      // Update the PermissionGroup information
+      const updatePermissionGroupQuery = `UPDATE "PermissionGroup" SET "PermissionGroupId" = $1 WHERE "PermissionId" = $2`;
+      const updatePermissionGroupValues = [
+        PermissionData.PermissionGroupId,
+        PermissionData.PermissionId,
+      ];
+      await db.query(updatePermissionGroupQuery, updatePermissionGroupValues);
+
+      return { message: "Permission updated successfully" };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   static async deleteRole(db, RoleId) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."Role" WHERE "RoleId" = $1`;
@@ -182,6 +348,21 @@ class PermissionModel {
       });
     });
   }
+
+  static async deletePermission(db, PermissionId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."Permission" WHERE "PermissionId" = $1`;
+      const values = [PermissionId];
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static async updateRole(db, RoleId, RoleData, RolePermissionData) {
     return new Promise((resolve, reject) => {
       const updateRoleQuery = `

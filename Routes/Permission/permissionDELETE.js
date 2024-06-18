@@ -8,6 +8,10 @@ const permissionDELETE = (db) => {
     PermissionController.deleteRole(req, res, db);
   });
 
+  router.delete("/DeletePermission", (req, res) => {
+    PermissionController.deletePermission(req, res, db);
+  });
+
   return router;
 };
 

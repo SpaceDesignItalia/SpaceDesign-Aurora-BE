@@ -10,6 +10,10 @@ const permissionUPDATE = (db) => {
     PermissionController.updateRole(req, res, db);
   });
 
+  router.put("/UpdatePermission", (req, res) => {
+    PermissionController.updatePermission(req, res, db);
+  });
+
   return router;
 };
 
