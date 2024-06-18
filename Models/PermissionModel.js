@@ -335,34 +335,6 @@ class PermissionModel {
     }
   }
 
-  static async deleteRole(db, RoleId) {
-    return new Promise((resolve, reject) => {
-      const query = `DELETE FROM public."Role" WHERE "RoleId" = $1`;
-      const values = [RoleId];
-      db.query(query, values, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result.rows);
-        }
-      });
-    });
-  }
-
-  static async deletePermission(db, PermissionId) {
-    return new Promise((resolve, reject) => {
-      const query = `DELETE FROM public."Permission" WHERE "PermissionId" = $1`;
-      const values = [PermissionId];
-      db.query(query, values, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result.rows);
-        }
-      });
-    });
-  }
-
   static async updateRole(db, RoleId, RoleData, RolePermissionData) {
     return new Promise((resolve, reject) => {
       const updateRoleQuery = `
@@ -418,6 +390,34 @@ class PermissionModel {
               reject(permissionError);
             });
         });
+      });
+    });
+  }
+
+  static async deleteRole(db, RoleId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."Role" WHERE "RoleId" = $1`;
+      const values = [RoleId];
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async deletePermission(db, PermissionId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."Permission" WHERE "PermissionId" = $1`;
+      const values = [PermissionId];
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
       });
     });
   }
