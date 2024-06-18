@@ -21,8 +21,16 @@ const permissionGET = (db) => {
     PermissionController.getRoleById(req, res, db);
   });
 
+  router.get("/GetPermissionById", (req, res) => {
+    PermissionController.getPermissionById(req, res, db);
+  });
+
   router.get("/SearchRoleByName", (req, res) => {
     PermissionController.searchRoleByName(req, res, db);
+  });
+
+  router.get("/SearchPermissionByName", (req, res) => {
+    PermissionController.searchPermissionByName(req, res, db);
   });
 
   router.get("/GetPermissionsByUserRole", (req, res) => {
