@@ -164,7 +164,20 @@ class ProjectModel {
         if (error) {
           reject(error);
         } else {
-          resolve(result.rows[0].ProjectId);
+          const query = `INSERT INTO public."ProjectTeam" ("ProjectId", "StafferId") VALUES ($1, $2) RETURNING *`;
+
+          const values = [
+            result.rows[0].ProjectId,
+            ProjectData.ProjectManagerId,
+          ];
+
+          db.query(query, values, (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result.rows[0].ProjectId);
+            }
+          });
         }
       });
     });
