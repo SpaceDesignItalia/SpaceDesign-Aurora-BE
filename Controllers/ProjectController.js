@@ -210,6 +210,18 @@ class ProjectController {
       res.status(500).send("Eliminazione del membro fallita");
     }
   }
+
+  static async deleteProject(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      await Project.deleteProject(db, ProjectId);
+      res.status(200).send("Progetto eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del progetto dal team:", error);
+      res.status(500).send("Eliminazione del progetto fallita");
+    }
+  }
 }
 
 module.exports = ProjectController;

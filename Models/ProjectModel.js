@@ -287,6 +287,19 @@ class ProjectModel {
       });
     });
   }
+
+  static deleteProject(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."Project" WHERE "ProjectId" = $1`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;
