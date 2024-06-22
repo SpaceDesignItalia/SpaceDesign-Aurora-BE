@@ -109,7 +109,11 @@ class ProjectController {
       const ProjectData = req.body.ProjectData;
 
       const ProjectId = await Project.addProject(db, ProjectData);
-      res.status(200).send(ProjectId);
+      const Conversation = await Project.createProjectConversation(
+        db,
+        ProjectId
+      );
+      res.status(200).send(Conversation);
     } catch (error) {
       console.error("Errore nella creazione del progetto:", error);
       res.status(500).send("Creazione del progetto fallito");
