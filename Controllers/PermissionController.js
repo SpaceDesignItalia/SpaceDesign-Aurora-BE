@@ -114,40 +114,6 @@ class PermissionController {
     }
   }
 
-  static async updatePermission(req, res, db) {
-    try {
-      const PermissionId = req.body.PermissionId;
-      const PermissionData = req.body.PermissionData;
-      await Permission.updatePermission(db, PermissionId, PermissionData);
-      res.status(200).send("Permesso aggiornato con successo.");
-    } catch (error) {
-      console.error("Error nell'aggiornare il permesso:", error);
-      res.status(500).send("Aggiunta del permesso fallita.");
-    }
-  }
-
-  static async deleteRole(req, res, db) {
-    try {
-      const RoleId = req.query.RoleId;
-      await Permission.deleteRole(db, RoleId);
-      res.status(200).send("Ruolo eliminato con successo.");
-    } catch (error) {
-      console.error("Error nell'eliminare il ruolo:", error);
-      res.status(500).send("Aggiunta del ruolo fallita.");
-    }
-  }
-
-  static async deletePermission(req, res, db) {
-    try {
-      const PermissionId = req.query.PermissionId;
-      await Permission.deletePermission(db, PermissionId);
-      res.status(200).send("Permesso eliminato con successo.");
-    } catch (error) {
-      console.error("Error nell'eliminare il permesso:", error);
-      res.status(500).send("Aggiunta del permesso fallita.");
-    }
-  }
-
   static async updateRole(req, res, db) {
     try {
       const RoleId = req.body.RoleId;
@@ -158,7 +124,29 @@ class PermissionController {
       res.status(200).send("Ruolo aggiornato con successo.");
     } catch (error) {
       console.error("Error nell'aggiornare il ruolo:", error);
-      res.status(500).send("Aggiunta del ruolo fallita.");
+      res.status(500).send("Aggiornamento del ruolo fallita.");
+    }
+  }
+
+  static async deleteRole(req, res, db) {
+    try {
+      const RoleId = req.query.RoleId;
+      await Permission.deleteRole(db, RoleId);
+      res.status(200).send("Ruolo eliminato con successo.");
+    } catch (error) {
+      console.error("Error nell'eliminare il ruolo:", error);
+      res.status(500).send("Eliminazione del ruolo fallita.");
+    }
+  }
+
+  static async deletePermission(req, res, db) {
+    try {
+      const PermissionId = req.query.PermissionId;
+      await Permission.deletePermission(db, PermissionId);
+      res.status(200).send("Permesso eliminato con successo.");
+    } catch (error) {
+      console.error("Error nell'eliminare il permesso:", error);
+      res.status(500).send("Eliminazione del permesso fallita.");
     }
   }
 }

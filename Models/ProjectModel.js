@@ -29,8 +29,8 @@ class ProjectModel {
 
   static getAllManagers(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "ProjectId", CONCAT("ProjectName",' ',"ProjectSurname") AS "ProjectFullName", "ProjectEmail", "RoleName" FROM public."Project"
-      INNER JOIN public."ProjectRole" USING("ProjectId")
+      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "RoleName" FROM public."Staffer"
+      INNER JOIN public."StafferRole" USING("StafferId")
       INNER JOIN public."Role" USING("RoleId")
       WHERE "RoleName" = 'CEO' OR "RoleName" = 'Project Manager'`;
 
@@ -148,8 +148,8 @@ class ProjectModel {
 
   static addProject(db, ProjectData) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."Project"("ProjectName", "ProjectDescription", "ProjectEndDate", "ProjectManagerId", "ProjectBanner", "CompanyId")
-      VALUES ($1, $2, $3, $4, $5, $6);`;
+      const query = `INSERT INTO public."Project"("ProjectName", "ProjectDescription", "ProjectEndDate", "ProjectManagerId", "ProjectBannerId", "CompanyId")
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
 
       const values = [
         ProjectData.ProjectName,
@@ -164,7 +164,20 @@ class ProjectModel {
         if (error) {
           reject(error);
         } else {
-          resolve(result.rows[0].ProjectId);
+          const query = `INSERT INTO public."ProjectTeam" ("ProjectId", "StafferId") VALUES ($1, $2) RETURNING *`;
+
+          const values = [
+            result.rows[0].ProjectId,
+            ProjectData.ProjectManagerId,
+          ];
+
+          db.query(query, values, (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result.rows[0].ProjectId);
+            }
+          });
         }
       });
     });
@@ -256,7 +269,7 @@ class ProjectModel {
   static getMessagesByConversationId(db, ConversationId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT public."Message"."MessageId", public."Message"."StafferSenderId", public."Message"."ConversationId", public."Message"."Date", public."Message"."Text", 
-                        CONCAT(public."Staffer"."StafferName", ' ', public."Staffer"."StafferSurname") AS "StafferSenderFullName"
+                        CONCAT(public."Staffer"."StafferName", ' ', public."Staffer"."StafferSurname") AS "StafferSenderFullName", public."Staffer"."StafferImageUrl"
                       FROM public."Message" 
                       INNER JOIN public."Staffer" 
                         ON public."Staffer"."StafferId" = public."Message"."StafferSenderId"
@@ -279,6 +292,19 @@ class ProjectModel {
       const values = [StafferId, ProjectId];
 
       db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static deleteProject(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."Project" WHERE "ProjectId" = $1`;
+      db.query(query, [ProjectId], (error, result) => {
         if (error) {
           reject(error);
         } else {

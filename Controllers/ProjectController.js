@@ -109,7 +109,11 @@ class ProjectController {
       const ProjectData = req.body.ProjectData;
 
       const ProjectId = await Project.addProject(db, ProjectData);
-      res.status(200).send(ProjectId);
+      const Conversation = await Project.createProjectConversation(
+        db,
+        ProjectId
+      );
+      res.status(200).send(Conversation);
     } catch (error) {
       console.error("Errore nella creazione del progetto:", error);
       res.status(500).send("Creazione del progetto fallito");
@@ -204,6 +208,18 @@ class ProjectController {
     } catch (error) {
       console.error("Errore nell'eliminazione del membro dal team:", error);
       res.status(500).send("Eliminazione del membro fallita");
+    }
+  }
+
+  static async deleteProject(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      await Project.deleteProject(db, ProjectId);
+      res.status(200).send("Progetto eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del progetto dal team:", error);
+      res.status(500).send("Eliminazione del progetto fallita");
     }
   }
 }
