@@ -42,13 +42,20 @@ const projectGET = (db) => {
     ProjectController.getMessagesByConversationId(req, res, db);
   });
 
-
   router.get("/GetProjetTeamMembers", (req, res) => {
     ProjectController.getProjectTeamMembers(req, res, db);
   });
 
   router.get("/GetMembersNotInProjectTeam", (req, res) => {
     ProjectController.getMembersNotInProjectTeam(req, res, db);
+  });
+
+  router.get("/GetTasksByProjectId", (req, res) => {
+    ProjectController.getTasksByProjectId(req, res, db);
+  });
+
+  router.get("/GetTaskStatuses", (req, res) => {
+    ProjectController.getTaskStatuses(req, res, db);
   });
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };

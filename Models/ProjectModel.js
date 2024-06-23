@@ -313,6 +313,50 @@ class ProjectModel {
       });
     });
   }
+
+  static getTasksByProjectId(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectId" = $1`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getTaskStatuses(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskStatus"`;
+
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static updateTaskStatus(db, ProjectTaskId, ProjectTaskStatusId) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTask" SET "ProjectTaskStatusId" = $1 WHERE "ProjectTaskId" = $2`;
+
+      const values = [ProjectTaskStatusId, ProjectTaskId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

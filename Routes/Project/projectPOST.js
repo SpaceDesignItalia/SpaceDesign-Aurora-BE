@@ -22,6 +22,10 @@ const projectPOST = (db) => {
     ProjectController.createProjectConversation(req, res, db);
   });
 
+  router.post("/UpdateTaskStatus", (req, res) => {
+    ProjectController.updateTaskStatus(req, res, db);
+  });
+
   return router;
 };
 
