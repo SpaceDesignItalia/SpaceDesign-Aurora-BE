@@ -357,6 +357,36 @@ class ProjectModel {
       });
     });
   }
+
+  static getTagsByTaskId(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectTaskTag"."ProjectTaskTagId", "ProjectTaskTag"."ProjectTaskTagName" FROM public."ProjectTaskTag" JOIN public."ProjectTasksTags" USING("ProjectTaskTagId") WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getMembersByTaskId(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName", "StafferImageUrl", "StafferEmail" FROM public."ProjectTaskTeam" 
+      INNER JOIN public."Staffer" USING("StafferId")
+      WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

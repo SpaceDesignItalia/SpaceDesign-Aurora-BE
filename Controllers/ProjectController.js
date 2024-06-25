@@ -255,6 +255,28 @@ class ProjectController {
       res.status(500).send("Aggiornamento dello stato del task fallito");
     }
   }
+
+  static async getTagsByTaskId(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const tags = await Project.getTagsByTaskId(db, ProjectTaskId);
+      res.status(200).json(tags);
+    } catch (error) {
+      console.error("Errore nel recupero dei tag del task:", error);
+      res.status(500).send("Recupero dei tag del task fallito");
+    }
+  }
+
+  static async getMembersByTaskId(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const members = await Project.getMembersByTaskId(db, ProjectTaskId);
+      res.status(200).json(members);
+    } catch (error) {
+      console.error("Errore nel recupero dei membri del task:", error);
+      res.status(500).send("Recupero dei membri del task fallito");
+    }
+  }
 }
 
 module.exports = ProjectController;
