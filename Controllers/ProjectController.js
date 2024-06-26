@@ -92,6 +92,20 @@ class ProjectController {
     }
   }
 
+  static async getMessagesByConversationId(req, res, db) {
+    try {
+      const ConversationId = req.query.ConversationId;
+      const messages = await Project.getMessagesByConversationId(
+        db,
+        ConversationId
+      );
+      res.status(200).json(messages);
+    } catch (error) {
+      console.error("Errore nel recupero dei messaggi", error);
+      res.status(500).send("Recupero dei messaggi fallito");
+    }
+  }
+
   static async getMembersNotInProjectTeam(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
@@ -120,6 +134,17 @@ class ProjectController {
     }
   }
 
+  static async createProjectConversation(req, res, db) {
+    try {
+      const ProjectId = req.body.ProjectId;
+      await Project.createProjectConversation(db, ProjectId);
+      res.status(200).send("Conversazione creata con successo.");
+    } catch (error) {
+      console.error("Errore nella creazione della conversazione", error);
+      res.status(500).send("Creazione della conversazione fallita");
+    }
+  }
+
   static async addProjectLink(req, res, db) {
     try {
       const ProjectLinkData = req.body.ProjectLinkData;
@@ -145,19 +170,6 @@ class ProjectController {
     }
   }
 
-  static async updateProjectTheme(req, res, db) {
-    try {
-      const ProjectId = req.body.ProjectId;
-      const ProjectBannerId = req.body.ProjectBannerId;
-
-      await Project.updateProjectTheme(db, ProjectId, ProjectBannerId);
-      res.status(200).send("Tema del progetto aggiornato con successo.");
-    } catch (error) {
-      console.error("Errore nell'aggiornamento del tema:", error);
-      res.status(500).send("Aggiornamento del tema fallito");
-    }
-  }
-
   static async getConversationByProjectId(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
@@ -173,28 +185,28 @@ class ProjectController {
     }
   }
 
-  static async createProjectConversation(req, res, db) {
+  static async updateProjectTheme(req, res, db) {
     try {
       const ProjectId = req.body.ProjectId;
-      await Project.createProjectConversation(db, ProjectId);
-      res.status(200).send("Conversazione creata con successo.");
+      const ProjectBannerId = req.body.ProjectBannerId;
+
+      await Project.updateProjectTheme(db, ProjectId, ProjectBannerId);
+      res.status(200).send("Tema del progetto aggiornato con successo.");
     } catch (error) {
-      console.error("Errore nella creazione della conversazione", error);
-      res.status(500).send("Creazione della conversazione fallita");
+      console.error("Errore nell'aggiornamento del tema:", error);
+      res.status(500).send("Aggiornamento del tema fallito");
     }
   }
 
-  static async getMessagesByConversationId(req, res, db) {
+  static async updateProject(req, res, db) {
     try {
-      const ConversationId = req.query.ConversationId;
-      const messages = await Project.getMessagesByConversationId(
-        db,
-        ConversationId
-      );
-      res.status(200).json(messages);
+      const ProjectData = req.body.ProjectData;
+
+      await Project.updateProject(db, ProjectData);
+      res.status(200).send("Progetto aggiornato con successo.");
     } catch (error) {
-      console.error("Errore nel recupero dei messaggi", error);
-      res.status(500).send("Recupero dei messaggi fallito");
+      console.error("Errore nell'aggiornamento del progetto:", error);
+      res.status(500).send("Aggiornamento del progetto fallito");
     }
   }
 
