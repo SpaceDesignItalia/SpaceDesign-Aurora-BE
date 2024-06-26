@@ -238,6 +238,31 @@ class ProjectModel {
     });
   }
 
+  static updateProject(db, ProjectData) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."Project" SET "ProjectName" = $1, "ProjectDescription" = $2, "ProjectCreationDate" = $3, 
+      "ProjectEndDate" = $4, "ProjectManagerId" = $5, "CompanyId" = $6 WHERE "ProjectId" = $7`;
+
+      const values = [
+        ProjectData.ProjectName,
+        ProjectData.ProjectDescription,
+        ProjectData.ProjectCreationDate,
+        ProjectData.ProjectEndDate,
+        ProjectData.ProjectManagerId,
+        ProjectData.CompanyId,
+        ProjectData.ProjectId,
+      ];
+
+      db.query(query, values, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static getConversationByProjectId(db, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT public."Conversation"."ConversationId" FROM public."Conversation"WHERE "ProjectId" = $1`;
