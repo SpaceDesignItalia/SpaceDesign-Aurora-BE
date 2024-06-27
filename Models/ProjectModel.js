@@ -256,7 +256,7 @@ class ProjectModel {
     return new Promise((resolve, reject) => {
       const query = `UPDATE public."Project" SET "ProjectName" = $1, "ProjectDescription" = $2, "ProjectCreationDate" = $3, 
       "ProjectEndDate" = $4, "ProjectManagerId" = $5, "CompanyId" = $6, "StatusId" = $7 WHERE "ProjectId" = $8`;
-      console.log(ProjectData);
+
       const values = [
         ProjectData.ProjectName,
         ProjectData.ProjectDescription,
