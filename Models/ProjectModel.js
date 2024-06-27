@@ -674,6 +674,34 @@ class ProjectModel {
       });
     });
   }
+
+  static deleteTaskMembers(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskTeam" WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static deleteTaskTags(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTasksTags" WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

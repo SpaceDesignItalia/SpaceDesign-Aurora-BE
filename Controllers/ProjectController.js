@@ -400,6 +400,8 @@ class ProjectController {
       const TaskData = req.body.TaskData;
       const FormattedDate = req.body.FormattedDate;
       await Project.updateTask(db, TaskData, FormattedDate);
+      this.addMemberToTask(TaskData, TaskData.ProjectTaskId, db);
+      this.addTagToTask(TaskData, TaskData.ProjectTaskId, db);
       res.status(200).send("Task aggiornato con successo.");
     } catch (error) {
       console.error("Errore nell'aggiornamento del task:", error);
@@ -433,6 +435,7 @@ class ProjectController {
 
   static async addMemberToTask(TaskData, TaskId, db) {
     try {
+      await Project.deleteTaskMembers(db, TaskId);
       TaskData.ProjectTaskMembers.map(async (member) => {
         await Project.addMemberToTask(db, TaskId, member.StafferId);
       });
@@ -443,6 +446,7 @@ class ProjectController {
 
   static async addTagToTask(TaskData, TaskId, db) {
     try {
+      await Project.deleteTaskTags(db, TaskId);
       TaskData.ProjectTaskTags.map(async (tag) => {
         await Project.addTagToTask(db, TaskId, tag.ProjectTaskTagId);
       });
