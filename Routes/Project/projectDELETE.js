@@ -8,9 +8,13 @@ const projectDELETE = (db) => {
     ProjectController.removeMemberFromProjectById(req, res, db);
   });
 
+  router.delete("/RemoveLinkFromProject", (req, res) => {
+    ProjectController.removeLinkFromProject(req, res, db);
+  });
+
   router.delete("/DeleteProject", (req, res) => {
     ProjectController.deleteProject(req, res, db);
-  })
+  });
   return router;
 };
 

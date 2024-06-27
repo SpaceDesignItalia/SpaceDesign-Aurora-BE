@@ -341,6 +341,22 @@ class ProjectModel {
     });
   }
 
+  static removeLinkFromProject(db, ProjectLinkId, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectLink" WHERE "ProjectLinkId" = $1 AND "ProjectId" = $2`;
+
+      const values = [ProjectLinkId, ProjectId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static deleteProject(db, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."Project" WHERE "ProjectId" = $1`;
