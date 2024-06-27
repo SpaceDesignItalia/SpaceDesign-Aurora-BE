@@ -476,8 +476,39 @@ class ProjectModel {
         if (error) {
           reject(error);
         } else {
-          console.log(result.rows[0]);
           resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static deleteTaskMember(db, ProjectTaskId, StafferId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskTeam" WHERE "ProjectTaskId" = $1 AND "StafferId" = $2`;
+
+      const values = [ProjectTaskId, StafferId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static deleteTaskTag(db, ProjectTaskId, ProjectTaskTagId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTasksTags" WHERE "ProjectTaskId" = $1 AND "ProjectTaskTagId" = $2`;
+
+      const values = [ProjectTaskId, ProjectTaskTagId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
         }
       });
     });

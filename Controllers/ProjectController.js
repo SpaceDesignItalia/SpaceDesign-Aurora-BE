@@ -334,6 +334,30 @@ class ProjectController {
       res.status(500).send("Recupero del task fallito");
     }
   }
+
+  static async deleteTaskMember(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const StafferId = req.query.StafferId;
+      await Project.deleteTaskMember(db, ProjectTaskId, StafferId);
+      res.status(200).send("Membro eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del membro dal task:", error);
+      res.status(500).send("Eliminazione del membro dal task fallita");
+    }
+  }
+
+  static async deleteTaskTag(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const ProjectTaskTagId = req.query.ProjectTaskTagId;
+      await Project.deleteTaskTag(db, ProjectTaskId, ProjectTaskTagId);
+      res.status(200).send("Tag eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del tag dal task:", error);
+      res.status(500).send("Eliminazione del tag dal task fallita");
+    }
+  }
 }
 
 module.exports = ProjectController;
