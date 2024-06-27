@@ -298,43 +298,6 @@ class PermissionModel {
       });
     });
   }
-
-  static async updatePermission(db, PermissionId, PermissionData) {
-    try {
-      // Check if the permission exists
-      const getPermissionQuery = `SELECT "PermissionId" FROM "Permission" WHERE "PermissionId" = $1`;
-      const permissionResult = await db.query(getPermissionQuery, [
-        PermissionId,
-      ]);
-
-      if (permissionResult.rows.length === 0) {
-        throw new Error("Permission not found");
-      }
-
-      // Update the permission information
-      const updatePermissionQuery = `UPDATE "Permission" SET "PermissionName" = $1, "PermissionDescription" = $2, "PermissionAction" = $3 WHERE "PermissionId" = $4`;
-      const updatePermissionValues = [
-        PermissionData.PermissionName,
-        PermissionData.PermissionDescription,
-        PermissionData.PermissionAction,
-        PermissionData.PermissionId,
-      ];
-      await db.query(updatePermissionQuery, updatePermissionValues);
-
-      // Update the PermissionGroup information
-      const updatePermissionGroupQuery = `UPDATE "PermissionGroup" SET "PermissionGroupId" = $1 WHERE "PermissionId" = $2`;
-      const updatePermissionGroupValues = [
-        PermissionData.PermissionGroupId,
-        PermissionData.PermissionId,
-      ];
-      await db.query(updatePermissionGroupQuery, updatePermissionGroupValues);
-
-      return { message: "Permission updated successfully" };
-    } catch (error) {
-      throw error;
-    }
-  }
-
   static async updateRole(db, RoleId, RoleData, RolePermissionData) {
     return new Promise((resolve, reject) => {
       const updateRoleQuery = `

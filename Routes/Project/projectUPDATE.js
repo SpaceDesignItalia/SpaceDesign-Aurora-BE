@@ -8,6 +8,10 @@ const projectUPDATE = (db) => {
   router.put("/UpdateProjectTheme", (req, res) => {
     ProjectController.updateProjectTheme(req, res, db);
   });
+
+  router.put("/UpdateProjectData", (req, res) => {
+    ProjectController.updateProject(req, res, db);
+  });
   return router;
 };
 
