@@ -416,7 +416,7 @@ class ProjectModel {
 
   static getTagsByTaskId(db, ProjectTaskId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "ProjectTaskTag"."ProjectTaskTagId", "ProjectTaskTag"."ProjectTaskTagName", "ProjectTaskTag"."ProjectTaskTagColor" FROM public."ProjectTaskTag" JOIN public."ProjectTasksTags" USING("ProjectTaskTagId") WHERE "ProjectTaskId" = $1`;
+      const query = `SELECT "ProjectTaskTag"."ProjectTaskTagId", "ProjectTaskTag"."ProjectTaskTagName" FROM public."ProjectTaskTag" JOIN public."ProjectTasksTags" USING("ProjectTaskTagId") WHERE "ProjectTaskId" = $1`;
 
       db.query(query, [ProjectTaskId], (error, result) => {
         if (error) {
@@ -473,7 +473,7 @@ class ProjectModel {
 
   static getTagsNotInTask(db, TaskData) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "ProjectTaskTagId", "ProjectTaskTagName", "ProjectTaskTagColor" FROM public."ProjectTaskTag" 
+      const query = `SELECT "ProjectTaskTagId", "ProjectTaskTagName" FROM public."ProjectTaskTag" 
       WHERE "ProjectTaskTagId" NOT IN (
           SELECT "ProjectTaskTagId"
           FROM public."ProjectTasksTags"
