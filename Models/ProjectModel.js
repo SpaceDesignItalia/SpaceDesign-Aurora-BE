@@ -604,6 +604,20 @@ class ProjectModel {
       });
     });
   }
+
+  static deleteTask(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTask" WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

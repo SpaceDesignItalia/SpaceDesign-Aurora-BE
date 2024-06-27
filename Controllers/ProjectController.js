@@ -414,6 +414,17 @@ class ProjectController {
       console.error("Errore nell'aggiunta dei tag al task:", error);
     }
   }
+
+  static async deleteTask(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      await Project.deleteTask(db, ProjectTaskId);
+      res.status(200).send("Task eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del task:", error);
+      res.status(500).send("Eliminazione del task fallita");
+    }
+  }
 }
 
 module.exports = ProjectController;
