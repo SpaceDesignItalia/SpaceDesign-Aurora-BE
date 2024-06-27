@@ -627,7 +627,7 @@ class ProjectModel {
     });
   }
 
-  static addTaskMember(db, ProjectTaskId, StafferId) {
+  static addMemberToTask(db, ProjectTaskId, StafferId) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."ProjectTaskTeam"("ProjectTaskId", "StafferId")
       VALUES ($1, $2) RETURNING *`;
@@ -644,7 +644,7 @@ class ProjectModel {
     });
   }
 
-  static addTaskTag(db, ProjectTaskId, ProjectTaskTagId) {
+  static addTagToTask(db, ProjectTaskId, ProjectTaskTagId) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."ProjectTasksTags"("ProjectTaskId", "ProjectTaskTagId")
       VALUES ($1, $2) RETURNING *`;

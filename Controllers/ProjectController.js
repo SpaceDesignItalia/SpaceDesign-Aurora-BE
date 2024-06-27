@@ -434,7 +434,7 @@ class ProjectController {
   static async addMemberToTask(TaskData, TaskId, db) {
     try {
       TaskData.ProjectTaskMembers.map(async (member) => {
-        await Project.addTaskMember(db, TaskId, member.StafferId);
+        await Project.addMemberToTask(db, TaskId, member.StafferId);
       });
     } catch (error) {
       console.error("Errore nell'aggiunta dei membri al task:", error);
@@ -444,7 +444,7 @@ class ProjectController {
   static async addTagToTask(TaskData, TaskId, db) {
     try {
       TaskData.ProjectTaskTags.map(async (tag) => {
-        await Project.addTaskTag(db, TaskId, tag.ProjectTaskTagId);
+        await Project.addTagToTask(db, TaskId, tag.ProjectTaskTagId);
       });
     } catch (error) {
       console.error("Errore nell'aggiunta dei tag al task:", error);
