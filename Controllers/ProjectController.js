@@ -358,6 +358,62 @@ class ProjectController {
       res.status(500).send("Eliminazione del tag dal task fallita");
     }
   }
+
+  static async updateTask(req, res, db) {
+    try {
+      const TaskData = req.body.TaskData;
+      const FormattedDate = req.body.FormattedDate;
+      await Project.updateTask(db, TaskData, FormattedDate);
+      res.status(200).send("Task aggiornato con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiornamento del task:", error);
+      res.status(500).send("Aggiornamento del task fallito");
+    }
+  }
+
+  static async getAllTags(req, res, db) {
+    try {
+      const tags = await Project.getAllTags(db);
+      res.status(200).json(tags);
+    } catch (error) {
+      console.error("Errore nel recupero dei tag:", error);
+      res.status(500).send("Recupero dei tag fallito");
+    }
+  }
+
+  static async addTask(req, res, db) {
+    try {
+      const TaskData = req.body.TaskData;
+      const FormattedDate = req.body.FormattedDate;
+      const Task = await Project.addTask(db, TaskData, FormattedDate);
+      this.addMemberToTask(TaskData, Task.ProjectTaskId, db);
+      this.addTagToTask(TaskData, Task.ProjectTaskId, db);
+      res.status(200).json(Task.ProjectTaskId);
+    } catch (error) {
+      console.error("Errore nella creazione del task:", error);
+      res.status(500).send("Creazione del task fallita");
+    }
+  }
+
+  static async addMemberToTask(TaskData, TaskId, db) {
+    try {
+      TaskData.ProjectTaskMembers.map(async (member) => {
+        await Project.addTaskMember(db, TaskId, member.StafferId);
+      });
+    } catch (error) {
+      console.error("Errore nell'aggiunta dei membri al task:", error);
+    }
+  }
+
+  static async addTagToTask(TaskData, TaskId, db) {
+    try {
+      TaskData.ProjectTaskTags.map(async (tag) => {
+        await Project.addTaskTag(db, TaskId, tag.ProjectTaskTagId);
+      });
+    } catch (error) {
+      console.error("Errore nell'aggiunta dei tag al task:", error);
+    }
+  }
 }
 
 module.exports = ProjectController;
