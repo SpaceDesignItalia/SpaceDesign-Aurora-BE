@@ -59,6 +59,18 @@ class ProjectController {
     }
   }
 
+  static async getProjectStatus(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      const StatusId = await Project.getProjectStatus(db, ProjectId);
+      res.status(200).json(StatusId);
+    } catch (error) {
+      console.error("Errore nel recupero dello stato:", error);
+      res.status(500).send("Recupero dello stato fallito");
+    }
+  }
+
   static async getAllLinkByProjectId(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;

@@ -79,6 +79,20 @@ class ProjectModel {
     });
   }
 
+  static getProjectStatus(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StatusId" FROM public."Project" WHERE "ProjectId" = $1`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
   static getAllLinkByProjectId(db, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectLink" INNER JOIN public."ProjectLinkType" USING("ProjectLinkTypeId") WHERE "ProjectId" = $1`;
@@ -241,8 +255,8 @@ class ProjectModel {
   static updateProject(db, ProjectData) {
     return new Promise((resolve, reject) => {
       const query = `UPDATE public."Project" SET "ProjectName" = $1, "ProjectDescription" = $2, "ProjectCreationDate" = $3, 
-      "ProjectEndDate" = $4, "ProjectManagerId" = $5, "CompanyId" = $6 WHERE "ProjectId" = $7`;
-
+      "ProjectEndDate" = $4, "ProjectManagerId" = $5, "CompanyId" = $6, "StatusId" = $7 WHERE "ProjectId" = $8`;
+      console.log(ProjectData);
       const values = [
         ProjectData.ProjectName,
         ProjectData.ProjectDescription,
@@ -250,6 +264,7 @@ class ProjectModel {
         ProjectData.ProjectEndDate,
         ProjectData.ProjectManagerId,
         ProjectData.CompanyId,
+        ProjectData.StatusId,
         ProjectData.ProjectId,
       ];
 
@@ -294,12 +309,12 @@ class ProjectModel {
   static getMessagesByConversationId(db, ConversationId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT public."Message"."MessageId", public."Message"."StafferSenderId", public."Message"."ConversationId", public."Message"."Date", public."Message"."Text", 
-                        CONCAT(public."Staffer"."StafferName", ' ', public."Staffer"."StafferSurname") AS "StafferSenderFullName", public."Staffer"."StafferImageUrl"
-                      FROM public."Message" 
-                      INNER JOIN public."Staffer" 
-                        ON public."Staffer"."StafferId" = public."Message"."StafferSenderId"
-                      WHERE "ConversationId" = $1 
-                      ORDER BY "Date" ASC`;
+      CONCAT(public."Staffer"."StafferName", ' ', public."Staffer"."StafferSurname") AS "StafferSenderFullName", public."Staffer"."StafferImageUrl"
+      FROM public."Message" INNER JOIN public."Staffer" 
+      ON public."Staffer"."StafferId" = public."Message"."StafferSenderId"
+      WHERE "ConversationId" = $1 
+      ORDER BY "Date" ASC`;
+
       db.query(query, [ConversationId], (error, result) => {
         if (error) {
           reject(error);
