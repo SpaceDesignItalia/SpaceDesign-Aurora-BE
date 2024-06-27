@@ -42,7 +42,6 @@ const projectGET = (db) => {
     ProjectController.getMessagesByConversationId(req, res, db);
   });
 
-
   router.get("/GetProjetTeamMembers", (req, res) => {
     ProjectController.getProjectTeamMembers(req, res, db);
   });
@@ -50,6 +49,39 @@ const projectGET = (db) => {
   router.get("/GetMembersNotInProjectTeam", (req, res) => {
     ProjectController.getMembersNotInProjectTeam(req, res, db);
   });
+
+  router.get("/GetTasksByProjectId", (req, res) => {
+    ProjectController.getTasksByProjectId(req, res, db);
+  });
+
+  router.get("/GetTaskStatuses", (req, res) => {
+    ProjectController.getTaskStatuses(req, res, db);
+  });
+
+  router.get("/GetTagsByTaskId", (req, res) => {
+    ProjectController.getTagsByTaskId(req, res, db);
+  });
+
+  router.get("/GetMembersByTaskId", (req, res) => {
+    ProjectController.getMembersByTaskId(req, res, db);
+  });
+
+  router.get("/GetMembersNotInTask", (req, res) => {
+    ProjectController.getMembersNotInTask(req, res, db);
+  });
+
+  router.get("/GetTagsNotInTask", (req, res) => {
+    ProjectController.getTagsNotInTask(req, res, db);
+  });
+
+  router.get("/GetTaskByTaskId", (req, res) => {
+    ProjectController.getTaskByTaskId(req, res, db);
+  });
+
+  router.get("/GetAllTags", (req, res) => {
+    ProjectController.getAllTags(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

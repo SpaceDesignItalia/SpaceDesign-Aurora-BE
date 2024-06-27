@@ -222,6 +222,209 @@ class ProjectController {
       res.status(500).send("Eliminazione del progetto fallita");
     }
   }
+
+  static async getTasksByProjectId(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      const tasks = await Project.getTasksByProjectId(db, ProjectId);
+      res.status(200).json(tasks);
+    } catch (error) {
+      console.error("Errore nel recupero dei task:", error);
+      res.status(500).send("Recupero dei task fallito");
+    }
+  }
+
+  static async getTaskStatuses(req, res, db) {
+    try {
+      const statuses = await Project.getTaskStatuses(db);
+      res.status(200).json(statuses);
+    } catch (error) {
+      console.error("Errore nel recupero degli status dei task:", error);
+      res.status(500).send("Recupero degli status dei task fallito");
+    }
+  }
+
+  static async updateTaskStatus(req, res, db) {
+    try {
+      const ProjectTaskId = req.body.ProjectTaskId;
+      const ProjectTaskStatusId = req.body.ProjectTaskStatusId;
+      await Project.updateTaskStatus(db, ProjectTaskId, ProjectTaskStatusId);
+      res.status(200).send("Stato del task aggiornato con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiornamento dello stato del task:", error);
+      res.status(500).send("Aggiornamento dello stato del task fallito");
+    }
+  }
+
+  static async getTagsByTaskId(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const tags = await Project.getTagsByTaskId(db, ProjectTaskId);
+      res.status(200).json(tags);
+    } catch (error) {
+      console.error("Errore nel recupero dei tag del task:", error);
+      res.status(500).send("Recupero dei tag del task fallito");
+    }
+  }
+
+  static async getMembersByTaskId(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const members = await Project.getMembersByTaskId(db, ProjectTaskId);
+      res.status(200).json(members);
+    } catch (error) {
+      console.error("Errore nel recupero dei membri del task:", error);
+      res.status(500).send("Recupero dei membri del task fallito");
+    }
+  }
+
+  static async getMembersNotInTask(req, res, db) {
+    try {
+      const TaskData = req.query.TaskData;
+      const members = await Project.getMembersNotInTask(db, TaskData);
+      res.status(200).json(members);
+    } catch (error) {
+      console.error("Errore nel recupero dei membri non nel task:", error);
+      res.status(500).send("Recupero dei membri non nel task fallito");
+    }
+  }
+
+  static async getTagsNotInTask(req, res, db) {
+    try {
+      const TaskData = req.query.TaskData;
+      const tags = await Project.getTagsNotInTask(db, TaskData);
+      res.status(200).json(tags);
+    } catch (error) {
+      console.error("Errore nel recupero dei tag non nel task:", error);
+      res.status(500).send("Recupero dei tag non nel task fallito");
+    }
+  }
+
+  static async addTaskMember(req, res, db) {
+    try {
+      const TaskData = req.body.TaskData;
+      const MemberData = req.body.MemberData;
+      await Project.addTaskMember(db, TaskData, MemberData);
+      res.status(200).send("Membro aggiunto con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiunta del membro al task:", error);
+      res.status(500).send("Aggiunta del membro al task fallita");
+    }
+  }
+
+  static async addTaskTag(req, res, db) {
+    try {
+      const TaskData = req.body.TaskData;
+      const TagData = req.body.TagData;
+      await Project.addTaskTag(db, TaskData, TagData);
+      res.status(200).send("Tag aggiunto con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiunta del tag al task:", error);
+      res.status(500).send("Aggiunta del tag al task fallita");
+    }
+  }
+
+  static async getTaskByTaskId(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const task = await Project.getTaskByTaskId(db, ProjectTaskId);
+      res.status(200).json(task);
+    } catch (error) {
+      console.error("Errore nel recupero del task:", error);
+      res.status(500).send("Recupero del task fallito");
+    }
+  }
+
+  static async deleteTaskMember(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const StafferId = req.query.StafferId;
+      await Project.deleteTaskMember(db, ProjectTaskId, StafferId);
+      res.status(200).send("Membro eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del membro dal task:", error);
+      res.status(500).send("Eliminazione del membro dal task fallita");
+    }
+  }
+
+  static async deleteTaskTag(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const ProjectTaskTagId = req.query.ProjectTaskTagId;
+      await Project.deleteTaskTag(db, ProjectTaskId, ProjectTaskTagId);
+      res.status(200).send("Tag eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del tag dal task:", error);
+      res.status(500).send("Eliminazione del tag dal task fallita");
+    }
+  }
+
+  static async updateTask(req, res, db) {
+    try {
+      const TaskData = req.body.TaskData;
+      const FormattedDate = req.body.FormattedDate;
+      await Project.updateTask(db, TaskData, FormattedDate);
+      res.status(200).send("Task aggiornato con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiornamento del task:", error);
+      res.status(500).send("Aggiornamento del task fallito");
+    }
+  }
+
+  static async getAllTags(req, res, db) {
+    try {
+      const tags = await Project.getAllTags(db);
+      res.status(200).json(tags);
+    } catch (error) {
+      console.error("Errore nel recupero dei tag:", error);
+      res.status(500).send("Recupero dei tag fallito");
+    }
+  }
+
+  static async addTask(req, res, db) {
+    try {
+      const TaskData = req.body.TaskData;
+      const FormattedDate = req.body.FormattedDate;
+      const Task = await Project.addTask(db, TaskData, FormattedDate);
+      this.addMemberToTask(TaskData, Task.ProjectTaskId, db);
+      this.addTagToTask(TaskData, Task.ProjectTaskId, db);
+      res.status(200).json(Task.ProjectTaskId);
+    } catch (error) {
+      console.error("Errore nella creazione del task:", error);
+      res.status(500).send("Creazione del task fallita");
+    }
+  }
+
+  static async addMemberToTask(TaskData, TaskId, db) {
+    try {
+      TaskData.ProjectTaskMembers.map(async (member) => {
+        await Project.addTaskMember(db, TaskId, member.StafferId);
+      });
+    } catch (error) {
+      console.error("Errore nell'aggiunta dei membri al task:", error);
+    }
+  }
+
+  static async addTagToTask(TaskData, TaskId, db) {
+    try {
+      TaskData.ProjectTaskTags.map(async (tag) => {
+        await Project.addTaskTag(db, TaskId, tag.ProjectTaskTagId);
+      });
+    } catch (error) {
+      console.error("Errore nell'aggiunta dei tag al task:", error);
+    }
+  }
+
+  static async deleteTask(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      await Project.deleteTask(db, ProjectTaskId);
+      res.status(200).send("Task eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del task:", error);
+      res.status(500).send("Eliminazione del task fallita");
+    }
+  }
 }
 
 module.exports = ProjectController;

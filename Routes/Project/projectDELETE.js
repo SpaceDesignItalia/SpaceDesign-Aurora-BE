@@ -10,7 +10,20 @@ const projectDELETE = (db) => {
 
   router.delete("/DeleteProject", (req, res) => {
     ProjectController.deleteProject(req, res, db);
-  })
+  });
+
+  router.delete("/DeleteTaskMember", (req, res) => {
+    ProjectController.deleteTaskMember(req, res, db);
+  });
+
+  router.delete("/DeleteTaskTag", (req, res) => {
+    ProjectController.deleteTaskTag(req, res, db);
+  });
+
+  router.delete("/DeleteTask", (req, res) => {
+    ProjectController.deleteTask(req, res, db);
+  });
+
   return router;
 };
 

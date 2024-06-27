@@ -313,6 +313,311 @@ class ProjectModel {
       });
     });
   }
+
+  static getTasksByProjectId(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectId" = $1`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getTaskStatuses(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskStatus"`;
+
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static updateTaskStatus(db, ProjectTaskId, ProjectTaskStatusId) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTask" SET "ProjectTaskStatusId" = $1 WHERE "ProjectTaskId" = $2`;
+
+      const values = [ProjectTaskStatusId, ProjectTaskId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getTagsByTaskId(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectTaskTag"."ProjectTaskTagId", "ProjectTaskTag"."ProjectTaskTagName", "ProjectTaskTag"."ProjectTaskTagColor" FROM public."ProjectTaskTag" JOIN public."ProjectTasksTags" USING("ProjectTaskTagId") WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getMembersByTaskId(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName", "StafferImageUrl", "StafferEmail" FROM public."ProjectTaskTeam" 
+      INNER JOIN public."Staffer" USING("StafferId")
+      WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getMembersNotInTask(db, TaskData) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "StafferImageUrl" FROM public."Staffer" 
+      WHERE "StafferId" NOT IN (
+          SELECT "StafferId"
+          FROM public."ProjectTaskTeam"
+          WHERE "ProjectTaskId" = $1)
+          AND "StafferId" IN (
+            SELECT "StafferId"
+            FROM public."ProjectTeam"
+            WHERE "ProjectId" = $2);
+      `;
+
+      db.query(
+        query,
+        [TaskData.ProjectTaskId, TaskData.ProjectId],
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result.rows);
+          }
+        }
+      );
+    });
+  }
+
+  static getTagsNotInTask(db, TaskData) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectTaskTagId", "ProjectTaskTagName", "ProjectTaskTagColor" FROM public."ProjectTaskTag" 
+      WHERE "ProjectTaskTagId" NOT IN (
+          SELECT "ProjectTaskTagId"
+          FROM public."ProjectTasksTags"
+          WHERE "ProjectTaskId" = $1);
+      `;
+
+      db.query(query, [TaskData.ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static addTaskMember(db, TaskData, MemberData) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskTeam"("ProjectTaskId", "StafferId")
+      VALUES ($1, $2);`;
+
+      const values = [TaskData.ProjectTaskId, MemberData.StafferId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static addTaskTag(db, TaskData, TagData) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTasksTags"("ProjectTaskId", "ProjectTaskTagId")
+      VALUES ($1, $2);`;
+
+      const values = [TaskData.ProjectTaskId, TagData.ProjectTaskTagId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getTaskByTaskId(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static deleteTaskMember(db, ProjectTaskId, StafferId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskTeam" WHERE "ProjectTaskId" = $1 AND "StafferId" = $2`;
+
+      const values = [ProjectTaskId, StafferId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static deleteTaskTag(db, ProjectTaskId, ProjectTaskTagId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTasksTags" WHERE "ProjectTaskId" = $1 AND "ProjectTaskTagId" = $2`;
+
+      const values = [ProjectTaskId, ProjectTaskTagId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static updateTask(db, TaskData, FormattedDate) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTask" SET "ProjectTaskName" = $1, "ProjectTaskDescription" = $2, "ProjectTaskExpiration" = $3 WHERE "ProjectTaskId" = $4`;
+
+      const values = [
+        TaskData.ProjectTaskName,
+        TaskData.ProjectTaskDescription,
+        FormattedDate,
+        TaskData.ProjectTaskId,
+      ];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getAllTags(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskTag"`;
+
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static addTask(db, TaskData, FormattedDate) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectId")
+      VALUES ($1, $2, $3, $4) RETURNING *`;
+
+      const values = [
+        TaskData.ProjectTaskName,
+        TaskData.ProjectTaskDescription,
+        FormattedDate,
+        TaskData.ProjectId,
+      ];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static addTaskMember(db, ProjectTaskId, StafferId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskTeam"("ProjectTaskId", "StafferId")
+      VALUES ($1, $2) RETURNING *`;
+
+      const values = [ProjectTaskId, StafferId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static addTaskTag(db, ProjectTaskId, ProjectTaskTagId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTasksTags"("ProjectTaskId", "ProjectTaskTagId")
+      VALUES ($1, $2) RETURNING *`;
+
+      const values = [ProjectTaskId, ProjectTaskTagId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static deleteTask(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTask" WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

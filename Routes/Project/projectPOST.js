@@ -22,6 +22,26 @@ const projectPOST = (db) => {
     ProjectController.createProjectConversation(req, res, db);
   });
 
+  router.post("/UpdateTaskStatus", (req, res) => {
+    ProjectController.updateTaskStatus(req, res, db);
+  });
+
+  router.post("/AddTaskMember", (req, res) => {
+    ProjectController.addTaskMember(req, res, db);
+  });
+
+  router.post("/AddTaskTag", (req, res) => {
+    ProjectController.addTaskTag(req, res, db);
+  });
+
+  router.post("/UpdateTask", (req, res) => {
+    ProjectController.updateTask(req, res, db);
+  });
+
+  router.post("/AddTask", (req, res) => {
+    ProjectController.addTask(req, res, db);
+  });
+
   return router;
 };
 
