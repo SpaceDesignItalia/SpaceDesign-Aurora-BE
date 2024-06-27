@@ -360,7 +360,7 @@ class ProjectModel {
 
   static getTagsByTaskId(db, ProjectTaskId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "ProjectTaskTag"."ProjectTaskTagId", "ProjectTaskTag"."ProjectTaskTagName" FROM public."ProjectTaskTag" JOIN public."ProjectTasksTags" USING("ProjectTaskTagId") WHERE "ProjectTaskId" = $1`;
+      const query = `SELECT "ProjectTaskTag"."ProjectTaskTagId", "ProjectTaskTag"."ProjectTaskTagName", "ProjectTaskTag"."ProjectTaskTagColor" FROM public."ProjectTaskTag" JOIN public."ProjectTasksTags" USING("ProjectTaskTagId") WHERE "ProjectTaskId" = $1`;
 
       db.query(query, [ProjectTaskId], (error, result) => {
         if (error) {
@@ -383,6 +383,101 @@ class ProjectModel {
           reject(error);
         } else {
           resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getMembersNotInTask(db, TaskData) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "StafferImageUrl" FROM public."Staffer" 
+      WHERE "StafferId" NOT IN (
+          SELECT "StafferId"
+          FROM public."ProjectTaskTeam"
+          WHERE "ProjectTaskId" = $1)
+          AND "StafferId" IN (
+            SELECT "StafferId"
+            FROM public."ProjectTeam"
+            WHERE "ProjectId" = $2);
+      `;
+
+      db.query(
+        query,
+        [TaskData.ProjectTaskId, TaskData.ProjectId],
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result.rows);
+          }
+        }
+      );
+    });
+  }
+
+  static getTagsNotInTask(db, TaskData) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectTaskTagId", "ProjectTaskTagName", "ProjectTaskTagColor" FROM public."ProjectTaskTag" 
+      WHERE "ProjectTaskTagId" NOT IN (
+          SELECT "ProjectTaskTagId"
+          FROM public."ProjectTasksTags"
+          WHERE "ProjectTaskId" = $1);
+      `;
+
+      db.query(query, [TaskData.ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static addTaskMember(db, TaskData, MemberData) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskTeam"("ProjectTaskId", "StafferId")
+      VALUES ($1, $2);`;
+
+      const values = [TaskData.ProjectTaskId, MemberData.StafferId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static addTaskTag(db, TaskData, TagData) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTasksTags"("ProjectTaskId", "ProjectTaskTagId")
+      VALUES ($1, $2);`;
+
+      const values = [TaskData.ProjectTaskId, TagData.ProjectTaskTagId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getTaskByTaskId(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          console.log(result.rows[0]);
+          resolve(result.rows[0]);
         }
       });
     });

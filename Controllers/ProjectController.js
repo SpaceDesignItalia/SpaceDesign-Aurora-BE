@@ -277,6 +277,63 @@ class ProjectController {
       res.status(500).send("Recupero dei membri del task fallito");
     }
   }
+
+  static async getMembersNotInTask(req, res, db) {
+    try {
+      const TaskData = req.query.TaskData;
+      const members = await Project.getMembersNotInTask(db, TaskData);
+      res.status(200).json(members);
+    } catch (error) {
+      console.error("Errore nel recupero dei membri non nel task:", error);
+      res.status(500).send("Recupero dei membri non nel task fallito");
+    }
+  }
+
+  static async getTagsNotInTask(req, res, db) {
+    try {
+      const TaskData = req.query.TaskData;
+      const tags = await Project.getTagsNotInTask(db, TaskData);
+      res.status(200).json(tags);
+    } catch (error) {
+      console.error("Errore nel recupero dei tag non nel task:", error);
+      res.status(500).send("Recupero dei tag non nel task fallito");
+    }
+  }
+
+  static async addTaskMember(req, res, db) {
+    try {
+      const TaskData = req.body.TaskData;
+      const MemberData = req.body.MemberData;
+      await Project.addTaskMember(db, TaskData, MemberData);
+      res.status(200).send("Membro aggiunto con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiunta del membro al task:", error);
+      res.status(500).send("Aggiunta del membro al task fallita");
+    }
+  }
+
+  static async addTaskTag(req, res, db) {
+    try {
+      const TaskData = req.body.TaskData;
+      const TagData = req.body.TagData;
+      await Project.addTaskTag(db, TaskData, TagData);
+      res.status(200).send("Tag aggiunto con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiunta del tag al task:", error);
+      res.status(500).send("Aggiunta del tag al task fallita");
+    }
+  }
+
+  static async getTaskByTaskId(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const task = await Project.getTaskByTaskId(db, ProjectTaskId);
+      res.status(200).json(task);
+    } catch (error) {
+      console.error("Errore nel recupero del task:", error);
+      res.status(500).send("Recupero del task fallito");
+    }
+  }
 }
 
 module.exports = ProjectController;

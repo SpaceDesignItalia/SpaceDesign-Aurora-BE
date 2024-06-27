@@ -66,6 +66,17 @@ const projectGET = (db) => {
     ProjectController.getMembersByTaskId(req, res, db);
   });
 
+  router.get("/GetMembersNotInTask", (req, res) => {
+    ProjectController.getMembersNotInTask(req, res, db);
+  });
+
+  router.get("/GetTagsNotInTask", (req, res) => {
+    ProjectController.getTagsNotInTask(req, res, db);
+  });
+
+  router.get("/GetTaskByTaskId", (req, res) => {
+    ProjectController.getTaskByTaskId(req, res, db);
+  });
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
