@@ -26,6 +26,10 @@ const projectGET = (db) => {
     ProjectController.getProjectByIdAndName(req, res, db);
   });
 
+  router.get("/GetProjectStatus", (req, res) => {
+    ProjectController.getProjectStatus(req, res, db);
+  });
+
   router.get("/GetAllLinkByProjectId", (req, res) => {
     ProjectController.getAllLinkByProjectId(req, res, db);
   });
@@ -41,7 +45,6 @@ const projectGET = (db) => {
   router.get("/GetMessagesByConversationId", (req, res) => {
     ProjectController.getMessagesByConversationId(req, res, db);
   });
-
 
   router.get("/GetProjetTeamMembers", (req, res) => {
     ProjectController.getProjectTeamMembers(req, res, db);

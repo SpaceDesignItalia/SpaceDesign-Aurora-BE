@@ -59,6 +59,18 @@ class ProjectController {
     }
   }
 
+  static async getProjectStatus(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      const StatusId = await Project.getProjectStatus(db, ProjectId);
+      res.status(200).json(StatusId);
+    } catch (error) {
+      console.error("Errore nel recupero dello stato:", error);
+      res.status(500).send("Recupero dello stato fallito");
+    }
+  }
+
   static async getAllLinkByProjectId(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
@@ -220,6 +232,18 @@ class ProjectController {
     } catch (error) {
       console.error("Errore nell'eliminazione del membro dal team:", error);
       res.status(500).send("Eliminazione del membro fallita");
+    }
+  }
+
+  static async removeLinkFromProject(req, res, db) {
+    try {
+      const ProjectLinkId = req.query.ProjectLinkId;
+      const ProjectId = req.query.ProjectId;
+      await Project.removeLinkFromProject(db, ProjectLinkId, ProjectId);
+      res.status(200).send("Link eliminato con successo.");
+    } catch (error) {
+      console.error("Errore nell'eliminazione del link:", error);
+      res.status(500).send("Eliminazione del link fallita");
     }
   }
 
