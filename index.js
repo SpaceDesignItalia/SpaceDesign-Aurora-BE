@@ -74,5 +74,9 @@ io.on("connection", async (socket) => {
     io.to(conversationId).emit("message-update", conversationId);
   });
 
+  socket.on("task-news", async (ProjectId) => {
+    io.to(ProjectId).emit("task-update", ProjectId);
+  });
+
   socket.on("disconnect", () => {});
 });
