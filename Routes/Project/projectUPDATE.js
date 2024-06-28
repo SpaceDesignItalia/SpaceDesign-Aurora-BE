@@ -9,6 +9,10 @@ const projectUPDATE = (db) => {
     ProjectController.updateProjectTheme(req, res, db);
   });
 
+  router.put("/UpdateTask", (req, res) => {
+    ProjectController.updateTask(req, res, db);
+  });
+
   router.put("/UpdateProjectData", (req, res) => {
     ProjectController.updateProject(req, res, db);
   });

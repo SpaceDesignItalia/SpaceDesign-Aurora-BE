@@ -34,10 +34,6 @@ const projectPOST = (db) => {
     ProjectController.addTaskTag(req, res, db);
   });
 
-  router.post("/UpdateTask", (req, res) => {
-    ProjectController.updateTask(req, res, db);
-  });
-
   router.post("/AddTask", (req, res) => {
     ProjectController.addTask(req, res, db);
   });
