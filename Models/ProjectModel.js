@@ -160,6 +160,22 @@ class ProjectModel {
     });
   }
 
+  static getTaskToDo(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT COUNT(*) AS "TasksNumber" FROM public."ProjectTask" 
+      INNER JOIN public."ProjectTaskStatus" USING("ProjectTaskStatusId") 
+      WHERE "ProjectTaskStatusId" = 1  AND  "ProjectId"  =  $1`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static addProject(db, ProjectData) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Project"("ProjectName", "ProjectDescription", "ProjectEndDate", "ProjectManagerId", "ProjectBannerId", "CompanyId")
@@ -594,6 +610,20 @@ class ProjectModel {
   static getAllTags(db) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectTaskTag"`;
+
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static searchProjectByName(db, ProjectName) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."Project" WHERE "ProjectName" LIKE '%${ProjectName}%'`;
 
       db.query(query, (error, result) => {
         if (error) {
