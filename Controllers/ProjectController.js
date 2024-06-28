@@ -130,6 +130,17 @@ class ProjectController {
     }
   }
 
+  static async getTaskToDo(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      const tasksNumber = await Project.getTaskToDo(db, ProjectId);
+      res.status(200).send(tasksNumber);
+    } catch (error) {
+      console.error("Errore nel recupero delle task da fare:", error);
+      res.status(500).send("Recupero delle task fallito");
+    }
+  }
+
   static async addProject(req, res, db) {
     try {
       const ProjectData = req.body.ProjectData;
@@ -416,6 +427,17 @@ class ProjectController {
     } catch (error) {
       console.error("Errore nel recupero dei tag:", error);
       res.status(500).send("Recupero dei tag fallito");
+    }
+  }
+
+  static async searchProjectByName(req, res, db) {
+    try {
+      const ProjectName = req.query.ProjectName;
+      const projects = await Project.searchProjectByName(db, ProjectName);
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Errore nel recupero deli progetti:", error);
+      res.status(500).send("Recupero dei progetti fallita");
     }
   }
 
