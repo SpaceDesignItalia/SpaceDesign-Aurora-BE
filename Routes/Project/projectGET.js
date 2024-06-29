@@ -54,6 +54,10 @@ const projectGET = (db) => {
     ProjectController.getMembersNotInProjectTeam(req, res, db);
   });
 
+  router.get("/GetTaskToDo", (req, res) => {
+    ProjectController.getTaskToDo(req, res, db);
+  });
+
   router.get("/GetTasksByProjectId", (req, res) => {
     ProjectController.getTasksByProjectId(req, res, db);
   });
@@ -84,6 +88,10 @@ const projectGET = (db) => {
 
   router.get("/GetAllTags", (req, res) => {
     ProjectController.getAllTags(req, res, db);
+  });
+
+  router.get("/SearchProjectByName", (req, res) => {
+    ProjectController.searchProjectByName(req, res, db);
   });
 
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
