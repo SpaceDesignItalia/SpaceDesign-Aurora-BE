@@ -6,12 +6,16 @@ class AuthenticationController {
     try {
       const LoginData = req.body.LoginData;
       let account = await Authentication.loginStaffer(db, LoginData);
+
       if (!account) {
         account = await Authentication.loginCustomer(db, LoginData);
+        account.IsStaffer = false;
         delete account.CustomerPassword;
         if (!account) {
           return res.status(404).json({ error: "Credenziali non valide" });
         }
+      } else {
+        account.IsStaffer = true;
       }
 
       // Imposta la durata del cookie di sessione
