@@ -357,6 +357,25 @@ class PermissionModel {
     });
   }
 
+  static async updatePermission(db, PermissionData) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."Permission" SET "PermissionName" = $1, "PermissionDescription" = $2, "PermissionAction" = $3 WHERE "PermissionId" = $4`;
+      const values = [
+        PermissionData.PermissionName,
+        PermissionData.PermissionDescription,
+        PermissionData.PermissionAction,
+        PermissionData.PermissionId,
+      ];
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static async deleteRole(db, RoleId) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."Role" WHERE "RoleId" = $1`;

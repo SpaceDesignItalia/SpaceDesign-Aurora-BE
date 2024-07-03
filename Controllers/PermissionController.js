@@ -128,6 +128,17 @@ class PermissionController {
     }
   }
 
+  static async updatePermission(req, res, db) {
+    try {
+      const PermissionData = req.body.PermissionData;
+      await Permission.updatePermission(db, PermissionData);
+      res.status(200).send("Permesso aggiornato con successo.");
+    } catch (error) {
+      console.error("Error nell'aggiornare il permesso:", error);
+      res.status(500).send("Aggiornamento del permesso fallito.");
+    }
+  }
+
   static async deleteRole(req, res, db) {
     try {
       const RoleId = req.query.RoleId;
