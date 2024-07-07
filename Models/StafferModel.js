@@ -138,10 +138,7 @@ class StafferModel {
               if (result !== selectedRole) {
                 const query = `UPDATE public."StafferRole" SET "RoleId"= $1
                 WHERE "StafferId"= $2`;
-                const values = [
-                  selectedRole.RoleId,
-                  newEmployeeData.EmployeeId,
-                ];
+                const values = [selectedRole, newEmployeeData.EmployeeId];
                 db.query(query, values, (error, result) => {
                   if (error) {
                     reject(error);
