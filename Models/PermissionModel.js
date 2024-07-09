@@ -360,6 +360,7 @@ class PermissionModel {
   static async updatePermission(db, PermissionData) {
     return new Promise((resolve, reject) => {
       const query = `UPDATE public."Permission" SET "PermissionName" = $1, "PermissionDescription" = $2, "PermissionAction" = $3 WHERE "PermissionId" = $4`;
+
       const values = [
         PermissionData.PermissionName,
         PermissionData.PermissionDescription,
@@ -370,7 +371,18 @@ class PermissionModel {
         if (error) {
           reject(error);
         } else {
-          resolve(result.rows);
+          const query = `UPDATE public."PermissionGroup" SET "PermissionGroupId" = $1 WHERE "PermissionId" = $2`;
+          db.query(
+            query,
+            [PermissionData.PermissionGroupId, PermissionData.PermissionId],
+            (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result.rows);
+              }
+            }
+          );
         }
       });
     });

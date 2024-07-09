@@ -90,6 +90,10 @@ const projectGET = (db) => {
     ProjectController.getAllTags(req, res, db);
   });
 
+  router.get("/GetProjectInTeam", (req, res) => {
+    ProjectController.getProjectInTeam(req, res, db);
+  });
+
   router.get("/SearchProjectByName", (req, res) => {
     ProjectController.searchProjectByName(req, res, db);
   });
