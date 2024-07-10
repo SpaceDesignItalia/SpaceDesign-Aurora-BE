@@ -12,6 +12,10 @@ const authenticationGET = (db) => {
   router.get("/GetSessionData", (req, res) => {
     AuthenticationController.GetSessionData(req, res);
   });
+
+  router.get("/Logout", (req, res) => {
+    AuthenticationController.logout(req, res);
+  });
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

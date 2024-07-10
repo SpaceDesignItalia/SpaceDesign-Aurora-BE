@@ -8,6 +8,7 @@ const authenticationPOST = (db) => {
   router.post("/Login", (req, res) => {
     AuthenticationController.login(req, res, db);
   });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

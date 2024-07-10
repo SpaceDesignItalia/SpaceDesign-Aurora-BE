@@ -36,6 +36,25 @@ class AuthenticationController {
     }
   }
 
+  static logout(req, res) {
+    try {
+      // Distruggi la sessione
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Errore durante il logout:", err);
+          return res.status(500).json({ error: "Errore interno del server" });
+        }
+        // Se la sessione è stata distrutta con successo, restituisci uno stato 200 (OK)
+        return res
+          .status(200)
+          .json({ message: "Logout effettuato con successo" });
+      });
+    } catch (error) {
+      console.error("Errore durante il logout:", error);
+      return res.status(500).json({ error: "Errore interno del server" });
+    }
+  }
+
   static async GetSessionData(req, res) {
     // Verifica se la sessione è stata creata
     if (req.session.account) {
