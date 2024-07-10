@@ -732,6 +732,16 @@ class ProjectModel {
       });
     });
   }
+
+  static async uploadFile(db, filePath, ProjectId) {
+    try {
+      const insertQuery = `INSERT INTO public."ProjectFiles" (ProjectId, FilePath) VALUES ($1, $2)`;
+      await db.query(insertQuery, [ProjectId, filePath]);
+    } catch (error) {
+      console.error("Error saving file to the database:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = ProjectModel;

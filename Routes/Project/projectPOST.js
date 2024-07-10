@@ -38,6 +38,13 @@ const projectPOST = (db) => {
     ProjectController.addTask(req, res, db);
   });
 
+  const multer = require("multer");
+  const upload = multer({ dest: "./public/data/uploads/projectFiles" });
+
+  router.post("/UploadFile", upload.single("file"), (req, res) => {
+    ProjectController.uploadFiles(req, res, db);
+  });
+
   return router;
 };
 

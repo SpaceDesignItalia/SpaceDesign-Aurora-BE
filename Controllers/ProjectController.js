@@ -487,6 +487,24 @@ class ProjectController {
       res.status(500).send("Eliminazione del task fallita");
     }
   }
+
+  static async uploadFiles(req, res, db) {
+    try {
+      const file = req.file;
+      const ProjectId = req.body.ProjectId;
+
+      if (!file) {
+        throw new Error("File not provided");
+      }
+
+      const filePath = `/uploads/${file.filename}`;
+      await Project.uploadFile(db, filePath, ProjectId);
+      res.status(200).send("File uploaded successfully.");
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).send("File upload failed");
+    }
+  }
 }
 
 module.exports = ProjectController;
