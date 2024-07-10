@@ -62,6 +62,25 @@ class ChatController {
     }
   }
 
+  static async findStaffersWithoutMessagesFromLoggedStaffer(req, res, db) {
+    try {
+      const LoggedStaffer = req.query.StafferId;
+      const staffers = await Chat.findStaffersWithoutMessagesFromLoggedStaffer(
+        db,
+        LoggedStaffer
+      );
+      res.status(200).json(staffers);
+    } catch (error) {
+      console.error(
+        "Errore nel recupero dei dipendenti con cui non hai conversazioni",
+        error
+      );
+      res
+        .status(500)
+        .send("Recupero dei dipendenti con cui non hai conversazioni fallito");
+    }
+  }
+
   static async createConversation(req, res, db) {
     try {
       const { Staffer1Id, Staffer2Id } = req.body;

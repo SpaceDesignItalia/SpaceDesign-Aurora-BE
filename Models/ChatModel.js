@@ -78,6 +78,25 @@ class ChatModel {
     });
   }
 
+  static findStaffersWithoutMessagesFromLoggedStaffer(db, LoggedStaffer) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName", "StafferImageUrl" FROM public."Staffer" s
+      WHERE s."StafferId" <> $1 AND s."StafferId" NOT IN (
+      SELECT c."Staffer2Id"
+      FROM public."Conversation" c
+      WHERE c."Staffer1Id" = $2);`;
+
+      const values = [LoggedStaffer, LoggedStaffer];
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static createConversation(db, Staffer1Id, Staffer2Id) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Conversation" ("Staffer1Id", "Staffer2Id") VALUES ($1, $2) RETURNING "ConversationId";`;
