@@ -491,14 +491,21 @@ class ProjectController {
   static async uploadFiles(req, res, db) {
     try {
       const files = req.files;
-      const ProjectId = req.body.ProjectId;
+      const { ProjectId, forClient } = req.body;
 
       if (!files || files.length === 0) {
         throw new Error("Files not provided");
       }
 
-      const filePaths = files.map((file) => `/${file.filename}`);
-      await Project.uploadFiles(db, filePaths, ProjectId);
+      // Parse forClient information, assuming it is sent as a comma-separated string
+      const forClientArray = Array.isArray(forClient) ? forClient : [forClient];
+
+      const fileData = files.map((file, index) => ({
+        filePath: `/${file.filename}`,
+        forClient: forClientArray[index] === "true",
+      }));
+
+      await Project.uploadFiles(db, fileData, ProjectId);
       res.status(200).send("Files uploaded successfully.");
     } catch (error) {
       console.error("Error uploading files:", error);
@@ -509,7 +516,8 @@ class ProjectController {
   static async getFilesByProjectId(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
-      const files = await Project.getFilesByProjectId(db, ProjectId);
+      const Access = req.query.Access;
+      const files = await Project.getFilesByProjectId(db, ProjectId, Access);
       res.status(200).json(files);
     } catch (error) {
       console.error("Error getting files:", error);

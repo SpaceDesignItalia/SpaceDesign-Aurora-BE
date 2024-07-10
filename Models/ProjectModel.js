@@ -733,11 +733,11 @@ class ProjectModel {
     });
   }
 
-  static async uploadFiles(db, filePaths, ProjectId) {
+  static async uploadFiles(db, fileData, ProjectId) {
     try {
-      const insertQuery = `INSERT INTO public."ProjectFiles" ("ProjectId", "FilePath") VALUES ($1, $2)`;
-      const insertPromises = filePaths.map((filePath) =>
-        db.query(insertQuery, [ProjectId, filePath])
+      const insertQuery = `INSERT INTO public."ProjectFiles" ("ProjectId", "FilePath", "ForClient") VALUES ($1, $2, $3)`;
+      const insertPromises = fileData.map(({ filePath, forClient }) =>
+        db.query(insertQuery, [ProjectId, filePath, forClient])
       );
       await Promise.all(insertPromises);
     } catch (error) {
@@ -746,10 +746,11 @@ class ProjectModel {
     }
   }
 
-  static async getFilesByProjectId(db, ProjectId) {
+  static async getFilesByProjectId(db, ProjectId, Access) {
+    console.log("Access:", Access);
     try {
-      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1`;
-      const result = await db.query(query, [ProjectId]);
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND ("ForClient" = false OR "ForClient" = $2)`;
+      const result = await db.query(query, [ProjectId, Access]);
       console.log("Files:", result.rows);
       return result.rows;
     } catch (error) {
