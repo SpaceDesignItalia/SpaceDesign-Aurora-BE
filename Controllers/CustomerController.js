@@ -51,7 +51,8 @@ class CustomerController {
 
   static async addCustomer(req, res, db) {
     try {
-      const customerData = req.body.customerData;
+      const customerData = req.body.CustomerData;
+      console.log(req.body.CustomerData);
       await Customer.addCustomer(db, customerData);
       EmailService.sendCustomerWelcomeMail(
         customerData.CustomerEmail,

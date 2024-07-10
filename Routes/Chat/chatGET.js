@@ -18,6 +18,10 @@ const chatGET = (db) => {
     ChatController.getConversationByStaffersId(req, res, db);
   });
 
+  router.get("/FindStaffersWithoutMessagesFromLoggedStaffer", (req, res) => {
+    ChatController.findStaffersWithoutMessagesFromLoggedStaffer(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

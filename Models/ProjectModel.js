@@ -635,6 +635,22 @@ class ProjectModel {
     });
   }
 
+  static getProjectInTeam(db, StafferId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectId", "ProjectName", "CompanyName" FROM public."ProjectTeam" 
+      INNER JOIN public."Project" USING("ProjectId") 
+      INNER JOIN public."Company" USING("CompanyId") WHERE "StafferId" = $1`;
+
+      db.query(query, [StafferId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static addTask(db, TaskData, FormattedDate) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectId")

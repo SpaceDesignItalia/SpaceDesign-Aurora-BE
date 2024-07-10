@@ -436,7 +436,18 @@ class ProjectController {
       const projects = await Project.searchProjectByName(db, ProjectName);
       res.status(200).json(projects);
     } catch (error) {
-      console.error("Errore nel recupero deli progetti:", error);
+      console.error("Errore nel recupero dei progetti:", error);
+      res.status(500).send("Recupero dei progetti fallita");
+    }
+  }
+
+  static async getProjectInTeam(req, res, db) {
+    try {
+      const StafferId = req.query.StafferId;
+      const projects = await Project.getProjectInTeam(db, StafferId);
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Errore nel recupero dei progetti:", error);
       res.status(500).send("Recupero dei progetti fallita");
     }
   }
