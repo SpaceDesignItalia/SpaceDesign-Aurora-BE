@@ -94,6 +94,10 @@ const projectGET = (db) => {
     ProjectController.searchProjectByName(req, res, db);
   });
 
+  router.get("/GetFilesByProjectId", (req, res) => {
+    ProjectController.getFilesByProjectId(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

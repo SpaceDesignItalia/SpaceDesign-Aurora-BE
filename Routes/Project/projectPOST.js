@@ -1,7 +1,28 @@
 // permissionPOST.js
 const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const router = express.Router();
 const ProjectController = require("../../Controllers/ProjectController");
+
+// Ensure the upload directory exists
+const uploadDir = "./public/uploads/projectFiles";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configure multer storage to retain the original file extension
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+  },
+});
 
 const projectPOST = (db) => {
   // Definisci le route GET qui
@@ -38,8 +59,7 @@ const projectPOST = (db) => {
     ProjectController.addTask(req, res, db);
   });
 
-  const multer = require("multer");
-  const upload = multer({ dest: "./public/data/uploads/projectFiles" });
+  const upload = multer({ storage: storage });
 
   router.post("/UploadFile", upload.single("file"), (req, res) => {
     ProjectController.uploadFiles(req, res, db);

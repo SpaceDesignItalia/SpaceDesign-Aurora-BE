@@ -497,12 +497,23 @@ class ProjectController {
         throw new Error("File not provided");
       }
 
-      const filePath = `/uploads/${file.filename}`;
+      const filePath = `/${file.filename}`;
       await Project.uploadFile(db, filePath, ProjectId);
       res.status(200).send("File uploaded successfully.");
     } catch (error) {
       console.error("Error uploading file:", error);
       res.status(500).send("File upload failed");
+    }
+  }
+
+  static async getFilesByProjectId(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      const files = await Project.getFilesByProjectId(db, ProjectId);
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
     }
   }
 }

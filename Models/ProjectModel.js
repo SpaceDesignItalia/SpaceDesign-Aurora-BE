@@ -735,10 +735,22 @@ class ProjectModel {
 
   static async uploadFile(db, filePath, ProjectId) {
     try {
-      const insertQuery = `INSERT INTO public."ProjectFiles" (ProjectId, FilePath) VALUES ($1, $2)`;
+      const insertQuery = `INSERT INTO public."ProjectFiles" ("ProjectId", "FilePath") VALUES ($1, $2)`;
       await db.query(insertQuery, [ProjectId, filePath]);
     } catch (error) {
       console.error("Error saving file to the database:", error);
+      throw error;
+    }
+  }
+
+  static async getFilesByProjectId(db, ProjectId) {
+    try {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1`;
+      const result = await db.query(query, [ProjectId]);
+      console.log("Files:", result.rows);
+      return result.rows;
+    } catch (error) {
+      console.error("Error getting files from the database:", error);
       throw error;
     }
   }

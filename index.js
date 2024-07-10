@@ -78,5 +78,10 @@ io.on("connection", async (socket) => {
     io.to(ProjectId).emit("task-update", ProjectId);
   });
 
+  socket.on("file-update", async (ProjectId) => {
+    console.log("file-update", ProjectId);
+    io.to(ProjectId).emit("file-update", ProjectId);
+  });
+
   socket.on("disconnect", () => {});
 });
