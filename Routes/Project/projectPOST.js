@@ -1,4 +1,3 @@
-// permissionPOST.js
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
@@ -25,8 +24,6 @@ const storage = multer.diskStorage({
 });
 
 const projectPOST = (db) => {
-  // Definisci le route GET qui
-
   router.post("/AddProject", (req, res) => {
     ProjectController.addProject(req, res, db);
   });
@@ -61,7 +58,7 @@ const projectPOST = (db) => {
 
   const upload = multer({ storage: storage });
 
-  router.post("/UploadFile", upload.single("file"), (req, res) => {
+  router.post("/UploadFile", upload.array("files"), (req, res) => {
     ProjectController.uploadFiles(req, res, db);
   });
 

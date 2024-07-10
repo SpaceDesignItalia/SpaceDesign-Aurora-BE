@@ -733,12 +733,15 @@ class ProjectModel {
     });
   }
 
-  static async uploadFile(db, filePath, ProjectId) {
+  static async uploadFiles(db, filePaths, ProjectId) {
     try {
       const insertQuery = `INSERT INTO public."ProjectFiles" ("ProjectId", "FilePath") VALUES ($1, $2)`;
-      await db.query(insertQuery, [ProjectId, filePath]);
+      const insertPromises = filePaths.map((filePath) =>
+        db.query(insertQuery, [ProjectId, filePath])
+      );
+      await Promise.all(insertPromises);
     } catch (error) {
-      console.error("Error saving file to the database:", error);
+      console.error("Error saving files to the database:", error);
       throw error;
     }
   }

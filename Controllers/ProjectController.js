@@ -490,18 +490,18 @@ class ProjectController {
 
   static async uploadFiles(req, res, db) {
     try {
-      const file = req.file;
+      const files = req.files;
       const ProjectId = req.body.ProjectId;
 
-      if (!file) {
-        throw new Error("File not provided");
+      if (!files || files.length === 0) {
+        throw new Error("Files not provided");
       }
 
-      const filePath = `/${file.filename}`;
-      await Project.uploadFile(db, filePath, ProjectId);
-      res.status(200).send("File uploaded successfully.");
+      const filePaths = files.map((file) => `/${file.filename}`);
+      await Project.uploadFiles(db, filePaths, ProjectId);
+      res.status(200).send("Files uploaded successfully.");
     } catch (error) {
-      console.error("Error uploading file:", error);
+      console.error("Error uploading files:", error);
       res.status(500).send("File upload failed");
     }
   }
