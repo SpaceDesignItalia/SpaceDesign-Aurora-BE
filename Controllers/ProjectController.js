@@ -525,6 +525,43 @@ class ProjectController {
       res.status(500).send("Eliminazione del task fallita");
     }
   }
+
+  static async uploadFiles(req, res, db) {
+    try {
+      const files = req.files;
+      const { ProjectId, forClient } = req.body;
+
+      if (!files || files.length === 0) {
+        throw new Error("Files not provided");
+      }
+
+      // Parse forClient information, assuming it is sent as a comma-separated string
+      const forClientArray = Array.isArray(forClient) ? forClient : [forClient];
+
+      const fileData = files.map((file, index) => ({
+        filePath: `/${file.filename}`,
+        forClient: forClientArray[index] === "true",
+      }));
+
+      await Project.uploadFiles(db, fileData, ProjectId);
+      res.status(200).send("Files uploaded successfully.");
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      res.status(500).send("File upload failed");
+    }
+  }
+
+  static async getFilesByProjectId(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      const Access = req.query.Access;
+      const files = await Project.getFilesByProjectId(db, ProjectId, Access);
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
+    }
+  }
 }
 
 module.exports = ProjectController;
