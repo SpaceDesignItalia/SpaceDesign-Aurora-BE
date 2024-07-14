@@ -635,6 +635,44 @@ class ProjectModel {
     });
   }
 
+  static getProjectsByCustomerId(db, CustomerId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectId","CompanyName", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "StatusId", "StatusName" FROM public."Customer"
+	    INNER JOIN public."CustomerCompany" USING("CustomerId")
+	    INNER JOIN public."Company" USING("CompanyId")
+	    INNER JOIN public."Project" USING("CompanyId")
+	    INNER JOIN public."Status" USING("StatusId") 
+      WHERE "CustomerId" = $1`;
+
+      db.query(query, [CustomerId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static searchProjectsByCustomerIdAndName(db, CustomerId, ProjectName) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectId","CompanyName", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "StatusId", "StatusName" FROM public."Customer"
+	    INNER JOIN public."CustomerCompany" USING("CustomerId")
+	    INNER JOIN public."Company" USING("CompanyId")
+	    INNER JOIN public."Project" USING("CompanyId")
+	    INNER JOIN public."Status" USING("StatusId") 
+      WHERE "CustomerId" = $1 AND "ProjectName" ILIKE '%${ProjectName}%'`;
+
+      db.query(query, [CustomerId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static getProjectInTeam(db, StafferId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId", "ProjectName", "CompanyName" FROM public."ProjectTeam" 

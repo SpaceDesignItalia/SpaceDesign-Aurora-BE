@@ -98,6 +98,14 @@ const projectGET = (db) => {
     ProjectController.searchProjectByName(req, res, db);
   });
 
+  router.get("/GetProjectsByCustomerId", (req, res) => {
+    ProjectController.getProjectsByCustomerId(req, res, db);
+  });
+
+  router.get("/SearchProjectByCustomerIdAndName", (req, res) => {
+    ProjectController.searchProjectsByCustomerIdAndName(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

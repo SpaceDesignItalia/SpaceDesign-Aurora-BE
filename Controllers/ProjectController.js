@@ -441,6 +441,33 @@ class ProjectController {
     }
   }
 
+  static async getProjectsByCustomerId(req, res, db) {
+    try {
+      const CustomerId = req.query.CustomerId;
+      const projects = await Project.getProjectsByCustomerId(db, CustomerId);
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Errore nel recupero dei progetti:", error);
+      res.status(500).send("Recupero dei progetti fallita");
+    }
+  }
+
+  static async searchProjectsByCustomerIdAndName(req, res, db) {
+    try {
+      const CustomerId = req.query.CustomerId;
+      const ProjectName = req.query.ProjectName;
+      const projects = await Project.searchProjectsByCustomerIdAndName(
+        db,
+        CustomerId,
+        ProjectName
+      );
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Errore nel recupero dei progetti:", error);
+      res.status(500).send("Recupero dei progetti fallita");
+    }
+  }
+
   static async getProjectInTeam(req, res, db) {
     try {
       const StafferId = req.query.StafferId;
