@@ -10,6 +10,10 @@ const chatPOST = (db) => {
     ChatController.sendMessage(req, res, db);
   });
 
+  router.post("/SendCustomerMessage", (req, res) => {
+    ChatController.SendCustomerMessage(req, res, db);
+  });
+
   router.post("/createConversation", (req, res) => {
     ChatController.createConversation(req, res, db);
   });

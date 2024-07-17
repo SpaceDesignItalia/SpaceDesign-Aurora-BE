@@ -308,7 +308,8 @@ class ProjectModel {
     });
   }
 
-  static createProjectConversation(db, ProjectId) {
+  static createProjectConversation(db, ProjectId, ProjectManagerId, CompanyId) {
+    console.log("ProjectId:", ProjectId);
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Conversation"("ProjectId") VALUES ($1);`;
 
@@ -316,7 +317,18 @@ class ProjectModel {
         if (error) {
           reject(error);
         } else {
-          resolve(result.rows);
+          const query = `INSERT INTO public."Conversation"("Staffer1Id", "ProjectId", "CompanyId") VALUES ($1, $2, $3) RETURNING *`;
+          db.query(
+            query,
+            [ProjectManagerId, ProjectId, CompanyId],
+            (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result.rows[0]);
+              }
+            }
+          );
         }
       });
     });
@@ -330,6 +342,46 @@ class ProjectModel {
       ON public."Staffer"."StafferId" = public."Message"."StafferSenderId"
       WHERE "ConversationId" = $1 
       ORDER BY "Date" ASC`;
+
+      db.query(query, [ConversationId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getMessagesCustomerByConversationId(db, ConversationId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT 
+            m."MessageId", 
+            m."StafferSenderId", 
+            m."ConversationId", 
+            m."Date", 
+            m."Text",
+            m."IsCustomer",
+            CASE
+                WHEN m."IsCustomer" = false THEN CONCAT(s."StafferName", ' ', s."StafferSurname")
+                ELSE CONCAT(c."CustomerName", ' ', c."CustomerSurname")
+            END AS "SenderFullName",
+            CASE
+                WHEN m."IsCustomer" = false THEN s."StafferImageUrl"
+            END AS "SenderImageUrl"
+        FROM 
+            public."Message" m
+        LEFT JOIN 
+            public."Staffer" s 
+            ON m."StafferSenderId" = s."StafferId" AND m."IsCustomer" = false
+        LEFT JOIN 
+            public."Customer" c 
+            ON m."StafferSenderId" = c."CustomerId" AND m."IsCustomer" = true
+        WHERE 
+            m."ConversationId" = $1
+        ORDER BY 
+            m."Date" ASC;
+        `;
 
       db.query(query, [ConversationId], (error, result) => {
         if (error) {
