@@ -788,29 +788,35 @@ class ProjectModel {
   }
 
   static async uploadFiles(db, fileData, ProjectId) {
-    try {
-      const insertQuery = `INSERT INTO public."ProjectFiles" ("ProjectId", "FilePath", "ForClient") VALUES ($1, $2, $3)`;
-      const insertPromises = fileData.map(({ filePath, forClient }) =>
-        db.query(insertQuery, [ProjectId, filePath, forClient])
+    return new Promise((resolve, reject) => {
+      const insertQuery = `INSERT INTO public."ProjectFiles" ("ProjectId", "FileName", "FilePath", "ForClient") VALUES ($1, $2, $3, $4)`;
+      const insertPromises = fileData.map(({ fileName, filePath, forClient }) =>
+        db.query(
+          insertQuery,
+          [ProjectId, fileName, filePath, forClient],
+          (error, result) => {
+            if (error) {
+              reject(error);
+            }
+          }
+        )
       );
-      await Promise.all(insertPromises);
-    } catch (error) {
-      console.error("Error saving files to the database:", error);
-      throw error;
-    }
+
+      resolve(insertPromises);
+    });
   }
 
-  static async getFilesByProjectId(db, ProjectId, Access) {
-    console.log("Access:", Access);
-    try {
-      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND ("ForClient" = false OR "ForClient" = $2)`;
-      const result = await db.query(query, [ProjectId, Access]);
-      console.log("Files:", result.rows);
-      return result.rows;
-    } catch (error) {
-      console.error("Error getting files from the database:", error);
-      throw error;
-    }
+  static async getFilesByProjectId(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
   }
 }
 

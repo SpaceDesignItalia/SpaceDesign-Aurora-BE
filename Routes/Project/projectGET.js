@@ -110,6 +110,10 @@ const projectGET = (db) => {
     ProjectController.searchProjectsByCustomerIdAndName(req, res, db);
   });
 
+  router.get("/DownloadProjectFileByPath", (req, res) => {
+    ProjectController.downloadFile(req, res);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
