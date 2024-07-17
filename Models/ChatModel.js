@@ -64,6 +64,24 @@ class ChatModel {
     });
   }
 
+  static SendCustomerMessage(db, ConversationId, StafferSenderId, Text) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."Message" ("ConversationId", "StafferSenderId", "Text", "Date", "IsCustomer") VALUES ($1, $2, $3, NOW(), $4);`;
+
+      db.query(
+        query,
+        [ConversationId, StafferSenderId, Text, true],
+        (error) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        }
+      );
+    });
+  }
+
   static getConversationByStaffersId(db, Staffer1Id, Staffer2Id) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."Conversation" WHERE ("Staffer1Id" = $1 AND "Staffer2Id" = $2) OR ("Staffer1Id" = $2 AND "Staffer2Id" = $1);`;

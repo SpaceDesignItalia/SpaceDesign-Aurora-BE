@@ -120,6 +120,21 @@ class ProjectController {
     }
   }
 
+  static async getMessagesCustomerByConversationId(req, res, db) {
+    try {
+      const ConversationId = req.query.ConversationId;
+      console.log("ConversationId", ConversationId);
+      const messages = await Project.getMessagesCustomerByConversationId(
+        db,
+        ConversationId
+      );
+      res.status(200).json(messages);
+    } catch (error) {
+      console.error("Errore nel recupero dei messaggi", error);
+      res.status(500).send("Recupero dei messaggi fallito");
+    }
+  }
+
   static async getMembersNotInProjectTeam(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
@@ -148,25 +163,18 @@ class ProjectController {
       const ProjectData = req.body.ProjectData;
 
       const ProjectId = await Project.addProject(db, ProjectData);
+      const ProjectManagerId = ProjectData.ProjectManagerId;
+      const CompanyId = ProjectData.CompanyId;
       const Conversation = await Project.createProjectConversation(
         db,
-        ProjectId
+        ProjectId,
+        ProjectManagerId,
+        CompanyId
       );
       res.status(200).send(Conversation);
     } catch (error) {
       console.error("Errore nella creazione del progetto:", error);
       res.status(500).send("Creazione del progetto fallito");
-    }
-  }
-
-  static async createProjectConversation(req, res, db) {
-    try {
-      const ProjectId = req.body.ProjectId;
-      await Project.createProjectConversation(db, ProjectId);
-      res.status(200).send("Conversazione creata con successo.");
-    } catch (error) {
-      console.error("Errore nella creazione della conversazione", error);
-      res.status(500).send("Creazione della conversazione fallita");
     }
   }
 

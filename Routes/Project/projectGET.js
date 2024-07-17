@@ -46,6 +46,10 @@ const projectGET = (db) => {
     ProjectController.getMessagesByConversationId(req, res, db);
   });
 
+  router.get("/GetMessagesCustomerByConversationId", (req, res) => {
+    ProjectController.getMessagesCustomerByConversationId(req, res, db);
+  });
+
   router.get("/GetProjetTeamMembers", (req, res) => {
     ProjectController.getProjectTeamMembers(req, res, db);
   });

@@ -42,6 +42,17 @@ class ChatController {
     }
   }
 
+  static async SendCustomerMessage(req, res, db) {
+    try {
+      const { ConversationId, StafferSenderId, Text } = req.body;
+      await Chat.SendCustomerMessage(db, ConversationId, StafferSenderId, Text);
+      res.status(200).send("Messaggio inviato con successo");
+    } catch (error) {
+      console.error("Errore nell'invio del messaggio", error);
+      res.status(500).send("Invio del messaggio fallito");
+    }
+  }
+
   static async getConversationByStaffersId(req, res, db) {
     try {
       const Staffer1Id = req.query.Staffer1Id;
