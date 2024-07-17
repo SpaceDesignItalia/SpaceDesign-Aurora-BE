@@ -617,7 +617,36 @@ class ProjectController {
     }
   }
 
+  static async getFilesByProjectIdForCustomer(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      const files = await Project.getFilesByProjectIdForCustomer(db, ProjectId);
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
+    }
+  }
+
   static async searchFilesByProjectIdAndName(req, res, db) {
+    try {
+      const FileName = req.query.FileName;
+      const ProjectId = req.query.ProjectId;
+
+      const files = await Project.searchFilesByProjectIdAndName(
+        db,
+        FileName,
+        ProjectId
+      );
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
+    }
+  }
+
+  static async searchFilesByProjectIdAndNameForCustomer(req, res, db) {
     try {
       const FileName = req.query.FileName;
       const ProjectId = req.query.ProjectId;

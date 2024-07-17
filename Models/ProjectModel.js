@@ -834,9 +834,39 @@ class ProjectModel {
     });
   }
 
+  static async getFilesByProjectIdForCustomer(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "ForClient" = true`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static async searchFilesByProjectIdAndName(db, FileName, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "FileName" ILIKE '%${FileName}%'`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async searchFilesByProjectIdAndNameForCustomer(
+    db,
+    FileName,
+    ProjectId
+  ) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ForClient" <> false AND "ProjectId" = $1 AND "FileName" ILIKE '%${FileName}%'`;
       db.query(query, [ProjectId], (error, result) => {
         if (error) {
           reject(error);
