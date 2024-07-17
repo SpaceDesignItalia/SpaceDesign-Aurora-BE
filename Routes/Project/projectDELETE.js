@@ -28,6 +28,10 @@ const projectDELETE = (db) => {
     ProjectController.deleteTask(req, res, db);
   });
 
+  router.delete("/DeleteFile", (req, res) => {
+    ProjectController.removeFile(req, res, db);
+  });
+
   return router;
 };
 

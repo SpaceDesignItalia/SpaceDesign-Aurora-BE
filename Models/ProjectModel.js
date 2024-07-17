@@ -623,7 +623,7 @@ class ProjectModel {
 
   static searchProjectByName(db, ProjectName) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."Project" WHERE "ProjectName" LIKE '%${ProjectName}%'`;
+      const query = `SELECT * FROM public."Project" WHERE "ProjectName" ILIKE '%${ProjectName}%'`;
 
       db.query(query, (error, result) => {
         if (error) {
@@ -788,29 +788,93 @@ class ProjectModel {
   }
 
   static async uploadFiles(db, fileData, ProjectId) {
-    try {
-      const insertQuery = `INSERT INTO public."ProjectFiles" ("ProjectId", "FilePath", "ForClient") VALUES ($1, $2, $3)`;
-      const insertPromises = fileData.map(({ filePath, forClient }) =>
-        db.query(insertQuery, [ProjectId, filePath, forClient])
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectFiles" ("ProjectId", "FileName", "FilePath", "ForClient") VALUES ($1, $2, $3, $4)`;
+      const insertPromises = fileData.map(({ fileName, filePath, forClient }) =>
+        db.query(
+          query,
+          [ProjectId, fileName, filePath, forClient],
+          (error, result) => {
+            if (error) {
+              reject(error);
+            }
+          }
+        )
       );
-      await Promise.all(insertPromises);
-    } catch (error) {
-      console.error("Error saving files to the database:", error);
-      throw error;
-    }
+
+      resolve(insertPromises);
+    });
   }
 
-  static async getFilesByProjectId(db, ProjectId, Access) {
-    console.log("Access:", Access);
-    try {
-      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND ("ForClient" = false OR "ForClient" = $2)`;
-      const result = await db.query(query, [ProjectId, Access]);
-      console.log("Files:", result.rows);
-      return result.rows;
-    } catch (error) {
-      console.error("Error getting files from the database:", error);
-      throw error;
-    }
+  static async removeFile(db, FilePath, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "FilePath" = $2`;
+      const values = [ProjectId, FilePath];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async getFilesByProjectId(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async getFilesByProjectIdForCustomer(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "ForClient" = true`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async searchFilesByProjectIdAndName(db, FileName, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "FileName" ILIKE '%${FileName}%'`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async searchFilesByProjectIdAndNameForCustomer(
+    db,
+    FileName,
+    ProjectId
+  ) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ForClient" <> false AND "ProjectId" = $1 AND "FileName" ILIKE '%${FileName}%'`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
   }
 }
 

@@ -1,5 +1,7 @@
 // controller/PermissionController.js
 const Project = require("../Models/ProjectModel");
+const path = require("path");
+const fs = require("fs");
 
 class ProjectController {
   static async getAllStatus(req, res, db) {
@@ -531,14 +533,10 @@ class ProjectController {
       const files = req.files;
       const { ProjectId, forClient } = req.body;
 
-      if (!files || files.length === 0) {
-        throw new Error("Files not provided");
-      }
-
-      // Parse forClient information, assuming it is sent as a comma-separated string
       const forClientArray = Array.isArray(forClient) ? forClient : [forClient];
 
       const fileData = files.map((file, index) => ({
+        fileName: file.originalname,
         filePath: `/${file.filename}`,
         forClient: forClientArray[index] === "true",
       }));
@@ -551,11 +549,113 @@ class ProjectController {
     }
   }
 
+  static async removeFile(req, res, db) {
+    try {
+      const { ProjectId, FilePath } = req.query;
+
+      const fullFilePath = path.join(
+        __dirname,
+        "../public/uploads/projectFiles",
+        FilePath
+      );
+
+      fs.unlink(fullFilePath, (err) => {
+        if (err) {
+          console.error("Error deleting file:", err);
+          return res.status(500).send("Error deleting file");
+        }
+      });
+
+      await Project.removeFile(db, FilePath, ProjectId);
+      res.status(200).send("File rimosso con successo.");
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      res.status(500).send("File upload failed");
+    }
+  }
+
+  static async downloadFile(req, res) {
+    try {
+      const { filePath, fileName } = req.query;
+
+      if (!filePath || !fileName) {
+        return res.status(400).send("File path and file name are required");
+      }
+
+      const fullFilePath = path.join(
+        __dirname,
+        "../public/uploads/projectFiles",
+        filePath
+      );
+
+      // Verifica se il file esiste
+      if (!fs.existsSync(fullFilePath)) {
+        return res.status(404).send("File not found");
+      }
+
+      res.download(fullFilePath, fileName, (err) => {
+        if (err) {
+          console.error("Error downloading file:", err);
+          return res.status(500).send("File download failed");
+        }
+      });
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      res.status(500).send("File download failed");
+    }
+  }
+
   static async getFilesByProjectId(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
-      const Access = req.query.Access;
-      const files = await Project.getFilesByProjectId(db, ProjectId, Access);
+
+      const files = await Project.getFilesByProjectId(db, ProjectId);
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
+    }
+  }
+
+  static async getFilesByProjectIdForCustomer(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      const files = await Project.getFilesByProjectIdForCustomer(db, ProjectId);
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
+    }
+  }
+
+  static async searchFilesByProjectIdAndName(req, res, db) {
+    try {
+      const FileName = req.query.FileName;
+      const ProjectId = req.query.ProjectId;
+
+      const files = await Project.searchFilesByProjectIdAndName(
+        db,
+        FileName,
+        ProjectId
+      );
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
+    }
+  }
+
+  static async searchFilesByProjectIdAndNameForCustomer(req, res, db) {
+    try {
+      const FileName = req.query.FileName;
+      const ProjectId = req.query.ProjectId;
+
+      const files = await Project.searchFilesByProjectIdAndName(
+        db,
+        FileName,
+        ProjectId
+      );
       res.status(200).json(files);
     } catch (error) {
       console.error("Error getting files:", error);
