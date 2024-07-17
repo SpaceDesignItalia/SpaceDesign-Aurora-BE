@@ -110,6 +110,10 @@ const projectGET = (db) => {
     ProjectController.searchProjectsByCustomerIdAndName(req, res, db);
   });
 
+  router.get("/SearchFilesByProjectIdAndName", (req, res) => {
+    ProjectController.searchFilesByProjectIdAndName(req, res, db);
+  });
+
   router.get("/DownloadProjectFileByPath", (req, res) => {
     ProjectController.downloadFile(req, res);
   });

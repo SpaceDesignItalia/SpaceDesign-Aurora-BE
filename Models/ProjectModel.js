@@ -623,7 +623,7 @@ class ProjectModel {
 
   static searchProjectByName(db, ProjectName) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."Project" WHERE "ProjectName" LIKE '%${ProjectName}%'`;
+      const query = `SELECT * FROM public."Project" WHERE "ProjectName" ILIKE '%${ProjectName}%'`;
 
       db.query(query, (error, result) => {
         if (error) {
@@ -789,10 +789,10 @@ class ProjectModel {
 
   static async uploadFiles(db, fileData, ProjectId) {
     return new Promise((resolve, reject) => {
-      const insertQuery = `INSERT INTO public."ProjectFiles" ("ProjectId", "FileName", "FilePath", "ForClient") VALUES ($1, $2, $3, $4)`;
+      const query = `INSERT INTO public."ProjectFiles" ("ProjectId", "FileName", "FilePath", "ForClient") VALUES ($1, $2, $3, $4)`;
       const insertPromises = fileData.map(({ fileName, filePath, forClient }) =>
         db.query(
-          insertQuery,
+          query,
           [ProjectId, fileName, filePath, forClient],
           (error, result) => {
             if (error) {
@@ -806,9 +806,37 @@ class ProjectModel {
     });
   }
 
+  static async removeFile(db, FilePath, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "FilePath" = $2`;
+      const values = [ProjectId, FilePath];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
   static async getFilesByProjectId(db, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async searchFilesByProjectIdAndName(db, FileName, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "FileName" ILIKE '%${FileName}%'`;
       db.query(query, [ProjectId], (error, result) => {
         if (error) {
           reject(error);
