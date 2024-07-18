@@ -151,10 +151,32 @@ class ProjectController {
     try {
       const ProjectId = req.query.ProjectId;
       const tasksNumber = await Project.getTaskToDo(db, ProjectId);
-      res.status(200).send(tasksNumber);
+      res.status(200).json(tasksNumber);
     } catch (error) {
       console.error("Errore nel recupero delle task da fare:", error);
       res.status(500).send("Recupero delle task fallito");
+    }
+  }
+
+  static async getTotalTasks(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      const totalTasks = await Project.getTotalTasks(db, ProjectId);
+      res.status(200).json(totalTasks);
+    } catch (error) {
+      console.error("Errore nel recupero delle tasks:", error);
+      res.status(500).send("Recupero delle tasks fallito");
+    }
+  }
+
+  static async getTotalTeamMembers(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      const totalTeamMembers = await Project.getTotalTeamMembers(db, ProjectId);
+      res.status(200).json(totalTeamMembers);
+    } catch (error) {
+      console.error("Errore nel recupero delle tasks:", error);
+      res.status(500).send("Recupero delle tasks fallito");
     }
   }
 

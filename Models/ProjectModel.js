@@ -176,6 +176,37 @@ class ProjectModel {
     });
   }
 
+  static getTotalTasks(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT COUNT(*) AS "TotalTasks" FROM public."ProjectTask" 
+      INNER JOIN public."ProjectTaskStatus" USING("ProjectTaskStatusId") 
+      WHERE "ProjectTaskStatusId" <> 4  AND  "ProjectId"  =  $1`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getTotalTeamMembers(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT COUNT(*) AS "TotalTeamMembers" FROM public."ProjectTeam" 
+      WHERE "ProjectId"  =  $1`;
+
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static addProject(db, ProjectData) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Project"("ProjectName", "ProjectDescription", "ProjectEndDate", "ProjectManagerId", "ProjectBannerId", "CompanyId")

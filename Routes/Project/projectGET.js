@@ -62,6 +62,14 @@ const projectGET = (db) => {
     ProjectController.getTaskToDo(req, res, db);
   });
 
+  router.get("/GetTotalTasks", (req, res) => {
+    ProjectController.getTotalTasks(req, res, db);
+  });
+
+  router.get("/GetTotalTeamMembers", (req, res) => {
+    ProjectController.getTotalTeamMembers(req, res, db);
+  });
+
   router.get("/GetTasksByProjectId", (req, res) => {
     ProjectController.getTasksByProjectId(req, res, db);
   });
