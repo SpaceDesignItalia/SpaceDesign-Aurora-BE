@@ -1,6 +1,8 @@
 //StafferController.js
 const EmailService = require("../middlewares/EmailService/EmailService");
 const Staffer = require("../Models/StafferModel");
+const path = require("path");
+const fs = require("fs");
 
 class StafferController {
   static async getAllStaffers(res, db) {
@@ -76,6 +78,42 @@ class StafferController {
 
       console.log(newEmployeeData, selectedRole);
       await Staffer.updateStaffer(db, newEmployeeData, selectedRole);
+      res.status(200).send("Dipendente modificato con successo.");
+    } catch (error) {
+      console.error("Errore nella modifica del dipendente:", error);
+      res.status(500).send("Modifica del dipendente fallita");
+    }
+  }
+
+  static async settingsUpdateStaffer(req, res, db) {
+    try {
+      const newEmployeeData = JSON.parse(req.body.newEmployeeData);
+      const newProfilePic = req.file;
+      const oldPhoto = req.body.oldPhoto;
+
+      console.log(newProfilePic, oldPhoto);
+      await Staffer.settingsUpdateStaffer(db, newEmployeeData, newProfilePic);
+
+      req.session.account.StafferName = newEmployeeData.StafferName;
+      req.session.account.StafferSurname = newEmployeeData.StafferSurname;
+      req.session.account.StafferPhone = newEmployeeData.StafferPhone;
+      if (newProfilePic !== undefined) {
+        const fullFilePath = path.join(
+          __dirname,
+          "../public/profileIcons",
+          oldPhoto
+        );
+
+        fs.unlink(fullFilePath, (err) => {
+          if (err) {
+            console.error("Error deleting file:", err);
+            return res.status(500).send("Error deleting file");
+          }
+        });
+
+        req.session.account.StafferImageUrl = newProfilePic.filename;
+      }
+
       res.status(200).send("Dipendente modificato con successo.");
     } catch (error) {
       console.error("Errore nella modifica del dipendente:", error);

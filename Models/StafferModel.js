@@ -155,6 +155,43 @@ class StafferModel {
       });
     });
   }
+
+  static settingsUpdateStaffer(db, newEmployeeData, newProfilePic) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."Staffer" SET "StafferName" = $1, "StafferSurname" = $2, "StafferPhone" = $3
+            WHERE "StafferId" = $4`;
+
+      const values = [
+        newEmployeeData.StafferName,
+        newEmployeeData.StafferSurname,
+        newEmployeeData.StafferPhone,
+        newEmployeeData.StafferId,
+      ];
+      console.log(newEmployeeData.StafferId);
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          if (newProfilePic !== undefined) {
+            const query = `UPDATE public."Staffer" SET "StafferImageUrl" = $1
+            WHERE "StafferId" = $2`;
+
+            const values = [newProfilePic.filename, newEmployeeData.StafferId];
+            db.query(query, values, (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result);
+              }
+            });
+          } else {
+            resolve(result);
+          }
+        }
+      });
+    });
+  }
+
   static deleteStaffer(db, EmployeeData) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."Staffer" WHERE "StafferId" = $1`;
