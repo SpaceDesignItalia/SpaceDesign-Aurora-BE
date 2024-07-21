@@ -30,7 +30,7 @@ class TicketModel {
     });
   }
 
-  static openNewTicket(db, TicketData) {
+  static openNewTicket(db, TicketData, CustomerId) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."ProjectTicket"(
 	    "ProjectTicketTitle", "ProjectTicketDescription", "ProjectId", "CustomerId", "TicketRequestTypeId")
@@ -40,7 +40,7 @@ class TicketModel {
         TicketData.ProjectTicketTitle,
         TicketData.ProjectTicketDescription,
         TicketData.ProjectId,
-        TicketData.CustomerId,
+        CustomerId,
         TicketData.TicketRequestTypeId,
       ];
       db.query(query, values, (error, result) => {

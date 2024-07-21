@@ -27,7 +27,8 @@ class TicketController {
   static async openNewTicket(req, res, db) {
     try {
       const TicketData = req.body.TicketData;
-      await Ticket.openNewTicket(db, TicketData);
+      const CustomerId = req.session.account.CustomerId;
+      await Ticket.openNewTicket(db, TicketData, CustomerId);
       res.status(200).send("Ticket aperto con successo");
     } catch (error) {
       console.error("Errore nell'apertura del ticket:", error);
