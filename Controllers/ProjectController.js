@@ -502,7 +502,7 @@ class ProjectController {
 
   static async getProjectInTeam(req, res, db) {
     try {
-      const StafferId = req.query.StafferId;
+      const StafferId = req.session.account.StafferId;
       const projects = await Project.getProjectInTeam(db, StafferId);
       res.status(200).json(projects);
     } catch (error) {
