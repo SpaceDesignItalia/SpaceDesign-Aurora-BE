@@ -475,7 +475,7 @@ class ProjectController {
 
   static async getProjectsByCustomerId(req, res, db) {
     try {
-      const CustomerId = req.query.CustomerId;
+      const CustomerId = req.session.account.CustomerId;
       const projects = await Project.getProjectsByCustomerId(db, CustomerId);
       res.status(200).json(projects);
     } catch (error) {
@@ -486,7 +486,7 @@ class ProjectController {
 
   static async searchProjectsByCustomerIdAndName(req, res, db) {
     try {
-      const CustomerId = req.query.CustomerId;
+      const CustomerId = req.session.account.CustomerId;
       const ProjectName = req.query.ProjectName;
       const projects = await Project.searchProjectsByCustomerIdAndName(
         db,
@@ -502,7 +502,7 @@ class ProjectController {
 
   static async getProjectInTeam(req, res, db) {
     try {
-      const StafferId = req.query.StafferId;
+      const StafferId = req.session.account.StafferId;
       const projects = await Project.getProjectInTeam(db, StafferId);
       res.status(200).json(projects);
     } catch (error) {
