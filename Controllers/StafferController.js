@@ -91,7 +91,6 @@ class StafferController {
       const newProfilePic = req.file;
       const oldPhoto = req.body.oldPhoto;
 
-      console.log(newProfilePic, oldPhoto);
       await Staffer.settingsUpdateStaffer(db, newEmployeeData, newProfilePic);
 
       req.session.account.StafferName = newEmployeeData.StafferName;
@@ -118,6 +117,33 @@ class StafferController {
     } catch (error) {
       console.error("Errore nella modifica del dipendente:", error);
       res.status(500).send("Modifica del dipendente fallita");
+    }
+  }
+
+  static async updateStafferPassword(req, res, db) {
+    try {
+      const changePasswordData = req.body.ChangePasswordData;
+
+      const staffer = await Staffer.updateStafferPassword(
+        db,
+        changePasswordData,
+        req.session.account.StafferId
+      );
+
+      if (!staffer) {
+        return res.status(401).send("Password errata.");
+      }
+
+      EmailService.sendPasswordChangedMail(
+        staffer.StafferEmail,
+        staffer.StafferName,
+        staffer.StafferSurname
+      );
+
+      res.status(200).send("Password modificata con successo.");
+    } catch (error) {
+      console.error("Errore nella modifica della password:", error);
+      res.status(500).send("Modifica della password fallita");
     }
   }
 

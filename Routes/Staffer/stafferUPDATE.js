@@ -37,6 +37,10 @@ const stafferUPDATE = (db) => {
     StafferController.settingsUpdateStaffer(req, res, db);
   });
 
+  router.put("/UpdateStafferPassword", (req, res) => {
+    StafferController.updateStafferPassword(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

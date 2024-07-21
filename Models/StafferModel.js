@@ -192,6 +192,52 @@ class StafferModel {
     });
   }
 
+  static updateStafferPassword(db, changePasswordData, StafferId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."Staffer" WHERE "StafferId" = $1`;
+
+      db.query(query, [StafferId], (error, result) => {
+        if (error) {
+          resolve(error);
+        } else {
+          if (result.rows.length === 1) {
+            const isPasswordValid = bcrypt.compareSync(
+              changePasswordData.OldPassword,
+              result.rows[0].StafferPassword
+            );
+            if (isPasswordValid) {
+              bcrypt.hash(
+                changePasswordData.NewPassword,
+                10,
+                (hashError, hashedPassword) => {
+                  if (hashError) {
+                    reject(hashError);
+                  }
+
+                  const query = `UPDATE public."Staffer" SET "StafferPassword" = $1 WHERE "StafferId" = $2`;
+
+                  const values = [hashedPassword, StafferId];
+
+                  db.query(query, values, (error, resultUpdate) => {
+                    if (error) {
+                      reject(error);
+                    } else {
+                      resolve(result.rows[0]);
+                    }
+                  });
+                }
+              );
+            } else {
+              resolve(false);
+            }
+          } else {
+            resolve(false);
+          }
+        }
+      });
+    });
+  }
+
   static deleteStaffer(db, EmployeeData) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."Staffer" WHERE "StafferId" = $1`;

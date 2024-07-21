@@ -108,5 +108,37 @@ class EmailService {
       console.log("Message sent: %s", info.messageId);
     });
   }
+
+  static sendPasswordChangedMail(email, name, surname) {
+    const emailTemplatePath = path.join(
+      __dirname,
+      "EmailTemplate/PasswordChanged.html"
+    );
+    const emailTemplate = fs.readFileSync(emailTemplatePath, "utf-8");
+
+    let htmlContent = emailTemplate
+      .replace("${name}", name)
+      .replace("${surname}", surname);
+
+    const sendPasswordChangedMail = {
+      from: `Space Design Italia <${mailData.mail}>`,
+      to: email,
+      subject: "Password di accesso modificata!",
+      text:
+        "Caro/a " +
+        name +
+        " " +
+        surname +
+        ",\n\nLa tua password di accesso è stata modificata!",
+      html: htmlContent,
+    };
+
+    transporter.sendMail(sendPasswordChangedMail, (error, info) => {
+      if (error) {
+        return console.log(error);
+      }
+      console.log("Message sent: %s", info.messageId);
+    });
+  }
 }
 module.exports = EmailService;
