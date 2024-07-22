@@ -106,7 +106,6 @@ class StafferController {
         fs.unlink(fullFilePath, (err) => {
           if (err) {
             console.error("Error deleting file:", err);
-            return res.status(500).send("Error deleting file");
           }
         });
 

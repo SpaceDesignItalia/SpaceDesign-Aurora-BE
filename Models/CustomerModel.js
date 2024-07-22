@@ -174,6 +174,89 @@ class CustomerModel {
     });
   }
 
+  static settingsUpdateCustomer(db, newCustomerData, newProfilePic) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."Customer" SET "CustomerName" = $1, "CustomerSurname" = $2, "CustomerEmail" = $3, "CustomerPhone" = $4
+            WHERE "CustomerId" = $5`;
+
+      const values = [
+        newCustomerData.CustomerName,
+        newCustomerData.CustomerSurname,
+        newCustomerData.CustomerEmail,
+        newCustomerData.CustomerPhone,
+        newCustomerData.CustomerId,
+      ];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          if (newProfilePic !== undefined) {
+            const query = `UPDATE public."Customer" SET "CustomerImageUrl" = $1
+            WHERE "CustomerId" = $2`;
+
+            const values = [newProfilePic.filename, newCustomerData.CustomerId];
+            db.query(query, values, (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result);
+              }
+            });
+          } else {
+            resolve(result);
+          }
+        }
+      });
+    });
+  }
+
+  static updateCustomerPassword(db, changePasswordData, CustomerId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."Customer" WHERE "CustomerId" = $1`;
+
+      db.query(query, [CustomerId], (error, result) => {
+        if (error) {
+          resolve(error);
+        } else {
+          if (result.rows.length === 1) {
+            const isPasswordValid = bcrypt.compareSync(
+              changePasswordData.OldPassword,
+              result.rows[0].CustomerPassword
+            );
+            if (isPasswordValid) {
+              bcrypt.hash(
+                changePasswordData.NewPassword,
+                10,
+                (hashError, hashedPassword) => {
+                  if (hashError) {
+                    reject(hashError);
+                  }
+
+                  const query = `UPDATE public."Customer" SET "CustomerPassword" = $1 WHERE "CustomerId" = $2`;
+
+                  const values = [hashedPassword, CustomerId];
+
+                  db.query(query, values, (error, resultUpdate) => {
+                    if (error) {
+                      reject(error);
+                    } else {
+                      resolve(result.rows[0]);
+                    }
+                  });
+                }
+              );
+            } else {
+              resolve(false);
+            }
+          } else {
+            resolve(false);
+          }
+        }
+      });
+    });
+  }
+
   static deleteCustomer(db, CustomerData) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."Customer" WHERE "CustomerId" = $1`;

@@ -1,6 +1,8 @@
 // controller/PermissionController.js
 const EmailService = require("../middlewares/EmailService/EmailService");
 const Customer = require("../Models/CustomerModel");
+const path = require("path");
+const fs = require("fs");
 
 class CustomerController {
   static async getAllCustomers(req, res, db) {
@@ -76,6 +78,68 @@ class CustomerController {
     } catch (error) {
       console.error("Errore nel'aggiornamento del cliente:", error);
       res.status(500).send("Aggiornamento del cliente fallita");
+    }
+  }
+
+  static async settingsUpdateCustomerData(req, res, db) {
+    try {
+      const newCustomerData = JSON.parse(req.body.newCustomerData);
+      const newProfilePic = req.file;
+      const oldPhoto = req.body.oldPhoto;
+
+      await Customer.settingsUpdateCustomer(db, newCustomerData, newProfilePic);
+
+      req.session.account.CustomerName = newCustomerData.CustomerName;
+      req.session.account.CustomerSurname = newCustomerData.CustomerSurname;
+      req.session.account.CustomerEmail = newCustomerData.CustomerEmail;
+      req.session.account.CustomerPhone = newCustomerData.CustomerPhone;
+      if (newProfilePic !== undefined) {
+        const fullFilePath = path.join(
+          __dirname,
+          "../public/profileIcons",
+          oldPhoto
+        );
+
+        fs.unlink(fullFilePath, (err) => {
+          if (err) {
+            console.error("Error deleting file:", err);
+          }
+        });
+
+        req.session.account.CustomerImageUrl = newProfilePic.filename;
+      }
+
+      res.status(200).send("Dipendente modificato con successo.");
+    } catch (error) {
+      console.error("Errore nella modifica del dipendente:", error);
+      res.status(500).send("Modifica del dipendente fallita");
+    }
+  }
+
+  static async updateCustomerPassword(req, res, db) {
+    try {
+      const changePasswordData = req.body.ChangePasswordData;
+
+      const customer = await Customer.updateCustomerPassword(
+        db,
+        changePasswordData,
+        req.session.account.CustomerId
+      );
+
+      if (!customer) {
+        return res.status(401).send("Password errata.");
+      }
+
+      /* EmailService.sendPasswordChangedMail(
+        customer.CustomerEmail,
+        customer.CustomerName,
+        customer.CustomerSurname
+      ); */
+
+      res.status(200).send("Password modificata con successo.");
+    } catch (error) {
+      console.error("Errore nella modifica della password:", error);
+      res.status(500).send("Modifica della password fallita");
     }
   }
 
