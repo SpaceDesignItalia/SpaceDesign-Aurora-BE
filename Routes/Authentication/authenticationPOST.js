@@ -9,6 +9,10 @@ const authenticationPOST = (db) => {
     AuthenticationController.login(req, res, db);
   });
 
+  router.post("/PasswordRecovery", (req, res) => {
+    AuthenticationController.passwordRecovery(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
