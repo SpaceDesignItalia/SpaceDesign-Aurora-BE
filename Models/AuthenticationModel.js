@@ -41,7 +41,6 @@ class StafferModel {
               result.rows[0].CustomerPassword
             );
 
-            console.log("ValidPassword: ", isPasswordValid);
             if (isPasswordValid) {
               resolve(result.rows[0]);
             } else {
@@ -73,8 +72,6 @@ class StafferModel {
                   "Errore durante la cancellazione del RecoveryCode:",
                   error
                 );
-              } else {
-                console.log("RecoveryCode cancellato per:", Email);
               }
             });
           }, 5 * 60 * 1000); // 5 minuti in millisecondi
@@ -86,9 +83,6 @@ class StafferModel {
   }
 
   static ResetPassword(db, Email, Code, newPassword) {
-    console.log("Email: ", Email);
-    console.log("Code: ", Code);
-    console.log("newPassword: ", newPassword);
     return new Promise((resolve, reject) => {
       const checkCode = `SELECT * FROM public."Staffer" WHERE "RecoveryCode" = $1 AND "StafferEmail" = $2`;
       db.query(checkCode, [Code, Email], (error, result) => {

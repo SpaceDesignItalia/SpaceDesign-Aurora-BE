@@ -123,7 +123,6 @@ class ProjectController {
   static async getMessagesCustomerByConversationId(req, res, db) {
     try {
       const ConversationId = req.query.ConversationId;
-      console.log("ConversationId", ConversationId);
       const messages = await Project.getMessagesCustomerByConversationId(
         db,
         ConversationId

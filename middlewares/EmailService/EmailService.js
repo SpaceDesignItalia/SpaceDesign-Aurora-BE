@@ -43,7 +43,6 @@ class EmailService {
       if (error) {
         return console.log(error);
       }
-      console.log("Message sent: %s", info.messageId);
     });
   }
 
@@ -71,7 +70,6 @@ class EmailService {
       if (error) {
         return console.log(error);
       }
-      console.log("Message sent: %s", info.messageId);
     });
   }
 
@@ -105,7 +103,6 @@ class EmailService {
       if (error) {
         return console.log(error);
       }
-      console.log("Message sent: %s", info.messageId);
     });
   }
 
@@ -137,7 +134,6 @@ class EmailService {
       if (error) {
         return console.log(error);
       }
-      console.log("Message sent: %s", info.messageId);
     });
   }
 
@@ -163,7 +159,6 @@ class EmailService {
       if (error) {
         return console.log(error);
       }
-      console.log("Message sent: %s", info.messageId);
     });
   }
 }

@@ -5,7 +5,7 @@ class ChatController {
   static async getConversationByStafferId(req, res, db) {
     try {
       const StafferId = req.query.StafferId;
-      console.log("StafferId", StafferId);
+
       const conversations = await Chat.getConversationByStafferId(
         db,
         StafferId
@@ -58,9 +58,6 @@ class ChatController {
       const Staffer1Id = req.query.Staffer1Id;
       const Staffer2Id = req.query.Staffer2Id;
 
-      console.log("Staffer1Id", Staffer1Id);
-      console.log("Staffer2Id", Staffer2Id);
-
       const messages = await Chat.getConversationByStaffersId(
         db,
         Staffer1Id,
@@ -100,7 +97,6 @@ class ChatController {
         Staffer1Id,
         Staffer2Id
       );
-      console.log("conversationId", conversationId);
       res.status(200).send(conversationId);
     } catch (error) {
       console.error("Errore nella creazione della conversazione", error);
