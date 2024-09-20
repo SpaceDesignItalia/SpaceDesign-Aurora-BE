@@ -340,7 +340,6 @@ class ProjectModel {
   }
 
   static createProjectConversation(db, ProjectId, ProjectManagerId, CompanyId) {
-    console.log("ProjectId:", ProjectId);
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Conversation"("ProjectId") VALUES ($1);`;
 

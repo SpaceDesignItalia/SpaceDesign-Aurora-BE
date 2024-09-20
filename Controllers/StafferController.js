@@ -76,7 +76,6 @@ class StafferController {
       const newEmployeeData = req.body.newEmployeeData;
       const selectedRole = req.body.selectedRole;
 
-      console.log(newEmployeeData, selectedRole);
       await Staffer.updateStaffer(db, newEmployeeData, selectedRole);
       res.status(200).send("Dipendente modificato con successo.");
     } catch (error) {

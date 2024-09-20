@@ -95,7 +95,6 @@ class CustomerModel {
               reject(error);
             } else {
               const CustomerId = result.rows[0].CustomerId;
-              console.log(CustomerId);
 
               const query = `INSERT INTO public."CustomerCompany"("CustomerId", "CompanyId")
               VALUES ($1, $2)`;

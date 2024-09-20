@@ -1,5 +1,6 @@
 // controller/PermissionController.js
 const Authentication = require("../Models/AuthenticationModel");
+const EmailService = require("../middlewares/EmailService/EmailService");
 
 class AuthenticationController {
   static async login(req, res, db) {
@@ -77,6 +78,35 @@ class AuthenticationController {
     } catch (error) {
       console.error("Errore nel recupero della sessione:", error);
       res.status(500).send("Recupero nel recupero della sessione");
+    }
+  }
+
+  static async passwordRecovery(req, res, db) {
+    try {
+      const Email = req.body.email;
+      const recoveryCode = Math.floor(Math.random() * 900000) + 100000;
+      Math.floor(Math.random() * 900000) + 100000;
+
+      await Authentication.passwordRecovery(db, Email, recoveryCode);
+      EmailService.sendPasswordRecoveryMail(Email, recoveryCode);
+      res.status(200).send("codice inviato con successo.");
+    } catch (error) {
+      console.error("Errore nell'invio del codice:", error);
+      res.status(500).send("Invio del codice fallito");
+    }
+  }
+
+  static async ResetPassword(req, res, db) {
+    try {
+      const Email = req.body.email;
+      const Code = req.body.code;
+      const newPassword = req.body.newPassword;
+
+      await Authentication.ResetPassword(db, Email, Code, newPassword);
+      res.status(200).send("Password aggiornata con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiornamento della password:", error);
+      res.status(500).send("Aggiornamento della password fallito");
     }
   }
 }

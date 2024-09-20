@@ -43,7 +43,6 @@ class EmailService {
       if (error) {
         return console.log(error);
       }
-      console.log("Message sent: %s", info.messageId);
     });
   }
 
@@ -71,7 +70,6 @@ class EmailService {
       if (error) {
         return console.log(error);
       }
-      console.log("Message sent: %s", info.messageId);
     });
   }
 
@@ -105,7 +103,6 @@ class EmailService {
       if (error) {
         return console.log(error);
       }
-      console.log("Message sent: %s", info.messageId);
     });
   }
 
@@ -137,7 +134,31 @@ class EmailService {
       if (error) {
         return console.log(error);
       }
-      console.log("Message sent: %s", info.messageId);
+    });
+  }
+
+  static sendPasswordRecoveryMail(email, recoveryCode) {
+    const emailTemplatePath = path.join(
+      __dirname,
+      "EmailTemplate/PasswordRecovery.html"
+    );
+    const emailTemplate = fs.readFileSync(emailTemplatePath, "utf-8");
+
+    let htmlContent = emailTemplate.replace("${recoveryCode}", recoveryCode);
+
+    const sendPasswordRecoveryMail = {
+      from: `Space Design Italia <${mailData.mail}>`,
+      to: email,
+      subject: "Recupero password",
+      text:
+        "Ciao! Ecco il codice per recuperare la tua password: " + recoveryCode,
+      html: htmlContent,
+    };
+
+    transporter.sendMail(sendPasswordRecoveryMail, (error, info) => {
+      if (error) {
+        return console.log(error);
+      }
     });
   }
 }

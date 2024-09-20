@@ -93,7 +93,6 @@ class StafferModel {
             } else {
               const StafferId = result.rows[0].StafferId;
 
-              console.log(StafferId);
               const query = `INSERT INTO public."StafferRole"("StafferId", "RoleId")
                 VALUES ($1, $2)`;
               db.query(
@@ -167,7 +166,6 @@ class StafferModel {
         newEmployeeData.StafferPhone,
         newEmployeeData.StafferId,
       ];
-      console.log(newEmployeeData.StafferId);
       db.query(query, values, (error, result) => {
         if (error) {
           reject(error);
