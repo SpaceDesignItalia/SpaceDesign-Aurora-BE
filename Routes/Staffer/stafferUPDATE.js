@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const router = express.Router();
 const StafferController = require("../../Controllers/StafferController");
+const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
 
 // Ensure the upload directory exists
 const uploadDir = "./public/profileIcons";
@@ -29,15 +30,25 @@ const upload = multer({ storage: storage });
 const stafferUPDATE = (db) => {
   // Definisci le route UPDATE qui
 
-  router.put("/UpdateStaffer", upload.single("files"), (req, res) => {
-    StafferController.updateStaffer(req, res, db);
-  });
+  router.put(
+    "/UpdateStaffer",
+    authenticateMiddleware,
+    upload.single("files"),
+    (req, res) => {
+      StafferController.updateStaffer(req, res, db);
+    }
+  );
 
-  router.put("/SettingsUpdateStaffer", upload.single("file"), (req, res) => {
-    StafferController.settingsUpdateStaffer(req, res, db);
-  });
+  router.put(
+    "/SettingsUpdateStaffer",
+    authenticateMiddleware,
+    upload.single("file"),
+    (req, res) => {
+      StafferController.settingsUpdateStaffer(req, res, db);
+    }
+  );
 
-  router.put("/UpdateStafferPassword", (req, res) => {
+  router.put("/UpdateStafferPassword", authenticateMiddleware, (req, res) => {
     StafferController.updateStafferPassword(req, res, db);
   });
 

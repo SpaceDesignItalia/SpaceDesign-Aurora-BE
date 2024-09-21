@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const router = express.Router();
 const CustomerController = require("../../Controllers/CustomerController");
+const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
 
 // Ensure the upload directory exists
 const uploadDir = "./public/profileIcons";
@@ -29,19 +30,20 @@ const upload = multer({ storage: storage });
 const customerUPDATE = (db) => {
   // Definisci le route GET qui
 
-  router.put("/UpdateCustomerData", (req, res) => {
+  router.put("/UpdateCustomerData", authenticateMiddleware, (req, res) => {
     CustomerController.updateCustomerData(req, res, db);
   });
 
   router.put(
     "/SettingsUpdateCustomerData",
+    authenticateMiddleware,
     upload.single("file"),
     (req, res) => {
       CustomerController.settingsUpdateCustomerData(req, res, db);
     }
   );
 
-  router.put("/UpdateCustomerPassword", (req, res) => {
+  router.put("/UpdateCustomerPassword", authenticateMiddleware, (req, res) => {
     CustomerController.updateCustomerPassword(req, res, db);
   });
 

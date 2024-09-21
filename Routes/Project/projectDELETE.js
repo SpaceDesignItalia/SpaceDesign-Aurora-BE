@@ -2,33 +2,42 @@
 const express = require("express");
 const router = express.Router();
 const ProjectController = require("../../Controllers/ProjectController");
+const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
 
 const projectDELETE = (db) => {
-  router.delete("/RemoveMemberFromProjectById", (req, res) => {
-    ProjectController.removeMemberFromProjectById(req, res, db);
-  });
+  router.delete(
+    "/RemoveMemberFromProjectById",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.removeMemberFromProjectById(req, res, db);
+    }
+  );
 
-  router.delete("/RemoveLinkFromProject", (req, res) => {
-    ProjectController.removeLinkFromProject(req, res, db);
-  });
+  router.delete(
+    "/RemoveLinkFromProject",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.removeLinkFromProject(req, res, db);
+    }
+  );
 
-  router.delete("/DeleteProject", (req, res) => {
+  router.delete("/DeleteProject", authenticateMiddleware, (req, res) => {
     ProjectController.deleteProject(req, res, db);
   });
 
-  router.delete("/DeleteTaskMember", (req, res) => {
+  router.delete("/DeleteTaskMember", authenticateMiddleware, (req, res) => {
     ProjectController.deleteTaskMember(req, res, db);
   });
 
-  router.delete("/DeleteTaskTag", (req, res) => {
+  router.delete("/DeleteTaskTag", authenticateMiddleware, (req, res) => {
     ProjectController.deleteTaskTag(req, res, db);
   });
 
-  router.delete("/DeleteTask", (req, res) => {
+  router.delete("/DeleteTask", authenticateMiddleware, (req, res) => {
     ProjectController.deleteTask(req, res, db);
   });
 
-  router.delete("/DeleteFile", (req, res) => {
+  router.delete("/DeleteFile", authenticateMiddleware, (req, res) => {
     ProjectController.removeFile(req, res, db);
   });
 

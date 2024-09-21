@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const router = express.Router();
 const ProjectController = require("../../Controllers/ProjectController");
+const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
 
 // Ensure the upload directory exists
 const uploadDir = "./public/uploads/projectFiles";
@@ -24,35 +25,39 @@ const storage = multer.diskStorage({
 });
 
 const projectPOST = (db) => {
-  router.post("/AddProject", (req, res) => {
+  router.post("/AddProject", authenticateMiddleware, (req, res) => {
     ProjectController.addProject(req, res, db);
   });
 
-  router.post("/AddProjectLink", (req, res) => {
+  router.post("/AddProjectLink", authenticateMiddleware, (req, res) => {
     ProjectController.addProjectLink(req, res, db);
   });
 
-  router.post("/AddProjectTeamMember", (req, res) => {
+  router.post("/AddProjectTeamMember", authenticateMiddleware, (req, res) => {
     ProjectController.addProjectTeamMember(req, res, db);
   });
 
-  router.post("/CreateProjectConversation", (req, res) => {
-    ProjectController.createProjectConversation(req, res, db);
-  });
+  router.post(
+    "/CreateProjectConversation",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.createProjectConversation(req, res, db);
+    }
+  );
 
-  router.post("/UpdateTaskStatus", (req, res) => {
+  router.post("/UpdateTaskStatus", authenticateMiddleware, (req, res) => {
     ProjectController.updateTaskStatus(req, res, db);
   });
 
-  router.post("/AddTaskMember", (req, res) => {
+  router.post("/AddTaskMember", authenticateMiddleware, (req, res) => {
     ProjectController.addTaskMember(req, res, db);
   });
 
-  router.post("/AddTaskTag", (req, res) => {
+  router.post("/AddTaskTag", authenticateMiddleware, (req, res) => {
     ProjectController.addTaskTag(req, res, db);
   });
 
-  router.post("/AddTask", (req, res) => {
+  router.post("/AddTask", authenticateMiddleware, (req, res) => {
     ProjectController.addTask(req, res, db);
   });
 

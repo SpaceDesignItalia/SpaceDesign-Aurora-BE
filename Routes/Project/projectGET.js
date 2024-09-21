@@ -2,141 +2,178 @@
 const express = require("express");
 const router = express.Router();
 const ProjectController = require("../../Controllers/ProjectController");
+const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
 
 const projectGET = (db) => {
   // Definisci le route GET qui
 
-  router.get("/GetAllStatus", (req, res) => {
+  router.get("/GetAllStatus", authenticateMiddleware, (req, res) => {
     ProjectController.getAllStatus(req, res, db);
   });
 
-  router.get("/GetAllBanners", (req, res) => {
+  router.get("/GetAllBanners", authenticateMiddleware, (req, res) => {
     ProjectController.getAllBanners(req, res, db);
   });
 
-  router.get("/GetAllManagers", (req, res) => {
+  router.get("/GetAllManagers", authenticateMiddleware, (req, res) => {
     ProjectController.getAllManagers(req, res, db);
   });
 
-  router.get("/GetAllProjects", (req, res) => {
+  router.get("/GetAllProjects", authenticateMiddleware, (req, res) => {
     ProjectController.getAllProjects(req, res, db);
   });
 
-  router.get("/GetProjectByIdAndName", (req, res) => {
+  router.get("/GetProjectByIdAndName", authenticateMiddleware, (req, res) => {
     ProjectController.getProjectByIdAndName(req, res, db);
   });
 
-  router.get("/GetProjectStatus", (req, res) => {
+  router.get("/GetProjectStatus", authenticateMiddleware, (req, res) => {
     ProjectController.getProjectStatus(req, res, db);
   });
 
-  router.get("/GetAllLinkByProjectId", (req, res) => {
+  router.get("/GetAllLinkByProjectId", authenticateMiddleware, (req, res) => {
     ProjectController.getAllLinkByProjectId(req, res, db);
   });
 
-  router.get("/GetAllLinkType", (req, res) => {
+  router.get("/GetAllLinkType", authenticateMiddleware, (req, res) => {
     ProjectController.getAllLinkTypes(req, res, db);
   });
 
-  router.get("/GetConversationByProjectId", (req, res) => {
-    ProjectController.getConversationByProjectId(req, res, db);
-  });
+  router.get(
+    "/GetConversationByProjectId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getConversationByProjectId(req, res, db);
+    }
+  );
 
-  router.get("/GetMessagesByConversationId", (req, res) => {
-    ProjectController.getMessagesByConversationId(req, res, db);
-  });
+  router.get(
+    "/GetMessagesByConversationId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getMessagesByConversationId(req, res, db);
+    }
+  );
 
-  router.get("/GetMessagesCustomerByConversationId", (req, res) => {
-    ProjectController.getMessagesCustomerByConversationId(req, res, db);
-  });
+  router.get(
+    "/GetMessagesCustomerByConversationId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getMessagesCustomerByConversationId(req, res, db);
+    }
+  );
 
-  router.get("/GetProjetTeamMembers", (req, res) => {
+  router.get("/GetProjetTeamMembers", authenticateMiddleware, (req, res) => {
     ProjectController.getProjectTeamMembers(req, res, db);
   });
 
-  router.get("/GetMembersNotInProjectTeam", (req, res) => {
-    ProjectController.getMembersNotInProjectTeam(req, res, db);
-  });
+  router.get(
+    "/GetMembersNotInProjectTeam",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getMembersNotInProjectTeam(req, res, db);
+    }
+  );
 
-  router.get("/GetTaskToDo", (req, res) => {
+  router.get("/GetTaskToDo", authenticateMiddleware, (req, res) => {
     ProjectController.getTaskToDo(req, res, db);
   });
 
-  router.get("/GetTotalTasks", (req, res) => {
+  router.get("/GetTotalTasks", authenticateMiddleware, (req, res) => {
     ProjectController.getTotalTasks(req, res, db);
   });
 
-  router.get("/GetTotalTeamMembers", (req, res) => {
+  router.get("/GetTotalTeamMembers", authenticateMiddleware, (req, res) => {
     ProjectController.getTotalTeamMembers(req, res, db);
   });
 
-  router.get("/GetTasksByProjectId", (req, res) => {
+  router.get("/GetTasksByProjectId", authenticateMiddleware, (req, res) => {
     ProjectController.getTasksByProjectId(req, res, db);
   });
 
-  router.get("/GetTaskStatuses", (req, res) => {
+  router.get("/GetTaskStatuses", authenticateMiddleware, (req, res) => {
     ProjectController.getTaskStatuses(req, res, db);
   });
 
-  router.get("/GetTagsByTaskId", (req, res) => {
+  router.get("/GetTagsByTaskId", authenticateMiddleware, (req, res) => {
     ProjectController.getTagsByTaskId(req, res, db);
   });
 
-  router.get("/GetMembersByTaskId", (req, res) => {
+  router.get("/GetMembersByTaskId", authenticateMiddleware, (req, res) => {
     ProjectController.getMembersByTaskId(req, res, db);
   });
 
-  router.get("/GetMembersNotInTask", (req, res) => {
+  router.get("/GetMembersNotInTask", authenticateMiddleware, (req, res) => {
     ProjectController.getMembersNotInTask(req, res, db);
   });
 
-  router.get("/GetTagsNotInTask", (req, res) => {
+  router.get("/GetTagsNotInTask", authenticateMiddleware, (req, res) => {
     ProjectController.getTagsNotInTask(req, res, db);
   });
 
-  router.get("/GetTaskByTaskId", (req, res) => {
+  router.get("/GetTaskByTaskId", authenticateMiddleware, (req, res) => {
     ProjectController.getTaskByTaskId(req, res, db);
   });
 
-  router.get("/GetAllTags", (req, res) => {
+  router.get("/GetAllTags", authenticateMiddleware, (req, res) => {
     ProjectController.getAllTags(req, res, db);
   });
 
-  router.get("/GetProjectInTeam", (req, res) => {
+  router.get("/GetProjectInTeam", authenticateMiddleware, (req, res) => {
     ProjectController.getProjectInTeam(req, res, db);
   });
 
-  router.get("/SearchProjectByName", (req, res) => {
+  router.get("/SearchProjectByName", authenticateMiddleware, (req, res) => {
     ProjectController.searchProjectByName(req, res, db);
   });
 
-  router.get("/GetFilesByProjectId", (req, res) => {
+  router.get("/GetFilesByProjectId", authenticateMiddleware, (req, res) => {
     ProjectController.getFilesByProjectId(req, res, db);
   });
 
-  router.get("/GetFilesByProjectIdForCustomer", (req, res) => {
-    ProjectController.getFilesByProjectIdForCustomer(req, res, db);
-  });
+  router.get(
+    "/GetFilesByProjectIdForCustomer",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getFilesByProjectIdForCustomer(req, res, db);
+    }
+  );
 
-  router.get("/GetProjectsByCustomerId", (req, res) => {
+  router.get("/GetProjectsByCustomerId", authenticateMiddleware, (req, res) => {
     ProjectController.getProjectsByCustomerId(req, res, db);
   });
 
-  router.get("/SearchProjectByCustomerIdAndName", (req, res) => {
-    ProjectController.searchProjectsByCustomerIdAndName(req, res, db);
-  });
+  router.get(
+    "/SearchProjectByCustomerIdAndName",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.searchProjectsByCustomerIdAndName(req, res, db);
+    }
+  );
 
-  router.get("/SearchFilesByProjectIdAndName", (req, res) => {
-    ProjectController.searchFilesByProjectIdAndName(req, res, db);
-  });
+  router.get(
+    "/SearchFilesByProjectIdAndName",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.searchFilesByProjectIdAndName(req, res, db);
+    }
+  );
 
-  router.get("/SearchFilesByProjectIdAndNameForCustomer", (req, res) => {
-    ProjectController.searchFilesByProjectIdAndNameForCustomer(req, res, db);
-  });
+  router.get(
+    "/SearchFilesByProjectIdAndNameForCustomer",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.searchFilesByProjectIdAndNameForCustomer(req, res, db);
+    }
+  );
 
-  router.get("/DownloadProjectFileByPath", (req, res) => {
-    ProjectController.downloadFile(req, res);
-  });
+  router.get(
+    "/DownloadProjectFileByPath",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.downloadFile(req, res);
+    }
+  );
 
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };

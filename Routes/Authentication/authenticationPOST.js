@@ -2,14 +2,15 @@
 const express = require("express");
 const router = express.Router();
 const AuthenticationController = require("../../Controllers/AuthenticationController");
+const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
 
 const authenticationPOST = (db) => {
   // Definisci le route POST qui
-  router.post("/Login", (req, res) => {
+  router.post("/Login", authenticateMiddleware, (req, res) => {
     AuthenticationController.login(req, res, db);
   });
 
-  router.post("/PasswordRecovery", (req, res) => {
+  router.post("/PasswordRecovery", authenticateMiddleware, (req, res) => {
     AuthenticationController.passwordRecovery(req, res, db);
   });
 

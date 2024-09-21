@@ -2,27 +2,28 @@
 const express = require("express");
 const router = express.Router();
 const CompanyController = require("../../Controllers/CompanyController");
+const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
 
 const companyGET = (db) => {
   // Definisci le route GET qui
 
-  router.get("/GetAllCompany", (req, res) => {
+  router.get("/GetAllCompany", authenticateMiddleware, (req, res) => {
     CompanyController.getAllCompany(req, res, db);
   });
 
-  router.get("/GetCompanyByIdAndName", (req, res) => {
+  router.get("/GetCompanyByIdAndName", authenticateMiddleware, (req, res) => {
     CompanyController.getCompanyByIdAndName(req, res, db);
   });
 
-  router.get("/GetCompanyById", (req, res) => {
+  router.get("/GetCompanyById", authenticateMiddleware, (req, res) => {
     CompanyController.getCompanyById(req, res, db);
   });
 
-  router.get("/SearchCompanyByName", (req, res) => {
+  router.get("/SearchCompanyByName", authenticateMiddleware, (req, res) => {
     CompanyController.searchCompanyByName(req, res, db);
   });
 
-  router.get("/GetCompanyMembersById", (req, res) => {
+  router.get("/GetCompanyMembersById", authenticateMiddleware, (req, res) => {
     CompanyController.getCompanyMembersById(req, res, db);
   });
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale

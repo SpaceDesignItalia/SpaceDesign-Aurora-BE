@@ -2,11 +2,12 @@
 const express = require("express");
 const router = express.Router();
 const CompanyController = require("../../Controllers/CompanyController");
+const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
 
 const companyPOST = (db) => {
   // Definisci le route GET qui
 
-  router.post("/AddCompany", (req, res) => {
+  router.post("/AddCompany", authenticateMiddleware, (req, res) => {
     CompanyController.addCompany(req, res, db);
   });
 
