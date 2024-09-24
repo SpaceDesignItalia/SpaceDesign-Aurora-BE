@@ -6,11 +6,11 @@ const authenticateMiddleware = require("../../middlewares/EmailService/Authentic
 
 const authenticationPOST = (db) => {
   // Definisci le route POST qui
-  router.post("/Login", authenticateMiddleware, (req, res) => {
+  router.post("/Login", (req, res) => {
     AuthenticationController.login(req, res, db);
   });
 
-  router.post("/PasswordRecovery", authenticateMiddleware, (req, res) => {
+  router.post("/PasswordRecovery", (req, res) => {
     AuthenticationController.passwordRecovery(req, res, db);
   });
 
