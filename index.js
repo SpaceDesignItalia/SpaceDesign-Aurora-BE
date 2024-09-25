@@ -14,6 +14,7 @@ const createCustomerRoutes = require("./Routes/Customer/Customer");
 const createProjectRoutes = require("./Routes/Project/Project");
 const createChatRoutes = require("./Routes/Chat/Chat");
 const createTicketRoutes = require("./Routes/Ticket/Ticket");
+const createNotificationRoutes = require("./Routes/Notification/Notification");
 
 const app = express();
 app.use(express.static("public"));
@@ -54,6 +55,7 @@ app.use(PREFIX + "/Customer", createCustomerRoutes(db));
 app.use(PREFIX + "/Chat", createChatRoutes(db));
 app.use(PREFIX + "/Project", createProjectRoutes(db));
 app.use(PREFIX + "/Ticket", createTicketRoutes(db));
+app.use(PREFIX + "/Notification", createNotificationRoutes(db));
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);

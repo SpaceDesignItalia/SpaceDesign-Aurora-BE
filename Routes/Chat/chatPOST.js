@@ -2,11 +2,12 @@
 const express = require("express");
 const router = express.Router();
 const ChatController = require("../../Controllers/ChatController");
+const authMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
 
 const chatPOST = (db) => {
   // Definisci le route GET qui
 
-  router.post("/sendMessage", (req, res) => {
+  router.post("/sendMessage", authMiddleware, (req, res) => {
     ChatController.sendMessage(req, res, db);
   });
 

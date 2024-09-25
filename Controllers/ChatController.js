@@ -1,11 +1,11 @@
 // controller/PermissionController.js
 const Chat = require("../Models/ChatModel");
+const NotifyMiddelware = require("../Middlewares/Notification/NotifyMiddelware");
 
 class ChatController {
   static async getConversationByStafferId(req, res, db) {
     try {
       const StafferId = req.query.StafferId;
-      console.log("StafferId", StafferId);
       const conversations = await Chat.getConversationByStafferId(
         db,
         StafferId
@@ -34,7 +34,18 @@ class ChatController {
   static async sendMessage(req, res, db) {
     try {
       const { ConversationId, StafferSenderId, Text } = req.body;
-      await Chat.sendMessage(db, ConversationId, StafferSenderId, Text);
+      const UserId = req.session.account.StafferId;
+      await Chat.sendMessage(db, ConversationId, StafferSenderId, Text).then(
+        () => {
+          NotifyMiddelware.MessageNotification(
+            db,
+            ConversationId,
+            StafferSenderId,
+            Text,
+            UserId
+          );
+        }
+      );
       res.status(200).send("Messaggio inviato con successo");
     } catch (error) {
       console.error("Errore nell'invio del messaggio", error);
@@ -57,9 +68,6 @@ class ChatController {
     try {
       const Staffer1Id = req.query.Staffer1Id;
       const Staffer2Id = req.query.Staffer2Id;
-
-      console.log("Staffer1Id", Staffer1Id);
-      console.log("Staffer2Id", Staffer2Id);
 
       const messages = await Chat.getConversationByStaffersId(
         db,
@@ -100,7 +108,6 @@ class ChatController {
         Staffer1Id,
         Staffer2Id
       );
-      console.log("conversationId", conversationId);
       res.status(200).send(conversationId);
     } catch (error) {
       console.error("Errore nella creazione della conversazione", error);
