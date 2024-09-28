@@ -18,6 +18,30 @@ class NotificationModel {
       });
     });
   }
+
+  static deleteNotification(notificationId, userId, db) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."NotificationExtraData" WHERE "NotificationId" = $1 AND "UserId" = $2`;
+      db.query(query, [notificationId, userId], (err) => {
+        if (err) {
+          reject(err);
+        }
+        resolve();
+      });
+    });
+  }
+
+  static async readNotification(notificationId, userId, db) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."NotificationExtraData" SET "IsRead" = TRUE WHERE "NotificationId" = $1 AND "UserId" = $2`;
+      db.query(query, [notificationId, userId], (err) => {
+        if (err) {
+          reject(err);
+        }
+        resolve();
+      });
+    });
+  }
 }
 
 module.exports = NotificationModel;

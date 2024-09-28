@@ -4,8 +4,9 @@ const cors = require("cors");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const http = require("http");
+const createSocketServer = require("./socket"); // Import the socket module
 
-//Main Routes declaration
+// Main Routes declaration
 const createAuthenticationRoutes = require("./Routes/Authentication/Authentication");
 const createStafferRoutes = require("./Routes/Staffer/Staffer");
 const createPermissionRoutes = require("./Routes/Permission/Permission");
@@ -22,7 +23,6 @@ const PREFIX = "/API/v1";
 const PORT = 3000;
 
 const db = require("./configs/Database");
-const { Server } = require("socket.io");
 
 app.use(
   cors({
@@ -46,7 +46,7 @@ app.use(cookieParser());
 
 const server = http.createServer(app);
 
-//Main routes
+// Main routes
 app.use(PREFIX + "/Authentication", createAuthenticationRoutes(db));
 app.use(PREFIX + "/Staffer", createStafferRoutes(db));
 app.use(PREFIX + "/Permission", createPermissionRoutes(db));
@@ -57,35 +57,11 @@ app.use(PREFIX + "/Project", createProjectRoutes(db));
 app.use(PREFIX + "/Ticket", createTicketRoutes(db));
 app.use(PREFIX + "/Notification", createNotificationRoutes(db));
 
+// Initialize Socket.IO
+const io = createSocketServer(server);
+
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
 
-const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-
-io.on("connection", async (socket) => {
-  socket.on("join", async (conversationId) => {
-    socket.join(conversationId);
-  });
-
-  socket.on("message", async (conversationId) => {
-    io.to(conversationId).emit("message-update", conversationId);
-  });
-
-  socket.on("task-news", async (ProjectId) => {
-    io.to(ProjectId).emit("task-update", ProjectId);
-  });
-
-  socket.on("file-update", async (ProjectId) => {
-    console.log("file-update", ProjectId);
-    io.to(ProjectId).emit("file-update", ProjectId);
-  });
-
-  socket.on("disconnect", () => {});
-});
+module.exports = server;

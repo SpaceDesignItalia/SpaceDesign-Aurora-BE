@@ -1,3 +1,5 @@
+const createSocketServer = require("../../socket");
+
 class NotifyMiddleware {
   static async MessageNotification(
     db,
@@ -26,8 +28,8 @@ class NotifyMiddleware {
       let notificationExtraDataQuery;
 
       if (ProjectId) {
-        query = `SELECT "StafferId" FROM public."ProjectTeam" WHERE "ProjectId" = $1`;
-        const ProjectTeam = await db.query(query, [ProjectId]);
+        query = `SELECT "StafferId" FROM public."ProjectTeam" WHERE "ProjectId" = $1 AND "StafferId" != $2`;
+        const ProjectTeam = await db.query(query, [ProjectId, StafferSenderId]);
         ProjectTeam.rows.forEach(async (projectStaffer) => {
           if (projectStaffer.StafferId !== userId) {
             query = `INSERT INTO public."NotificationExtraData" ("NotificationId", "UserId", "IsRead") VALUES ($1, $2, $3)`;
@@ -59,8 +61,7 @@ class NotifyMiddleware {
 
       // Esegui tutte le query in parallelo
       await Promise.all([notificationExtraDataQuery, notificationInfoQuery]);
-      console.log("Notifica inviata con successo");
-
+      createSocketServer.sendNotification(userId); // Invia la notifica al destinatario
       // Risolvi la promessa finale
       return { success: true };
     } catch (error) {
