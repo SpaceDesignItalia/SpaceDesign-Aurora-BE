@@ -758,9 +758,22 @@ class ProjectModel {
 
   static getProjectInTeam(db, StafferId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "ProjectId", "ProjectName", "CompanyName" FROM public."ProjectTeam" 
-      INNER JOIN public."Project" USING("ProjectId") 
-      INNER JOIN public."Company" USING("CompanyId") WHERE "StafferId" = $1`;
+      const query = `SELECT public."Project"."ProjectId", 
+       public."Project"."ProjectName", 
+       public."Company"."CompanyName", 
+       COUNT(public."NotificationInfo"."NotificationId") AS "NotificationCount"
+        FROM public."ProjectTeam" 
+        INNER JOIN public."Project" USING("ProjectId") 
+        INNER JOIN public."Company" USING("CompanyId") 
+        LEFT JOIN public."NotificationExtraData" ON public."ProjectTeam"."StafferId" = public."NotificationExtraData"."UserId"
+        LEFT JOIN public."NotificationInfo" ON public."NotificationExtraData"."NotificationId" = public."NotificationInfo"."NotificationId" 
+              AND public."NotificationInfo"."ProjectId" = public."Project"."ProjectId"
+        WHERE public."ProjectTeam"."StafferId" = $1
+        GROUP BY public."Project"."ProjectId", 
+                public."Project"."ProjectName", 
+                public."Company"."CompanyName",
+            public."NotificationExtraData"."IsRead"
+        HAVING (public."NotificationExtraData"."IsRead" = false OR COUNT(public."NotificationInfo"."NotificationId") = 0);`;
 
       db.query(query, [StafferId], (error, result) => {
         if (error) {
