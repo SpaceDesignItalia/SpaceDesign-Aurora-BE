@@ -129,11 +129,11 @@ class CustomerController {
         return res.status(401).send("Password errata.");
       }
 
-      /* EmailService.sendPasswordChangedMail(
+      EmailService.sendPasswordChangedMail(
         customer.CustomerEmail,
         customer.CustomerName,
         customer.CustomerSurname
-      ); */
+      );
 
       res.status(200).send("Password modificata con successo.");
     } catch (error) {

@@ -1,6 +1,17 @@
 // db.js
 const { Pool } = require("pg");
 
+<<<<<<< HEAD
+=======
+const db = new Pool({
+  user: "spacedesigndev",
+  host: "lab.spacedesign-italia.it",
+  database: "SpaceDesignAurora-Development",
+  password: "imusRbRLPsStwgZa",
+});
+
+/*
+>>>>>>> Notification
 const db = new Pool({
   user: "spacedesigndev",
   host: "lab.spacedesign-italia.it",

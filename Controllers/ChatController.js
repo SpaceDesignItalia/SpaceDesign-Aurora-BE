@@ -1,11 +1,15 @@
 // controller/PermissionController.js
 const Chat = require("../Models/ChatModel");
+const NotifyMiddelware = require("../Middlewares/Notification/NotifyMiddelware");
 
 class ChatController {
   static async getConversationByStafferId(req, res, db) {
     try {
       const StafferId = req.query.StafferId;
+<<<<<<< HEAD
 
+=======
+>>>>>>> Notification
       const conversations = await Chat.getConversationByStafferId(
         db,
         StafferId
@@ -34,7 +38,18 @@ class ChatController {
   static async sendMessage(req, res, db) {
     try {
       const { ConversationId, StafferSenderId, Text } = req.body;
-      await Chat.sendMessage(db, ConversationId, StafferSenderId, Text);
+      const UserId = req.session.account.StafferId;
+      await Chat.sendMessage(db, ConversationId, StafferSenderId, Text).then(
+        () => {
+          NotifyMiddelware.MessageNotification(
+            db,
+            ConversationId,
+            StafferSenderId,
+            Text,
+            UserId
+          );
+        }
+      );
       res.status(200).send("Messaggio inviato con successo");
     } catch (error) {
       console.error("Errore nell'invio del messaggio", error);
