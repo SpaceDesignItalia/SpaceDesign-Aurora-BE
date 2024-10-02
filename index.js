@@ -14,6 +14,7 @@ const createCustomerRoutes = require("./Routes/Customer/Customer");
 const createProjectRoutes = require("./Routes/Project/Project");
 const createChatRoutes = require("./Routes/Chat/Chat");
 const createTicketRoutes = require("./Routes/Ticket/Ticket");
+const createLeadRoutes = require("./Routes/Lead/Lead");
 
 const app = express();
 app.use(express.static("public"));
@@ -22,6 +23,7 @@ const PORT = 3000;
 
 const db = require("./configs/Database");
 const { Server } = require("socket.io");
+const { create } = require("domain");
 
 app.use(
   cors({
@@ -54,6 +56,7 @@ app.use(PREFIX + "/Customer", createCustomerRoutes(db));
 app.use(PREFIX + "/Chat", createChatRoutes(db));
 app.use(PREFIX + "/Project", createProjectRoutes(db));
 app.use(PREFIX + "/Ticket", createTicketRoutes(db));
+app.use(PREFIX + "/Lead", createLeadRoutes(db));
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
