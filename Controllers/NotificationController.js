@@ -38,6 +38,27 @@ class NotificationController {
       console.error(err);
     }
   }
+
+  static async deleteConversationNotifications(db, req, res) {
+    const StafferId = req.query.StafferId;
+    const UserId = req.query.UserId;
+    console.log(StafferId, UserId);
+    try {
+      await NotificationModel.deleteConversationNotifications(
+        StafferId,
+        UserId,
+        db
+      );
+      res
+        .status(200)
+        .send("Notifiche della conversazione eliminate con successo");
+    } catch (err) {
+      res
+        .status(500)
+        .send("Errore nell'eliminazione delle notifiche della conversazione");
+      console.error(err);
+    }
+  }
 }
 
 module.exports = NotificationController;

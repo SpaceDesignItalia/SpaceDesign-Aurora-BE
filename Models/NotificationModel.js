@@ -42,6 +42,22 @@ class NotificationModel {
       });
     });
   }
+
+  static async deleteConversationNotifications(StafferId, UserId, db) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."NotificationExtraData"
+        USING public."NotificationInfo"
+        WHERE public."NotificationExtraData"."NotificationId" = public."NotificationInfo"."NotificationId"
+        AND "StafferId" = $1 AND "UserId" = $2;
+        `;
+      db.query(query, [StafferId, UserId], (err) => {
+        if (err) {
+          reject(err);
+        }
+        resolve();
+      });
+    });
+  }
 }
 
 module.exports = NotificationModel;

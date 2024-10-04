@@ -8,6 +8,14 @@ const notificationDELETE = (db) => {
     NotificationController.deleteNotification(db, req, res);
   });
 
+  router.delete(
+    "/DeleteConversationNotifications",
+    authMiddleware,
+    (req, res) => {
+      NotificationController.deleteConversationNotifications(db, req, res);
+    }
+  );
+
   return router;
 };
 

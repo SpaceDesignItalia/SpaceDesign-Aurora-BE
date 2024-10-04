@@ -6,10 +6,6 @@ class ChatController {
   static async getConversationByStafferId(req, res, db) {
     try {
       const StafferId = req.query.StafferId;
-<<<<<<< HEAD
-
-=======
->>>>>>> Notification
       const conversations = await Chat.getConversationByStafferId(
         db,
         StafferId
