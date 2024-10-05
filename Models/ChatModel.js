@@ -2,24 +2,49 @@ class ChatModel {
   static getConversationByStafferId(db, StafferId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT 
-              public."Conversation"."ConversationId",
-              public."Conversation"."Staffer1Id",
-              public."Conversation"."Staffer2Id",
-              staffer1."StafferImageUrl" AS "Staffer1ImageUrl",
-              staffer2."StafferImageUrl" AS "Staffer2ImageUrl",
-              CONCAT(staffer1."StafferName", ' ', staffer1."StafferSurname") AS "Staffer1FullName",
-              CONCAT(staffer2."StafferName", ' ', staffer2."StafferSurname") AS "Staffer2FullName"
-          FROM 
-              public."Conversation"
-          INNER JOIN 
-              public."Staffer" AS staffer1 ON public."Conversation"."Staffer1Id" = staffer1."StafferId"
-          LEFT JOIN 
-              public."Staffer" AS staffer2 ON public."Conversation"."Staffer2Id" = staffer2."StafferId"
-          WHERE 
-              "Staffer1Id" = $1 OR "Staffer2Id" = $1 
-          ORDER BY 
-              "ConversationId" DESC;
-          `;
+            public."Conversation"."ConversationId",
+            public."Conversation"."Staffer1Id",
+            public."Conversation"."Staffer2Id",
+            staffer1."StafferImageUrl" AS "Staffer1ImageUrl",
+            staffer2."StafferImageUrl" AS "Staffer2ImageUrl",
+            CONCAT(staffer1."StafferName", ' ', staffer1."StafferSurname") AS "Staffer1FullName",
+            CONCAT(staffer2."StafferName", ' ', staffer2."StafferSurname") AS "Staffer2FullName",
+            COALESCE(SUM(
+                CASE 
+                    WHEN extra."UserId" = $1 
+                    AND (
+                        (notification."StafferId" = public."Conversation"."Staffer1Id" AND public."Conversation"."Staffer2Id" = $1)
+                        OR (notification."StafferId" = public."Conversation"."Staffer2Id" AND public."Conversation"."Staffer1Id" = $1)
+                    )
+                    THEN 1 
+                    ELSE 0 
+                END
+            ), 0) AS "notificationCount"
+        FROM 
+            public."Conversation"
+        INNER JOIN 
+            public."Staffer" AS staffer1 ON public."Conversation"."Staffer1Id" = staffer1."StafferId"
+        LEFT JOIN 
+            public."Staffer" AS staffer2 ON public."Conversation"."Staffer2Id" = staffer2."StafferId"
+        LEFT JOIN 
+            public."NotificationInfo" AS notification ON 
+                (notification."StafferId" = public."Conversation"."Staffer1Id"
+                OR notification."StafferId" = public."Conversation"."Staffer2Id")
+        LEFT JOIN 
+            public."NotificationExtraData" AS extra ON notification."NotificationId" = extra."NotificationId"
+        WHERE 
+            (public."Conversation"."Staffer1Id" = $1 OR public."Conversation"."Staffer2Id" = $1)
+            AND (notification."NotificationTypeName" = 'Dipendente' OR notification."NotificationId" IS NULL)
+        GROUP BY 
+            public."Conversation"."ConversationId", 
+            staffer1."StafferName", 
+            staffer1."StafferSurname", 
+            staffer1."StafferImageUrl", 
+            staffer2."StafferName", 
+            staffer2."StafferSurname", 
+            staffer2."StafferImageUrl"
+        ORDER BY 
+            public."Conversation"."ConversationId" DESC;`;
 
       db.query(query, [StafferId], (error, result) => {
         if (error) {
