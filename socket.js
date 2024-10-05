@@ -33,7 +33,6 @@ const createSocketServer = (httpServer) => {
     });
 
     socket.on("delete-notifications", (userId) => {
-      console.log("newNotification");
       io.to(userId).emit("delete-notifications");
     });
 

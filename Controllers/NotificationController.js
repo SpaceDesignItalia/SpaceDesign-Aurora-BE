@@ -42,7 +42,6 @@ class NotificationController {
   static async deleteConversationNotifications(db, req, res) {
     const StafferId = req.query.StafferId;
     const UserId = req.query.UserId;
-    console.log(StafferId, UserId);
     try {
       await NotificationModel.deleteConversationNotifications(
         StafferId,
