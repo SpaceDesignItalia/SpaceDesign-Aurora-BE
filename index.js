@@ -16,6 +16,7 @@ const createProjectRoutes = require("./Routes/Project/Project");
 const createChatRoutes = require("./Routes/Chat/Chat");
 const createTicketRoutes = require("./Routes/Ticket/Ticket");
 const createNotificationRoutes = require("./Routes/Notification/Notification");
+const createLeadRoutes = require("./Routes/Lead/Lead");
 
 const app = express();
 app.use(express.static("public"));
@@ -56,6 +57,7 @@ app.use(PREFIX + "/Chat", createChatRoutes(db));
 app.use(PREFIX + "/Project", createProjectRoutes(db));
 app.use(PREFIX + "/Ticket", createTicketRoutes(db));
 app.use(PREFIX + "/Notification", createNotificationRoutes(db));
+app.use(PREFIX + "/Lead", createLeadRoutes(db));
 
 // Initialize Socket.IO
 const io = createSocketServer(server);
