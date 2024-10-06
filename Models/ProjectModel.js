@@ -339,7 +339,7 @@ class ProjectModel {
     });
   }
 
-  static createProjectConversation(db, ProjectId, ProjectManagerId, CompanyId) {
+  static createProjectConversation(db, ProjectId, ProjectManagerId) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Conversation"("ProjectId") VALUES ($1);`;
 
@@ -347,7 +347,7 @@ class ProjectModel {
         if (error) {
           reject(error);
         } else {
-          const query = `INSERT INTO public."Conversation"("Staffer1Id", "ProjectId", "CompanyId") VALUES ($1, $2, $3) RETURNING *`;
+          const query = `INSERT INTO public."Conversation"("Staffer1Id", "ProjectId") VALUES ($1, $2) RETURNING *`;
           db.query(
             query,
             [ProjectManagerId, ProjectId, CompanyId],
