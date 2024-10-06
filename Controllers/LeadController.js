@@ -26,8 +26,7 @@ class LeadController {
   }
 
   static async searchLeadByCompany(req, res, db) {
-    const { Company } = req.query;
-
+    const company = req.query.Company;
     try {
       const leads = await Lead.searchLeadByCompany(db, Company);
       res.status(200).json(leads);
