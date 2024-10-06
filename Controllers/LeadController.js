@@ -28,7 +28,7 @@ class LeadController {
   static async searchLeadByCompany(req, res, db) {
     const company = req.query.Company;
     try {
-      const leads = await Lead.searchLeadByCompany(db, Company);
+      const leads = await Lead.searchLeadByCompany(db, company);
       res.status(200).json(leads);
     } catch (error) {
       console.error("Errore nella ricerca del lead:", error);
