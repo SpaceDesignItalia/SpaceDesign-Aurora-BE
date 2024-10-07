@@ -668,14 +668,15 @@ class ProjectModel {
     });
   }
 
-  static updateTask(db, TaskData, FormattedDate) {
+  static updateTask(db, TaskData, FormattedDate, FormattedCreationDate) {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE public."ProjectTask" SET "ProjectTaskName" = $1, "ProjectTaskDescription" = $2, "ProjectTaskExpiration" = $3 WHERE "ProjectTaskId" = $4`;
+      const query = `UPDATE public."ProjectTask" SET "ProjectTaskName" = $1, "ProjectTaskDescription" = $2, "ProjectTaskExpiration" = $3, "ProjectTaskCreation"= $4 WHERE "ProjectTaskId" = $5`;
 
       const values = [
         TaskData.ProjectTaskName,
         TaskData.ProjectTaskDescription,
         FormattedDate,
+        FormattedCreationDate,
         TaskData.ProjectTaskId,
       ];
 
@@ -789,15 +790,16 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
     });
   }
 
-  static addTask(db, TaskData, FormattedDate) {
+  static addTask(db, TaskData, FormattedDate, FormattedCreationDate) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectId")
-      VALUES ($1, $2, $3, $4) RETURNING *`;
+      const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectTaskCreation", "ProjectId")
+      VALUES ($1, $2, $3, $4, $5) RETURNING *`;
 
       const values = [
         TaskData.ProjectTaskName,
         TaskData.ProjectTaskDescription,
         FormattedDate,
+        FormattedCreationDate,
         TaskData.ProjectId,
       ];
 

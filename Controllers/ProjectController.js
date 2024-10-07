@@ -441,7 +441,13 @@ class ProjectController {
     try {
       const TaskData = req.body.TaskData;
       const FormattedDate = req.body.FormattedDate;
-      await Project.updateTask(db, TaskData, FormattedDate);
+      const FormattedCreationDate = req.body.FormattedCreationDate;
+      await Project.updateTask(
+        db,
+        TaskData,
+        FormattedDate,
+        FormattedCreationDate
+      );
       this.addMemberToTask(TaskData, TaskData.ProjectTaskId, db);
       this.addTagToTask(TaskData, TaskData.ProjectTaskId, db);
       res.status(200).send("Task aggiornato con successo.");
@@ -514,7 +520,13 @@ class ProjectController {
     try {
       const TaskData = req.body.TaskData;
       const FormattedDate = req.body.FormattedDate;
-      const Task = await Project.addTask(db, TaskData, FormattedDate);
+      const FormattedCreationDate = req.body.FormattedCreationDate;
+      const Task = await Project.addTask(
+        db,
+        TaskData,
+        FormattedDate,
+        FormattedCreationDate
+      );
       this.addMemberToTask(TaskData, Task.ProjectTaskId, db);
       this.addTagToTask(TaskData, Task.ProjectTaskId, db);
       res.status(200).json(Task.ProjectTaskId);
