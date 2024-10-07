@@ -35,6 +35,17 @@ class TicketController {
       res.status(500).send("Creazione del ticket fallita");
     }
   }
+
+  static async updateTicketStatus(req, res, db) {
+    try {
+      const { ProjectTicketId, TicketStatusId } = req.body; // Assuming IDs are passed in the request body
+      await Ticket.updateTicketStatus(db, ProjectTicketId, TicketStatusId);
+      res.status(200).send("Ticket status updated successfully");
+    } catch (error) {
+      console.error("Error updating ticket status:", error);
+      res.status(500).send("Failed to update ticket status");
+    }
+  }
 }
 
 module.exports = TicketController;
