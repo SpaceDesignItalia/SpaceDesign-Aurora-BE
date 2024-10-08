@@ -52,6 +52,23 @@ class TicketModel {
       });
     });
   }
+
+  static updateTicketStatus(db, ProjectTicketId, TicketStatusId) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTicket"
+                     SET "TicketStatusId" = $1
+                     WHERE "ProjectTicketId" = $2`;
+
+      const values = [TicketStatusId, ProjectTicketId];
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
 }
 
 module.exports = TicketModel;
