@@ -542,6 +542,22 @@ class ProjectModel {
     });
   }
 
+  static getCommentsByTaskId(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectTaskCommentId", "StafferId", "CommentDate", "Text", "StafferImageUrl", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName" FROM public."ProjectTaskComment" 
+      INNER JOIN public."Staffer" USING("StafferId")
+      WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static getMembersNotInTask(db, TaskData) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "StafferImageUrl" FROM public."Staffer" 
@@ -974,6 +990,32 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
           reject(error);
         } else {
           resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async addTaskComment(db, Comment, TaskId, StafferId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskComment"("ProjectTaskId", "StafferId", "Text") VALUES ($1, $2, $3) RETURNING *`;
+      db.query(query, [TaskId, StafferId, Comment], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async deleteTaskComment(db, CommentId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskComment" WHERE "ProjectTaskCommentId" = $1`;
+      db.query(query, [CommentId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
         }
       });
     });

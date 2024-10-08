@@ -356,6 +356,17 @@ class ProjectController {
     }
   }
 
+  static async getCommentsByTaskId(req, res, db) {
+    try {
+      const ProjectTaskId = req.query.ProjectTaskId;
+      const comments = await Project.getCommentsByTaskId(db, ProjectTaskId);
+      res.status(200).json(comments);
+    } catch (error) {
+      console.error("Errore nel recupero dei commenti del task:", error);
+      res.status(500).send("Recupero dei commenti del task fallito");
+    }
+  }
+
   static async getMembersNotInTask(req, res, db) {
     try {
       const TaskData = req.query.TaskData;
@@ -701,6 +712,31 @@ class ProjectController {
     } catch (error) {
       console.error("Error getting files:", error);
       res.status(500).send("File retrieval failed");
+    }
+  }
+
+  static async addTaskComment(req, res, db) {
+    try {
+      const Comment = req.body.Comment;
+      const TaskId = req.body.TaskId;
+      const StafferId = req.session.account.StafferId;
+
+      await Project.addTaskComment(db, Comment, TaskId, StafferId);
+      res.status(200).send("Commento aggiunto con successo.");
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      res.status(500).send("Comment addition failed");
+    }
+  }
+
+  static async deleteTaskComment(req, res, db) {
+    try {
+      const CommentId = req.body.CommentId;
+      await Project.deleteTaskComment(db, CommentId);
+      res.status(200).send("Commento eliminato con successo.");
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      res.status(500).send("Comment deletion failed");
     }
   }
 }

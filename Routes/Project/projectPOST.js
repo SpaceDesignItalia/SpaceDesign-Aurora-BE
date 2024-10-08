@@ -67,6 +67,10 @@ const projectPOST = (db) => {
     ProjectController.uploadFiles(req, res, db);
   });
 
+  router.post("/AddTaskComment", authenticateMiddleware, (req, res) => {
+    ProjectController.addTaskComment(req, res, db);
+  });
+
   return router;
 };
 

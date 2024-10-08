@@ -41,6 +41,10 @@ const projectDELETE = (db) => {
     ProjectController.removeFile(req, res, db);
   });
 
+  router.delete("/DeleteTaskComment", authenticateMiddleware, (req, res) => {
+    ProjectController.deleteTaskComment(req, res, db);
+  });
+
   return router;
 };
 

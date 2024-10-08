@@ -103,6 +103,10 @@ const projectGET = (db) => {
     ProjectController.getMembersByTaskId(req, res, db);
   });
 
+  router.get("/GetCommentsByTaskId", authenticateMiddleware, (req, res) => {
+    ProjectController.getCommentsByTaskId(req, res, db);
+  });
+
   router.get("/GetMembersNotInTask", authenticateMiddleware, (req, res) => {
     ProjectController.getMembersNotInTask(req, res, db);
   });
