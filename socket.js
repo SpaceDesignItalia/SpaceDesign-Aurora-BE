@@ -1,5 +1,4 @@
 // socket.js
-const http = require("http");
 const { Server } = require("socket.io");
 
 const createSocketServer = (httpServer) => {

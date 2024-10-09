@@ -25,6 +25,7 @@ const PORT = 3000;
 
 const db = require("./configs/Database");
 
+// Setup CORS
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
@@ -32,6 +33,7 @@ app.use(
   })
 );
 
+// Middleware
 app.use(bodyParser.json());
 app.use(
   session({
@@ -45,7 +47,11 @@ app.use(
 );
 app.use(cookieParser());
 
+// Create HTTP server
 const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = createSocketServer(server); // Correct socket server initialization
 
 // Main routes
 app.use(PREFIX + "/Authentication", createAuthenticationRoutes(db));
@@ -59,9 +65,7 @@ app.use(PREFIX + "/Ticket", createTicketRoutes(db));
 app.use(PREFIX + "/Notification", createNotificationRoutes(db));
 app.use(PREFIX + "/Lead", createLeadRoutes(db));
 
-// Initialize Socket.IO
-const io = createSocketServer(server);
-
+// Start the server
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
