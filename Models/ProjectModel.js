@@ -546,7 +546,8 @@ class ProjectModel {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectTaskCommentId", "StafferId", "CommentDate", "Text", "StafferImageUrl", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName" FROM public."ProjectTaskComment" 
       INNER JOIN public."Staffer" USING("StafferId")
-      WHERE "ProjectTaskId" = $1`;
+      WHERE "ProjectTaskId" = $1
+      ORDER BY "ProjectTaskCommentId" DESC`;
 
       db.query(query, [ProjectTaskId], (error, result) => {
         if (error) {
