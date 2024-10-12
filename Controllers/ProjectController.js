@@ -803,6 +803,28 @@ class ProjectController {
       res.status(500).send("Checklist addition failed");
     }
   }
+
+  static async deleteTaskChecklist(req, res, db) {
+    try {
+      const ChecklistId = req.body.ChecklistId;
+      await Project.deleteTaskChecklist(db, ChecklistId);
+      res.status(200).send("Checklist eliminata con successo.");
+    } catch (error) {
+      console.error("Error deleting checklist:", error);
+      res.status(500).send("Checklist deletion failed");
+    }
+  }
+
+  static async deleteTaskCheckbox(req, res, db) {
+    try {
+      const CheckboxId = req.body.CheckboxId;
+      await Project.deleteTaskCheckbox(db, CheckboxId);
+      res.status(200).send("Checkbox eliminata con successo.");
+    } catch (error) {
+      console.error("Error deleting checkbox:", error);
+      res.status(500).send("Checkbox deletion failed");
+    }
+  }
 }
 
 module.exports = ProjectController;

@@ -1086,6 +1086,32 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
       });
     });
   }
+
+  static async deleteTaskChecklist(db, ChecklistId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskChecklist" WHERE "ChecklistId" = $1`;
+      db.query(query, [ChecklistId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async deleteTaskCheckbox(db, CheckboxId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskCheckbox" WHERE "CheckboxId" = $1`;
+      db.query(query, [CheckboxId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;
