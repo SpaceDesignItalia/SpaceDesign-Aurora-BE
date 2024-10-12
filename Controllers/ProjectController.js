@@ -739,6 +739,43 @@ class ProjectController {
       res.status(500).send("Comment deletion failed");
     }
   }
+
+  static async addTaskCheckbox(req, res, db) {
+    try {
+      const CheckboxText = req.body.CheckboxText;
+      const TaskId = req.body.TaskId;
+
+      await Project.addTaskCheckbox(db, CheckboxText, TaskId);
+      res.status(200).send("Checkbox aggiunto con successo.");
+    } catch (error) {
+      console.error("Error adding checkbox:", error);
+      res.status(500).send("Checkbox addition failed");
+    }
+  }
+
+  static async getCheckboxesByTaskId(req, res, db) {
+    try {
+      const TaskId = req.query.TaskId;
+      const checkboxes = await Project.getCheckboxesByTaskId(db, TaskId);
+      res.status(200).json(checkboxes);
+    } catch (error) {
+      console.error("Error getting checkboxes:", error);
+      res.status(500).send("Checkbox retrieval failed");
+    }
+  }
+
+  static async updateCheckboxStatus(req, res, db) {
+    try {
+      const CheckboxId = req.body.CheckboxId;
+      const isSelected = req.body.isSelected;
+
+      await Project.updateCheckboxStatus(db, CheckboxId, isSelected);
+      res.status(200).send("Stato della checkbox aggiornato con successo.");
+    } catch (error) {
+      console.error("Error updating checkbox status:", error);
+      res.status(500).send("Checkbox status update failed");
+    }
+  }
 }
 
 module.exports = ProjectController;

@@ -1021,6 +1021,47 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
       });
     });
   }
+
+  static async addTaskCheckbox(db, CheckboxText, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskCheckbox"("ProjectTaskId", "Text") VALUES ($1, $2) RETURNING *`;
+      db.query(query, [TaskId, CheckboxText], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async getCheckboxesByTaskId(db, TaskId) {
+    console.log(TaskId);
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskCheckbox" WHERE "ProjectTaskId" = $1`;
+      db.query(query, [TaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          console.log(result.rows);
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async updateCheckboxStatus(db, CheckboxId, isSelected) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTaskCheckbox" SET "IsSelected" = $1 WHERE "CheckboxId" = $2`;
+      db.query(query, [isSelected, CheckboxId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

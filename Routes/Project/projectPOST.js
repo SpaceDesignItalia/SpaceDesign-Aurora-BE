@@ -71,6 +71,10 @@ const projectPOST = (db) => {
     ProjectController.addTaskComment(req, res, db);
   });
 
+  router.post("/AddTaskCheckbox", authenticateMiddleware, (req, res) => {
+    ProjectController.addTaskCheckbox(req, res, db);
+  });
+
   return router;
 };
 
