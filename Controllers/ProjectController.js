@@ -743,9 +743,9 @@ class ProjectController {
   static async addTaskCheckbox(req, res, db) {
     try {
       const CheckboxText = req.body.CheckboxText;
-      const TaskId = req.body.TaskId;
+      const ChecklistId = req.body.ChecklistId;
 
-      await Project.addTaskCheckbox(db, CheckboxText, TaskId);
+      await Project.addTaskCheckbox(db, CheckboxText, ChecklistId);
       res.status(200).send("Checkbox aggiunto con successo.");
     } catch (error) {
       console.error("Error adding checkbox:", error);
@@ -753,10 +753,13 @@ class ProjectController {
     }
   }
 
-  static async getCheckboxesByTaskId(req, res, db) {
+  static async getCheckboxesByChecklistId(req, res, db) {
     try {
-      const TaskId = req.query.TaskId;
-      const checkboxes = await Project.getCheckboxesByTaskId(db, TaskId);
+      const ChecklistId = req.query.ChecklistId;
+      const checkboxes = await Project.getCheckboxesByChecklistId(
+        db,
+        ChecklistId
+      );
       res.status(200).json(checkboxes);
     } catch (error) {
       console.error("Error getting checkboxes:", error);
@@ -774,6 +777,30 @@ class ProjectController {
     } catch (error) {
       console.error("Error updating checkbox status:", error);
       res.status(500).send("Checkbox status update failed");
+    }
+  }
+
+  static async getChecklistsByTaskId(req, res, db) {
+    try {
+      const TaskId = req.query.TaskId;
+      const checklists = await Project.getChecklistsByTaskId(db, TaskId);
+      res.status(200).json(checklists);
+    } catch (error) {
+      console.error("Error getting checklists:", error);
+      res.status(500).send("Checklist retrieval failed");
+    }
+  }
+
+  static async addTaskChecklist(req, res, db) {
+    try {
+      const ChecklistText = req.body.ChecklistText;
+      const TaskId = req.body.TaskId;
+
+      await Project.addTaskChecklist(db, ChecklistText, TaskId);
+      res.status(200).send("Checklist aggiunta con successo.");
+    } catch (error) {
+      console.error("Error adding checklist:", error);
+      res.status(500).send("Checklist addition failed");
     }
   }
 }

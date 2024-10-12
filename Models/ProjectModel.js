@@ -1022,10 +1022,10 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
     });
   }
 
-  static async addTaskCheckbox(db, CheckboxText, TaskId) {
+  static async addTaskCheckbox(db, CheckboxText, ChecklistId) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."ProjectTaskCheckbox"("ProjectTaskId", "Text") VALUES ($1, $2) RETURNING *`;
-      db.query(query, [TaskId, CheckboxText], (error, result) => {
+      const query = `INSERT INTO public."ProjectTaskCheckbox"("ChecklistId", "Text") VALUES ($1, $2) RETURNING *`;
+      db.query(query, [ChecklistId, CheckboxText], (error, result) => {
         if (error) {
           reject(error);
         } else {
@@ -1035,15 +1035,13 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
     });
   }
 
-  static async getCheckboxesByTaskId(db, TaskId) {
-    console.log(TaskId);
+  static async getCheckboxesByChecklistId(db, ChecklistId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectTaskCheckbox" WHERE "ProjectTaskId" = $1`;
-      db.query(query, [TaskId], (error, result) => {
+      const query = `SELECT * FROM public."ProjectTaskCheckbox" WHERE "ChecklistId" = $1`;
+      db.query(query, [ChecklistId], (error, result) => {
         if (error) {
           reject(error);
         } else {
-          console.log(result.rows);
           resolve(result.rows);
         }
       });
@@ -1058,6 +1056,32 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
           reject(error);
         } else {
           resolve(result);
+        }
+      });
+    });
+  }
+
+  static async getChecklistsByTaskId(db, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskChecklist" WHERE "ProjectTaskId" = $1`;
+      db.query(query, [TaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async addTaskChecklist(db, ChecklistText, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskChecklist"("ProjectTaskId", "Text") VALUES ($1, $2) RETURNING *`;
+      db.query(query, [TaskId, ChecklistText], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
         }
       });
     });
