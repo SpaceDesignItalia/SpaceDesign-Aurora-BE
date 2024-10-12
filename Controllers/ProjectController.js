@@ -825,6 +825,19 @@ class ProjectController {
       res.status(500).send("Checkbox deletion failed");
     }
   }
+
+  static async updateCheckboxText(req, res, db) {
+    try {
+      const CheckboxId = req.body.CheckboxId;
+      const CheckboxText = req.body.CheckboxText;
+
+      await Project.updateCheckboxText(db, CheckboxId, CheckboxText);
+      res.status(200).send("Testo della checkbox aggiornato con successo.");
+    } catch (error) {
+      console.error("Error updating checkbox text:", error);
+      res.status(500).send("Checkbox text update failed");
+    }
+  }
 }
 
 module.exports = ProjectController;

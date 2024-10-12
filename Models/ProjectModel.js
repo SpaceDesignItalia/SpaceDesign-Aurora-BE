@@ -1112,6 +1112,19 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
       });
     });
   }
+
+  static async updateCheckboxText(db, CheckboxId, CheckboxText) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTaskCheckbox" SET "Text" = $1 WHERE "CheckboxId" = $2`;
+      db.query(query, [CheckboxText, CheckboxId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;
