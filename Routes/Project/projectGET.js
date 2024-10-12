@@ -179,6 +179,18 @@ const projectGET = (db) => {
     }
   );
 
+  router.get(
+    "/GetCheckboxesByChecklistId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getCheckboxesByChecklistId(req, res, db);
+    }
+  );
+
+  router.get("/GetChecklistsByTaskId", authenticateMiddleware, (req, res) => {
+    ProjectController.getChecklistsByTaskId(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

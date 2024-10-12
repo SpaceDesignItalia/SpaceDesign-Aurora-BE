@@ -1021,6 +1021,71 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
       });
     });
   }
+
+  static async addTaskCheckbox(db, CheckboxText, ChecklistId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskCheckbox"("ChecklistId", "Text") VALUES ($1, $2) RETURNING *`;
+      db.query(query, [ChecklistId, CheckboxText], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async getCheckboxesByChecklistId(db, ChecklistId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskCheckbox" WHERE "ChecklistId" = $1`;
+      db.query(query, [ChecklistId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async updateCheckboxStatus(db, CheckboxId, isSelected) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTaskCheckbox" SET "IsSelected" = $1 WHERE "CheckboxId" = $2`;
+      db.query(query, [isSelected, CheckboxId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async getChecklistsByTaskId(db, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskChecklist" WHERE "ProjectTaskId" = $1`;
+      db.query(query, [TaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async addTaskChecklist(db, ChecklistText, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskChecklist"("ProjectTaskId", "Text") VALUES ($1, $2) RETURNING *`;
+      db.query(query, [TaskId, ChecklistText], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

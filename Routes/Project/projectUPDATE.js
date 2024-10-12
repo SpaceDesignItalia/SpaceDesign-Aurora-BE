@@ -17,6 +17,10 @@ const projectUPDATE = (db) => {
   router.put("/UpdateProjectData", authenticateMiddleware, (req, res) => {
     ProjectController.updateProject(req, res, db);
   });
+
+  router.put("/UpdateCheckboxStatus", authenticateMiddleware, (req, res) => {
+    ProjectController.updateCheckboxStatus(req, res, db);
+  });
   return router;
 };
 
