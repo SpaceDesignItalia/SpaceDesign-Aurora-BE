@@ -1037,7 +1037,7 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
 
   static async getCheckboxesByChecklistId(db, ChecklistId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectTaskCheckbox" WHERE "ChecklistId" = $1`;
+      const query = `SELECT * FROM public."ProjectTaskCheckbox" WHERE "ChecklistId" = $1 ORDER BY "CheckboxId" ASC`;
       db.query(query, [ChecklistId], (error, result) => {
         if (error) {
           reject(error);
