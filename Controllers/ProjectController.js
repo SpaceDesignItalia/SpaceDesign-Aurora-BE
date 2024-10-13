@@ -803,6 +803,54 @@ class ProjectController {
       res.status(500).send("Checklist addition failed");
     }
   }
+
+  static async deleteTaskChecklist(req, res, db) {
+    try {
+      const ChecklistId = req.body.ChecklistId;
+      await Project.deleteTaskChecklist(db, ChecklistId);
+      res.status(200).send("Checklist eliminata con successo.");
+    } catch (error) {
+      console.error("Error deleting checklist:", error);
+      res.status(500).send("Checklist deletion failed");
+    }
+  }
+
+  static async deleteTaskCheckbox(req, res, db) {
+    try {
+      const CheckboxId = req.body.CheckboxId;
+      await Project.deleteTaskCheckbox(db, CheckboxId);
+      res.status(200).send("Checkbox eliminata con successo.");
+    } catch (error) {
+      console.error("Error deleting checkbox:", error);
+      res.status(500).send("Checkbox deletion failed");
+    }
+  }
+
+  static async updateCheckboxText(req, res, db) {
+    try {
+      const CheckboxId = req.body.CheckboxId;
+      const CheckboxText = req.body.CheckboxText;
+
+      await Project.updateCheckboxText(db, CheckboxId, CheckboxText);
+      res.status(200).send("Testo della checkbox aggiornato con successo.");
+    } catch (error) {
+      console.error("Error updating checkbox text:", error);
+      res.status(500).send("Checkbox text update failed");
+    }
+  }
+
+  static async updateComment(req, res, db) {
+    try {
+      const CommentId = req.body.CommentId;
+      const CommentText = req.body.CommentText;
+
+      await Project.updateComment(db, CommentId, CommentText);
+      res.status(200).send("Commento aggiornato con successo.");
+    } catch (error) {
+      console.error("Error updating comment:", error);
+      res.status(500).send("Comment update failed");
+    }
+  }
 }
 
 module.exports = ProjectController;
