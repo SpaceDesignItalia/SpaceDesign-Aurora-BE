@@ -1125,6 +1125,19 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
       });
     });
   }
+
+  static async updateComment(db, CommentId, CommentText) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTaskComment" SET "Text" = $1 WHERE "ProjectTaskCommentId" = $2`;
+      db.query(query, [CommentText, CommentId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

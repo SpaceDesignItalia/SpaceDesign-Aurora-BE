@@ -838,6 +838,19 @@ class ProjectController {
       res.status(500).send("Checkbox text update failed");
     }
   }
+
+  static async updateComment(req, res, db) {
+    try {
+      const CommentId = req.body.CommentId;
+      const CommentText = req.body.CommentText;
+
+      await Project.updateComment(db, CommentId, CommentText);
+      res.status(200).send("Commento aggiornato con successo.");
+    } catch (error) {
+      console.error("Error updating comment:", error);
+      res.status(500).send("Comment update failed");
+    }
+  }
 }
 
 module.exports = ProjectController;
