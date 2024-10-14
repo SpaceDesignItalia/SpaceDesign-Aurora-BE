@@ -18,7 +18,7 @@ class LeadModel {
     return new Promise((resolve, reject) => {
       const query = `
         SELECT 
-          TO_CHAR("CreatedAt", 'YYYY-MM-DD') AS month, 
+          TO_CHAR("CreatedAt", 'YYYY-MM') AS month, 
           COUNT(*) AS read_lead_count 
         FROM "ReadContact" 
         GROUP BY month 
@@ -36,7 +36,7 @@ class LeadModel {
   static getPendingLeadsByMonth(db) {
     return new Promise((resolve, reject) => {
       const query = `SELECT 
-          TO_CHAR("CreatedAt", 'YYYY-MM-DD') AS month, 
+          TO_CHAR("CreatedAt", 'YYYY-MM') AS month, 
           COUNT(*) AS unread_lead_count 
         FROM "Contact" 
         GROUP BY month 
