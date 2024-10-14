@@ -14,6 +14,42 @@ class LeadModel {
     });
   }
 
+  static getReadLeadsByMonth(db) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          TO_CHAR("CreatedAt", 'YYYY-MM-DD') AS month, 
+          COUNT(*) AS read_lead_count 
+        FROM "ReadContact" 
+        GROUP BY month 
+        ORDER BY month;
+      `;
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        }
+        resolve(result.rows);
+      });
+    });
+  }
+
+  static getPendingLeadsByMonth(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT 
+          TO_CHAR("CreatedAt", 'YYYY-MM-DD') AS month, 
+          COUNT(*) AS unread_lead_count 
+        FROM "Contact" 
+        GROUP BY month 
+        ORDER BY month;`;
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        }
+        resolve(result.rows);
+      });
+    });
+  }
+
   static getLeadById(db, id) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM "Contact" INNER JOIN "ContactObject" ON "Contact"."IdObject" = "ContactObject"."IdObject" 
@@ -43,6 +79,18 @@ class LeadModel {
   static getAllRanges(db) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "Range" FROM "ContactBudgetRange"`;
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        }
+        resolve(result.rows);
+      });
+    });
+  }
+
+  static getReadLeads(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM "ReadContact"`;
       db.query(query, (error, result) => {
         if (error) {
           reject(error);
@@ -110,7 +158,7 @@ class LeadModel {
               return reject(err);
             }
 
-            resolve(result.rows[0]); // Restituisci i dati inseriti
+            resolve(result.rows[0]);
           });
         });
       });
@@ -119,12 +167,40 @@ class LeadModel {
 
   static async deleteLead(db, id) {
     return new Promise((resolve, reject) => {
-      const query = `DELETE FROM "Contact" WHERE "IdContact" = $1`;
-      db.query(query, [id], (error, result) => {
+      const getQuery = `SELECT * FROM "Contact" WHERE "IdContact" = $1`;
+      const readContactQuery = `INSERT INTO "ReadContact" ("IdContact", "FirstName", "LastName", "Email", "Company", "IdBudget", "IdObject", "Message", "CreatedAt") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
+      db.query(getQuery, [id], (error, result) => {
         if (error) {
           reject(error);
         }
-        resolve(result);
+        if (result.rows.length === 0) {
+          reject(new Error("Nessun contatto trovato"));
+        }
+        const contact = result.rows[0];
+        const values = [
+          contact.IdContact,
+          contact.FirstName,
+          contact.LastName,
+          contact.Email,
+          contact.Company,
+          contact.IdBudget,
+          contact.IdObject,
+          contact.Message,
+          contact.CreatedAt,
+        ];
+        db.query(readContactQuery, values, (error, result) => {
+          if (error) {
+            reject(error);
+          }
+          const query = `DELETE FROM "Contact" WHERE "IdContact" = $1`;
+          db.query(query, [id], (error, result) => {
+            if (error) {
+              reject(error);
+            }
+            resolve(result);
+            console.log("Contatto eliminato");
+          });
+        });
       });
     });
   }
