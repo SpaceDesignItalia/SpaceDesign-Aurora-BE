@@ -41,6 +41,18 @@ const projectDELETE = (db) => {
     ProjectController.removeFile(req, res, db);
   });
 
+  router.delete("/DeleteTaskComment", authenticateMiddleware, (req, res) => {
+    ProjectController.deleteTaskComment(req, res, db);
+  });
+
+  router.delete("/DeleteTaskChecklist", authenticateMiddleware, (req, res) => {
+    ProjectController.deleteTaskChecklist(req, res, db);
+  });
+
+  router.delete("/DeleteTaskCheckbox", authenticateMiddleware, (req, res) => {
+    ProjectController.deleteTaskCheckbox(req, res, db);
+  });
+
   return router;
 };
 
