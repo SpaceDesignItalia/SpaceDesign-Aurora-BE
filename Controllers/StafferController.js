@@ -19,6 +19,20 @@ class StafferController {
     }
   }
 
+  static async getNewStaffers(res, db) {
+    try {
+      const staffers = await Staffer.getNewStaffers(db);
+      if (staffers.length > 0) {
+        res.status(200).json(staffers);
+      } else {
+        res.status(404).send("Nessun dipendente trovato");
+      }
+    } catch (error) {
+      console.error("Errore nel recupero dei nuovi dipendenti:", error);
+      res.status(500).send("Recupero dei nuovi dipendenti fallita");
+    }
+  }
+
   static async getStafferById(req, res, db) {
     try {
       const EmployeeId = req.query.EmployeeId;

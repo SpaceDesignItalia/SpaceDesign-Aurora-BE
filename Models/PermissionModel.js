@@ -31,7 +31,7 @@ class PermissionModel {
 
   static async getAllRoles(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "RoleId","RoleName","RoleDescription" FROM public."Role"`;
+      const query = `SELECT "RoleId","RoleName","RoleDescription", "RolePriority" FROM public."Role"`;
 
       db.query(query, (error, result) => {
         if (error) {
@@ -53,20 +53,6 @@ class PermissionModel {
       WHERE "StafferId" = $1`;
 
       db.query(query, [StafferId], (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result.rows);
-        }
-      });
-    });
-  }
-
-  static async addRole(db, RoleData, RolePermissionData) {
-    return new Promise((resolve, reject) => {
-      const query = `SELECT "RoleId", "RoleName", "RoleDescription" FROM "Role" ORDER BY "RoleId"`;
-
-      db.query(query, (error, result) => {
         if (error) {
           reject(error);
         } else {
@@ -127,6 +113,7 @@ class PermissionModel {
           r."RoleId", 
           r."RoleName", 
           r."RoleDescription", 
+          r."RolePriority",
           json_agg(json_build_object('PermissionId', p."PermissionId", 'PermissionName', p."PermissionName")) AS permissions
         FROM 
           "Role" r
@@ -209,12 +196,16 @@ class PermissionModel {
   static async addRole(db, RoleData, RolePermissionData) {
     return new Promise((resolve, reject) => {
       const insertRoleQuery = `
-        INSERT INTO public."Role" ("RoleName", "RoleDescription")
-        VALUES ($1, $2)
+        INSERT INTO public."Role" ("RoleName", "RoleDescription", "RolePriority")
+        VALUES ($1, $2, $3)
         RETURNING "RoleId";
       `;
 
-      const roleValues = [RoleData.RoleName, RoleData.RoleDescription];
+      const roleValues = [
+        RoleData.RoleName,
+        RoleData.RoleDescription,
+        RoleData.RolePriority,
+      ];
 
       db.query(insertRoleQuery, roleValues, (roleError, roleResult) => {
         if (roleError) {
@@ -223,7 +214,6 @@ class PermissionModel {
 
         const newRoleId = roleResult.rows[0].RoleId;
 
-        // Prepara le query di inserimento per RolePermission
         const insertRolePermissionQuery = `
           INSERT INTO public."RolePermission" ("RoleId", "PermissionId")
           VALUES ($1, $2);
@@ -244,7 +234,6 @@ class PermissionModel {
           });
         });
 
-        // Esegui tutte le query di inserimento per RolePermission
         Promise.all(rolePermissionPromises)
           .then(() => {
             resolve({ RoleId: newRoleId });
@@ -255,58 +244,20 @@ class PermissionModel {
       });
     });
   }
-
   static async updateRole(db, RoleId, RoleData, RolePermissionData) {
     return new Promise((resolve, reject) => {
       const updateRoleQuery = `
         UPDATE public."Role"
-        SET "RoleName" = $1, "RoleDescription" = $2
-        WHERE "RoleId" = $3;
-      `;
-      const roleValues = [RoleData.RoleName, RoleData.RoleDescription, RoleId];
-      db.query(updateRoleQuery, roleValues, (roleError, roleResult) => {
-        if (roleError) {
-          return reject(roleError);
-        }
-        // Prepara le query di inserimento per RolePermission
-        const insertRolePermissionQuery = `
-          INSERT INTO public."RolePermission" ("RoleId", "PermissionId")
-          VALUES ($1, $2);
-        `;
-        const rolePermissionPromises = RolePermissionData.map((permission) => {
-          return new Promise((resolve, reject) => {
-            db.query(
-              insertRolePermissionQuery,
-              [RoleId, permission.PermissionId],
-              (permissionError) => {
-                if (permissionError) {
-                  return reject(permissionError);
-                }
-                resolve();
-              }
-            );
-          });
-        });
-        // Esegui tutte le query di inserimento per RolePermission
-        Promise.all(rolePermissionPromises)
-          .then(() => {
-            resolve({ RoleId });
-          })
-          .catch((permissionError) => {
-            reject(permissionError);
-          });
-      });
-    });
-  }
-  static async updateRole(db, RoleId, RoleData, RolePermissionData) {
-    return new Promise((resolve, reject) => {
-      const updateRoleQuery = `
-        UPDATE public."Role"
-        SET "RoleName" = $1, "RoleDescription" = $2
-        WHERE "RoleId" = $3;
+        SET "RoleName" = $1, "RoleDescription" = $2, "RolePriority" = $3
+        WHERE "RoleId" = $4;
       `;
 
-      const roleValues = [RoleData.RoleName, RoleData.RoleDescription, RoleId];
+      const roleValues = [
+        RoleData.RoleName,
+        RoleData.RoleDescription,
+        RoleData.RolePriority,
+        RoleId,
+      ];
 
       db.query(updateRoleQuery, roleValues, (roleError) => {
         if (roleError) {

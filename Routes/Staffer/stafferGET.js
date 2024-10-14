@@ -11,6 +11,10 @@ const stafferGET = (db) => {
     StafferController.getAllStaffers(res, db);
   });
 
+  router.get("/GetNewStaffers", authenticateMiddleware, (req, res) => {
+    StafferController.getNewStaffers(res, db);
+  });
+
   router.get("/GetStafferById", authenticateMiddleware, (req, res) => {
     StafferController.getStafferById(req, res, db);
   });

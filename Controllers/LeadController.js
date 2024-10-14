@@ -12,6 +12,26 @@ class LeadController {
     }
   }
 
+  static async getReadLeadsByMonth(req, res, db) {
+    try {
+      const leads = await Lead.getReadLeadsByMonth(db);
+      res.status(200).json(leads);
+    } catch (error) {
+      console.error("Errore nel recupero dei lead:", error);
+      res.status(500).send("Recupero dei lead fallito");
+    }
+  }
+
+  static async getPendingLeadsByMonth(req, res, db) {
+    try {
+      const leads = await Lead.getPendingLeadsByMonth(db);
+      res.status(200).json(leads);
+    } catch (error) {
+      console.error("Errore nel recupero dei lead:", error);
+      res.status(500).send("Recupero dei lead fallito");
+    }
+  }
+
   // Recupera un lead per ID
   static async getLeadById(req, res, db) {
     const { id } = req.query;
@@ -55,6 +75,16 @@ class LeadController {
     } catch (error) {
       console.error("Errore nel recupero degli intervalli:", error);
       res.status(500).send("Recupero degli intervalli fallito");
+    }
+  }
+
+  static async getReadLeads(req, res, db) {
+    try {
+      const leads = await Lead.getReadLeads(db);
+      res.status(200).json(leads);
+    } catch (error) {
+      console.error("Errore nel recupero dei lead:", error);
+      res.status(500).send("Recupero dei lead fallito");
     }
   }
 
