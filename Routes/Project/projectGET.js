@@ -135,6 +135,10 @@ const projectGET = (db) => {
     ProjectController.getFilesByProjectId(req, res, db);
   });
 
+  router.get("/GetFilesByTaskId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFilesByTaskId(req, res, db);
+  });
+
   router.get(
     "/GetFilesByProjectIdForCustomer",
     authenticateMiddleware,

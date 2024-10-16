@@ -925,6 +925,21 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
     });
   }
 
+  static async uploadTaskFiles(db, fileData, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskFiles" ("TaskId", "FileName", "FilePath") VALUES ($1, $2, $3)`;
+      const insertPromises = fileData.map(({ fileName, filePath }) =>
+        db.query(query, [TaskId, fileName, filePath], (error, result) => {
+          if (error) {
+            reject(error);
+          }
+        })
+      );
+
+      resolve(insertPromises);
+    });
+  }
+
   static async removeFile(db, FilePath, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "FilePath" = $2`;
@@ -944,6 +959,19 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1`;
       db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async getFilesByTaskId(db, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskFiles" WHERE "TaskId" = $1`;
+      db.query(query, [TaskId], (error, result) => {
         if (error) {
           reject(error);
         } else {

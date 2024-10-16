@@ -601,6 +601,25 @@ class ProjectController {
     }
   }
 
+  static async uploadTaskFiles(req, res, db) {
+    try {
+      const files = req.files;
+      const { TaskId } = req.body;
+
+      console.log("Files:", files);
+      const fileData = files.map((file, index) => ({
+        fileName: file.originalname,
+        filePath: `/${file.filename}`,
+      }));
+
+      await Project.uploadTaskFiles(db, fileData, TaskId);
+      res.status(200).send("Files uploaded successfully.");
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      res.status(500).send("File upload failed");
+    }
+  }
+
   static async removeFile(req, res, db) {
     try {
       const { ProjectId, FilePath } = req.query;
@@ -662,6 +681,18 @@ class ProjectController {
       const ProjectId = req.query.ProjectId;
 
       const files = await Project.getFilesByProjectId(db, ProjectId);
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
+    }
+  }
+
+  static async getFilesByTaskId(req, res, db) {
+    try {
+      const TaskId = req.query.TaskId;
+
+      const files = await Project.getFilesByTaskId(db, TaskId);
       res.status(200).json(files);
     } catch (error) {
       console.error("Error getting files:", error);
