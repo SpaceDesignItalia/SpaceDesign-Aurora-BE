@@ -955,6 +955,21 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
     });
   }
 
+  static async removeTaskFile(db, FilePath, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskFiles" WHERE "TaskId" = $1 AND "FilePath" = $2`;
+      const values = [ProjectId, FilePath];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
   static async getFilesByProjectId(db, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1`;

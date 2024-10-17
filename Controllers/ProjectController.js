@@ -645,6 +645,31 @@ class ProjectController {
     }
   }
 
+  static async removeTaskFile(req, res, db) {
+    try {
+      const { TaskId, FilePath } = req.query;
+
+      const fullFilePath = path.join(
+        __dirname,
+        "../public/uploads/projectFiles",
+        FilePath
+      );
+
+      fs.unlink(fullFilePath, (err) => {
+        if (err) {
+          console.error("Error deleting file:", err);
+          return res.status(500).send("Error deleting file");
+        }
+      });
+
+      await Project.removeTaskFile(db, FilePath, TaskId);
+      res.status(200).send("File rimosso con successo.");
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      res.status(500).send("File upload failed");
+    }
+  }
+
   static async downloadFile(req, res) {
     try {
       const { filePath, fileName } = req.query;
