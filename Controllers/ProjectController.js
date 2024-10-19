@@ -2,6 +2,7 @@
 const Project = require("../Models/ProjectModel");
 const path = require("path");
 const fs = require("fs");
+const NotifyMiddleware = require("../middlewares/Notification/NotifyMiddelware");
 
 class ProjectController {
   static async getAllStatus(req, res, db) {
@@ -202,8 +203,14 @@ class ProjectController {
   static async addProjectLink(req, res, db) {
     try {
       const ProjectLinkData = req.body.ProjectLinkData;
-
       await Project.addProjectLink(db, ProjectLinkData);
+      const UserId = req.session.account.StafferId;
+      await NotifyMiddleware.ProjectNotification(
+        db,
+        UserId,
+        ProjectLinkData.ProjectId,
+        "Un nuovo link è stato aggiunto al progetto"
+      );
       res.status(200).send("Collegamento creato con successo.");
     } catch (error) {
       console.error("Errore nella creazione del collegamento:", error);
@@ -217,6 +224,13 @@ class ProjectController {
       const ProjectId = req.body.ProjectId;
 
       await Project.addProjectTeamMember(db, ProjectId, ProjectMemberId);
+      const UserId = req.session.account.StafferId;
+      await NotifyMiddleware.ProjectNotification(
+        db,
+        UserId,
+        ProjectId,
+        "Un nuovo membro è stato aggiunto al progetto"
+      );
       res.status(200).send("Membro aggiunto con successo.");
     } catch (error) {
       console.error("Errore nell'aggiunta del membro al progetto:", error);

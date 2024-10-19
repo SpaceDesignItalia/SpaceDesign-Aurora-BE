@@ -776,11 +776,12 @@ class ProjectModel {
   static getProjectInTeam(db, StafferId) {
     return new Promise((resolve, reject) => {
       const query = `WITH NotificationCounts AS (
-    SELECT public."Project"."ProjectId", 
-           public."Project"."ProjectName", 
-           public."Company"."CompanyName", 
-           COUNT(public."NotificationInfo"."NotificationId") AS "NotificationCount",
-           bool_or(public."NotificationExtraData"."IsRead" = false) AS "HasUnread"
+    SELECT 
+        public."Project"."ProjectId", 
+        public."Project"."ProjectName", 
+        public."Company"."CompanyName", 
+        COUNT(CASE WHEN public."NotificationExtraData"."IsRead" = false THEN public."NotificationInfo"."NotificationId" END) AS "NotificationCount",
+        bool_or(public."NotificationExtraData"."IsRead" = false) AS "HasUnread"
     FROM public."ProjectTeam" 
     INNER JOIN public."Project" USING("ProjectId") 
     INNER JOIN public."Company" USING("CompanyId") 
@@ -794,8 +795,7 @@ class ProjectModel {
 )
 SELECT "ProjectId", "ProjectName", "CompanyName", "NotificationCount"
 FROM NotificationCounts
-WHERE ("HasUnread" = true OR "NotificationCount" = 0);
-`;
+WHERE ("HasUnread" = true OR "NotificationCount" = 0);`;
 
       db.query(query, [StafferId], (error, result) => {
         if (error) {
