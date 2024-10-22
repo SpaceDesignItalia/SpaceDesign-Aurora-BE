@@ -11,6 +11,10 @@ const ticketGET = (db) => {
     TicketController.getAllTicketTypes(req, res, db);
   });
 
+  router.get("/GetAllTicketStatusTypes", authenticateMiddleware, (req, res) => {
+    TicketController.getAllTicketStatusTypes(req, res, db);
+  });
+
   router.get("/GetProjectOpenTicket", authenticateMiddleware, (req, res) => {
     TicketController.getProjectTicketOpen(req, res, db);
   });

@@ -13,6 +13,20 @@ class TicketModel {
     });
   }
 
+  static getAllTicketStatusTypes(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."TicketStatus"`;
+
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static getProjectTicketOpen(db, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectTicket" 
