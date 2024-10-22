@@ -61,7 +61,7 @@ class ProjectModel {
   static getAllProjectsTable(db) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId", "ProjectName", "ProjectCreationDate", "ProjectEndDate", CONCAT("StafferName",' ',"StafferSurname") AS "ProjectManagerName", 
-      "StafferImageUrl", "RoleName", "StatusId", "StatusName", "CompanyName"
+      "StafferImageUrl", "RoleName", "StatusId", "StatusName", "CompanyId", "CompanyName"
       FROM public."Project" 
       INNER JOIN public."Staffer" s ON "ProjectManagerId" = s."StafferId" 
       INNER JOIN public."StafferRole" USING ("StafferId") 
