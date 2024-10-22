@@ -1,6 +1,7 @@
 // socket.js
-const http = require("http");
 const { Server } = require("socket.io");
+
+let onlineUsers = [];
 
 const createSocketServer = (httpServer) => {
   const io = new Server(httpServer, {
@@ -42,7 +43,37 @@ const createSocketServer = (httpServer) => {
 
     module.exports.sendNotification = sendNotification;
 
-    socket.on("disconnect", () => {});
+    socket.on("new-user-add", (newUserId) => {
+      if (!onlineUsers.some((user) => user.userId === newUserId)) {
+        // if user is not added before
+        onlineUsers.push({
+          userId: newUserId,
+          status: "online",
+          socketId: socket.id,
+        });
+      }
+      // send all active users to new user
+      io.emit("get-users", onlineUsers);
+    });
+
+    socket.on("disconnect", () => {
+      onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+      // send all online users to all users
+      io.emit("get-users", onlineUsers);
+    });
+
+    socket.on("offline", () => {
+      // remove user from active users
+      onlineUsers = onlineUsers.map((user) =>
+        user.socketId === socket.id ? { ...user, status: "offline" } : user
+      );
+      // send all online users to all users
+      io.emit("get-users", onlineUsers);
+    });
+
+    socket.on("get-users", () => {
+      io.emit("get-users", onlineUsers);
+    });
   });
 
   return io;

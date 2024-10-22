@@ -542,6 +542,23 @@ class ProjectModel {
     });
   }
 
+  static getCommentsByTaskId(db, ProjectTaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectTaskCommentId", "StafferId", "CommentDate", "Text", "StafferImageUrl", CONCAT("StafferName", ' ', "StafferSurname") AS "StafferFullName" FROM public."ProjectTaskComment" 
+      INNER JOIN public."Staffer" USING("StafferId")
+      WHERE "ProjectTaskId" = $1
+      ORDER BY "ProjectTaskCommentId" DESC`;
+
+      db.query(query, [ProjectTaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static getMembersNotInTask(db, TaskData) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "StafferImageUrl" FROM public."Staffer" 
@@ -668,14 +685,15 @@ class ProjectModel {
     });
   }
 
-  static updateTask(db, TaskData, FormattedDate) {
+  static updateTask(db, TaskData, FormattedDate, FormattedCreationDate) {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE public."ProjectTask" SET "ProjectTaskName" = $1, "ProjectTaskDescription" = $2, "ProjectTaskExpiration" = $3 WHERE "ProjectTaskId" = $4`;
+      const query = `UPDATE public."ProjectTask" SET "ProjectTaskName" = $1, "ProjectTaskDescription" = $2, "ProjectTaskExpiration" = $3, "ProjectTaskCreation"= $4 WHERE "ProjectTaskId" = $5`;
 
       const values = [
         TaskData.ProjectTaskName,
         TaskData.ProjectTaskDescription,
         FormattedDate,
+        FormattedCreationDate,
         TaskData.ProjectTaskId,
       ];
 
@@ -758,11 +776,12 @@ class ProjectModel {
   static getProjectInTeam(db, StafferId) {
     return new Promise((resolve, reject) => {
       const query = `WITH NotificationCounts AS (
-    SELECT public."Project"."ProjectId", 
-           public."Project"."ProjectName", 
-           public."Company"."CompanyName", 
-           COUNT(public."NotificationInfo"."NotificationId") AS "NotificationCount",
-           bool_or(public."NotificationExtraData"."IsRead" = false) AS "HasUnread"
+    SELECT 
+        public."Project"."ProjectId", 
+        public."Project"."ProjectName", 
+        public."Company"."CompanyName", 
+        COUNT(CASE WHEN public."NotificationExtraData"."IsRead" = false THEN public."NotificationInfo"."NotificationId" END) AS "NotificationCount",
+        bool_or(public."NotificationExtraData"."IsRead" = false) AS "HasUnread"
     FROM public."ProjectTeam" 
     INNER JOIN public."Project" USING("ProjectId") 
     INNER JOIN public."Company" USING("CompanyId") 
@@ -776,8 +795,7 @@ class ProjectModel {
 )
 SELECT "ProjectId", "ProjectName", "CompanyName", "NotificationCount"
 FROM NotificationCounts
-WHERE ("HasUnread" = true OR "NotificationCount" = 0);
-`;
+WHERE ("HasUnread" = true OR "NotificationCount" = 0);`;
 
       db.query(query, [StafferId], (error, result) => {
         if (error) {
@@ -789,15 +807,16 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
     });
   }
 
-  static addTask(db, TaskData, FormattedDate) {
+  static addTask(db, TaskData, FormattedDate, FormattedCreationDate) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectId")
-      VALUES ($1, $2, $3, $4) RETURNING *`;
+      const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectTaskCreation", "ProjectId")
+      VALUES ($1, $2, $3, $4, $5) RETURNING *`;
 
       const values = [
         TaskData.ProjectTaskName,
         TaskData.ProjectTaskDescription,
         FormattedDate,
+        FormattedCreationDate,
         TaskData.ProjectId,
       ];
 
@@ -906,9 +925,39 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
     });
   }
 
+  static async uploadTaskFiles(db, fileData, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskFiles" ("TaskId", "FileName", "FilePath") VALUES ($1, $2, $3)`;
+      const insertPromises = fileData.map(({ fileName, filePath }) =>
+        db.query(query, [TaskId, fileName, filePath], (error, result) => {
+          if (error) {
+            reject(error);
+          }
+        })
+      );
+
+      resolve(insertPromises);
+    });
+  }
+
   static async removeFile(db, FilePath, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "FilePath" = $2`;
+      const values = [ProjectId, FilePath];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async removeTaskFile(db, FilePath, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskFiles" WHERE "TaskId" = $1 AND "FilePath" = $2`;
       const values = [ProjectId, FilePath];
 
       db.query(query, values, (error, result) => {
@@ -925,6 +974,19 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1`;
       db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async getFilesByTaskId(db, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskFiles" WHERE "TaskId" = $1`;
+      db.query(query, [TaskId], (error, result) => {
         if (error) {
           reject(error);
         } else {
@@ -972,6 +1034,149 @@ WHERE ("HasUnread" = true OR "NotificationCount" = 0);
           reject(error);
         } else {
           resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async addTaskComment(db, Comment, TaskId, StafferId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskComment"("ProjectTaskId", "StafferId", "Text") VALUES ($1, $2, $3) RETURNING *`;
+      db.query(query, [TaskId, StafferId, Comment], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async deleteTaskComment(db, CommentId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskComment" WHERE "ProjectTaskCommentId" = $1`;
+      db.query(query, [CommentId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async addTaskCheckbox(db, CheckboxText, ChecklistId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskCheckbox"("ChecklistId", "Text") VALUES ($1, $2) RETURNING *`;
+      db.query(query, [ChecklistId, CheckboxText], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async getCheckboxesByChecklistId(db, ChecklistId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskCheckbox" WHERE "ChecklistId" = $1 ORDER BY "CheckboxId" ASC`;
+      db.query(query, [ChecklistId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async updateCheckboxStatus(db, CheckboxId, isSelected) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTaskCheckbox" SET "IsSelected" = $1 WHERE "CheckboxId" = $2`;
+      db.query(query, [isSelected, CheckboxId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async getChecklistsByTaskId(db, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskChecklist" WHERE "ProjectTaskId" = $1`;
+      db.query(query, [TaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async addTaskChecklist(db, ChecklistText, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskChecklist"("ProjectTaskId", "Text") VALUES ($1, $2) RETURNING *`;
+      db.query(query, [TaskId, ChecklistText], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async deleteTaskChecklist(db, ChecklistId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskChecklist" WHERE "ChecklistId" = $1`;
+      db.query(query, [ChecklistId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async deleteTaskCheckbox(db, CheckboxId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskCheckbox" WHERE "CheckboxId" = $1`;
+      db.query(query, [CheckboxId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async updateCheckboxText(db, CheckboxId, CheckboxText) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTaskCheckbox" SET "Text" = $1 WHERE "CheckboxId" = $2`;
+      db.query(query, [CheckboxText, CheckboxId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async updateComment(db, CommentId, CommentText) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTaskComment" SET "Text" = $1 WHERE "ProjectTaskCommentId" = $2`;
+      db.query(query, [CommentText, CommentId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
         }
       });
     });

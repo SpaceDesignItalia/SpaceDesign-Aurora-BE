@@ -17,6 +17,7 @@ const createChatRoutes = require("./Routes/Chat/Chat");
 const createTicketRoutes = require("./Routes/Ticket/Ticket");
 const createNotificationRoutes = require("./Routes/Notification/Notification");
 const createLeadRoutes = require("./Routes/Lead/Lead");
+const createFileiconRoutes = require("./Routes/FileIcon/Fileicon");
 
 const app = express();
 app.use(express.static("public"));
@@ -25,6 +26,7 @@ const PORT = 3000;
 
 const db = require("./configs/Database");
 
+// Setup CORS
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
@@ -32,6 +34,7 @@ app.use(
   })
 );
 
+// Middleware
 app.use(bodyParser.json());
 app.use(
   session({
@@ -45,7 +48,11 @@ app.use(
 );
 app.use(cookieParser());
 
+// Create HTTP server
 const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = createSocketServer(server); // Correct socket server initialization
 
 // Main routes
 app.use(PREFIX + "/Authentication", createAuthenticationRoutes(db));
@@ -58,10 +65,9 @@ app.use(PREFIX + "/Project", createProjectRoutes(db));
 app.use(PREFIX + "/Ticket", createTicketRoutes(db));
 app.use(PREFIX + "/Notification", createNotificationRoutes(db));
 app.use(PREFIX + "/Lead", createLeadRoutes(db));
+app.use(PREFIX + "/Fileicon", createFileiconRoutes());
 
-// Initialize Socket.IO
-const io = createSocketServer(server);
-
+// Start the server
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });

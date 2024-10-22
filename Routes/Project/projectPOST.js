@@ -67,6 +67,22 @@ const projectPOST = (db) => {
     ProjectController.uploadFiles(req, res, db);
   });
 
+  router.post("/UploadTaskFile", upload.array("files"), (req, res) => {
+    ProjectController.uploadTaskFiles(req, res, db);
+  });
+
+  router.post("/AddTaskComment", authenticateMiddleware, (req, res) => {
+    ProjectController.addTaskComment(req, res, db);
+  });
+
+  router.post("/AddTaskCheckbox", authenticateMiddleware, (req, res) => {
+    ProjectController.addTaskCheckbox(req, res, db);
+  });
+
+  router.post("/AddTaskChecklist", authenticateMiddleware, (req, res) => {
+    ProjectController.addTaskChecklist(req, res, db);
+  });
+
   return router;
 };
 

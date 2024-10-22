@@ -1,13 +1,7 @@
 const createSocketServer = require("../../socket");
 
 class NotifyMiddleware {
-  static async MessageNotification(
-    db,
-    ConversationId,
-    StafferSenderId,
-    Text,
-    UserId
-  ) {
+  static async MessageNotification(db, ConversationId, StafferSenderId, Text) {
     try {
       // Prima query: inserimento nella tabella Notification
       let query = `INSERT INTO public."Notification" ("NotificationMessage", "NotificationCreationDate") VALUES ($1, $2) RETURNING "NotificationId"`;
@@ -62,6 +56,47 @@ class NotifyMiddleware {
       // Esegui tutte le query in parallelo
       await Promise.all([notificationExtraDataQuery, notificationInfoQuery]);
       createSocketServer.sendNotification(userId); // Invia la notifica al destinatario
+      // Risolvi la promessa finale
+      return { success: true };
+    } catch (error) {
+      // Gestione degli errori
+      throw error;
+    }
+  }
+
+  static async ProjectNotification(db, UserId, ProjectId, Text) {
+    try {
+      // Prima query: inserimento nella tabella Notification
+      let query = `INSERT INTO public."Notification" ("NotificationMessage", "NotificationCreationDate") VALUES ($1, $2) RETURNING "NotificationId"`;
+      const notificationResult = await db.query(query, [Text, new Date()]);
+      const NotificationId = notificationResult.rows[0].NotificationId;
+
+      let notificationExtraDataQuery;
+
+      query = `SELECT "StafferId" FROM public."ProjectTeam" WHERE "ProjectId" = $1 AND "StafferId" != $2`;
+      const ProjectTeam = await db.query(query, [ProjectId, UserId]);
+      ProjectTeam.rows.forEach(async (projectStaffer) => {
+        if (projectStaffer.StafferId !== UserId) {
+          query = `INSERT INTO public."NotificationExtraData" ("NotificationId", "UserId", "IsRead") VALUES ($1, $2, $3)`;
+          notificationExtraDataQuery = await db.query(query, [
+            NotificationId,
+            projectStaffer.StafferId,
+            false,
+          ]);
+        }
+      });
+
+      const NotificationTypeName = "Progetto";
+      query = `INSERT INTO public."NotificationInfo" ("NotificationId", "ProjectId", "NotificationTypeName") VALUES ($1, $2, $3)`;
+      const notificationInfoQuery = db.query(query, [
+        NotificationId,
+        ProjectId,
+        NotificationTypeName,
+      ]);
+
+      // Esegui tutte le query in parallelo
+      await Promise.all([notificationExtraDataQuery, notificationInfoQuery]);
+      createSocketServer.sendNotification(UserId); // Invia la notifica al destinatario
       // Risolvi la promessa finale
       return { success: true };
     } catch (error) {

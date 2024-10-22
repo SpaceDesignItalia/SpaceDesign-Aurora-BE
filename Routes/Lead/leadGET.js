@@ -9,6 +9,18 @@ const leadGET = (db) => {
     LeadController.getAllLeads(req, res, db);
   });
 
+  router.get("/GetReadLeads", authenticateMiddleware, (req, res) => {
+    LeadController.getReadLeads(req, res, db);
+  });
+
+  router.get("/GetReadLeadsByMonth", authenticateMiddleware, (req, res) => {
+    LeadController.getReadLeadsByMonth(req, res, db);
+  });
+
+  router.get("/GetPendingLeadsByMonth", authenticateMiddleware, (req, res) => {
+    LeadController.getPendingLeadsByMonth(req, res, db);
+  });
+
   router.get("/GetLeadById", authenticateMiddleware, (req, res) => {
     LeadController.getLeadById(req, res, db);
   });
@@ -23,7 +35,6 @@ const leadGET = (db) => {
   router.get("/GetRanges", authenticateMiddleware, (req, res) => {
     LeadController.getRanges(req, res, db);
   });
-
   return router;
 };
 

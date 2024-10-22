@@ -103,6 +103,10 @@ const projectGET = (db) => {
     ProjectController.getMembersByTaskId(req, res, db);
   });
 
+  router.get("/GetCommentsByTaskId", authenticateMiddleware, (req, res) => {
+    ProjectController.getCommentsByTaskId(req, res, db);
+  });
+
   router.get("/GetMembersNotInTask", authenticateMiddleware, (req, res) => {
     ProjectController.getMembersNotInTask(req, res, db);
   });
@@ -129,6 +133,10 @@ const projectGET = (db) => {
 
   router.get("/GetFilesByProjectId", authenticateMiddleware, (req, res) => {
     ProjectController.getFilesByProjectId(req, res, db);
+  });
+
+  router.get("/GetFilesByTaskId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFilesByTaskId(req, res, db);
   });
 
   router.get(
@@ -174,6 +182,18 @@ const projectGET = (db) => {
       ProjectController.downloadFile(req, res);
     }
   );
+
+  router.get(
+    "/GetCheckboxesByChecklistId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getCheckboxesByChecklistId(req, res, db);
+    }
+  );
+
+  router.get("/GetChecklistsByTaskId", authenticateMiddleware, (req, res) => {
+    ProjectController.getChecklistsByTaskId(req, res, db);
+  });
 
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };

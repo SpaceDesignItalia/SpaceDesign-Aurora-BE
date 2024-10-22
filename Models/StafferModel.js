@@ -3,8 +3,49 @@ const bcrypt = require("bcrypt");
 class StafferModel {
   static getAllStaffers(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "StafferId" AS "EmployeeId", CONCAT("StafferName", ' ', "StafferSurname") "EmployeeFullName", 
-      "StafferEmail" AS "EmployeeEmail", "StafferPhone" AS "EmployeePhone" FROM public."Staffer"`;
+      const query = `
+        SELECT 
+          s."StafferId" AS "EmployeeId", 
+          CONCAT(s."StafferName", ' ', s."StafferSurname") AS "EmployeeFullName", 
+          s."StafferEmail" AS "EmployeeEmail", 
+          s."StafferPhone" AS "EmployeePhone", 
+          s."CreationTime" AS "EmployeeCreationTime",
+          r."RoleName" AS "RoleName"
+        FROM 
+          public."Staffer" s
+        LEFT JOIN 
+          public."StafferRole" sr ON s."StafferId" = sr."StafferId"
+        LEFT JOIN 
+          public."Role" r ON sr."RoleId" = r."RoleId"`;
+
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getNewStaffers(db) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          s."StafferId" AS "EmployeeId", 
+          CONCAT(s."StafferName", ' ', s."StafferSurname") AS "EmployeeFullName", 
+          s."StafferEmail" AS "EmployeeEmail", 
+          s."StafferPhone" AS "EmployeePhone", 
+          s."CreationTime" AS "EmployeeCreationTime",
+          r."RoleName" AS "RoleName"
+        FROM 
+          public."Staffer" s
+        LEFT JOIN 
+          public."StafferRole" sr ON s."StafferId" = sr."StafferId"
+        LEFT JOIN 
+          public."Role" r ON sr."RoleId" = r."RoleId"
+        WHERE 
+          s."CreationTime" >= NOW() - INTERVAL '1 MONTH'`;
 
       db.query(query, (error, result) => {
         if (error) {
@@ -37,11 +78,21 @@ class StafferModel {
       INNER JOIN public."StafferRole" USING("StafferId")
       WHERE "StafferId" = $1`;
 
+      const query1 = `SELECT * FROM public."Role" WHERE "RoleId" = $1`;
+
       db.query(query, [EmployeeId], (error, result) => {
         if (error) {
           reject(error);
         } else {
-          resolve(result.rows);
+          for (let i = 0; i < result.rows.length; i++) {
+            db.query(query1, [result.rows[i].RoleId], (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result.rows);
+              }
+            });
+          }
         }
       });
     });
