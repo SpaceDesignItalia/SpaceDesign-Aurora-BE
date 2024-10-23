@@ -143,8 +143,12 @@ const projectGET = (db) => {
     }
   );
 
-  router.get("/GetFilesByProjectId", authenticateMiddleware, (req, res) => {
-    ProjectController.getFilesByProjectId(req, res, db);
+  router.get("/GetFoldersByProjectId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFoldersByProjectId(req, res, db);
+  });
+
+  router.get("/GetFilesByFolderId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFilesByFolderId(req, res, db);
   });
 
   router.get("/GetFilesByTaskId", authenticateMiddleware, (req, res) => {
@@ -172,10 +176,18 @@ const projectGET = (db) => {
   );
 
   router.get(
-    "/SearchFilesByProjectIdAndName",
+    "/SearchFolderByProjectIdAndName",
     authenticateMiddleware,
     (req, res) => {
-      ProjectController.searchFilesByProjectIdAndName(req, res, db);
+      ProjectController.searchFolderByProjectIdAndName(req, res, db);
+    }
+  );
+
+  router.get(
+    "/SearchFilesByFolderIdAndName",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.searchFilesByFolderIdAndName(req, res, db);
     }
   );
 

@@ -618,7 +618,7 @@ class ProjectController {
   static async uploadFiles(req, res, db) {
     try {
       const files = req.files;
-      const { ProjectId, forClient } = req.body;
+      const { FolderId, forClient } = req.body;
 
       const forClientArray = Array.isArray(forClient) ? forClient : [forClient];
 
@@ -628,7 +628,7 @@ class ProjectController {
         forClient: forClientArray[index] === "true",
       }));
 
-      await Project.uploadFiles(db, fileData, ProjectId);
+      await Project.uploadFiles(db, fileData, FolderId);
       res.status(200).send("Files uploaded successfully.");
     } catch (error) {
       console.error("Error uploading files:", error);
@@ -657,7 +657,7 @@ class ProjectController {
 
   static async removeFile(req, res, db) {
     try {
-      const { ProjectId, FilePath } = req.query;
+      const { FolderId, FilePath } = req.query;
 
       const fullFilePath = path.join(
         __dirname,
@@ -672,7 +672,7 @@ class ProjectController {
         }
       });
 
-      await Project.removeFile(db, FilePath, ProjectId);
+      await Project.removeFile(db, FilePath, FolderId);
       res.status(200).send("File rimosso con successo.");
     } catch (error) {
       console.error("Error uploading files:", error);
@@ -736,11 +736,23 @@ class ProjectController {
     }
   }
 
-  static async getFilesByProjectId(req, res, db) {
+  static async getFilesByFolderId(req, res, db) {
+    try {
+      const FolderId = req.query.FolderId;
+
+      const files = await Project.getFilesByFolderId(db, FolderId);
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
+    }
+  }
+
+  static async getFoldersByProjectId(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
 
-      const files = await Project.getFilesByProjectId(db, ProjectId);
+      const files = await Project.getFoldersByProjectId(db, ProjectId);
       res.status(200).json(files);
     } catch (error) {
       console.error("Error getting files:", error);
@@ -772,20 +784,37 @@ class ProjectController {
     }
   }
 
-  static async searchFilesByProjectIdAndName(req, res, db) {
+  static async searchFilesByFolderIdAndName(req, res, db) {
     try {
       const FileName = req.query.FileName;
-      const ProjectId = req.query.ProjectId;
+      const FolderId = req.query.FolderId;
 
-      const files = await Project.searchFilesByProjectIdAndName(
+      const files = await Project.searchFilesByFolderIdAndName(
         db,
         FileName,
-        ProjectId
+        FolderId
       );
       res.status(200).json(files);
     } catch (error) {
       console.error("Error getting files:", error);
       res.status(500).send("File retrieval failed");
+    }
+  }
+
+  static async searchFolderByProjectIdAndName(req, res, db) {
+    try {
+      const FolderName = req.query.FolderName;
+      const ProjectId = req.query.ProjectId;
+
+      const files = await Project.searchFolderByProjectIdAndName(
+        db,
+        FolderName,
+        ProjectId
+      );
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting folders:", error);
+      res.status(500).send("Folders retrieval failed");
     }
   }
 
@@ -940,6 +969,19 @@ class ProjectController {
     } catch (error) {
       console.error("Error updating comment:", error);
       res.status(500).send("Comment update failed");
+    }
+  }
+
+  static async addFolder(req, res, db) {
+    try {
+      const ProjectId = req.body.ProjectId;
+      const FolderName = req.body.FolderName;
+
+      await Project.addFolder(db, ProjectId, FolderName);
+      res.status(200).send("Cartella aggiunta con successo.");
+    } catch (error) {
+      console.error("Error adding folder:", error);
+      res.status(500).send("Folder addition failed");
     }
   }
 }

@@ -83,6 +83,10 @@ const projectPOST = (db) => {
     ProjectController.addTaskChecklist(req, res, db);
   });
 
+  router.post("/AddFolder", authenticateMiddleware, (req, res) => {
+    ProjectController.addFolder(req, res, db);
+  });
+
   return router;
 };
 

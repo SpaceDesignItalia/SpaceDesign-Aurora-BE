@@ -944,13 +944,13 @@ class ProjectModel {
     });
   }
 
-  static async uploadFiles(db, fileData, ProjectId) {
+  static async uploadFiles(db, fileData, FolderId) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."ProjectFiles" ("ProjectId", "FileName", "FilePath", "ForClient") VALUES ($1, $2, $3, $4)`;
+      const query = `INSERT INTO public."ProjectFiles" ("FolderId", "FileName", "FilePath", "ForClient") VALUES ($1, $2, $3, $4)`;
       const insertPromises = fileData.map(({ fileName, filePath, forClient }) =>
         db.query(
           query,
-          [ProjectId, fileName, filePath, forClient],
+          [FolderId, fileName, filePath, forClient],
           (error, result) => {
             if (error) {
               reject(error);
@@ -978,10 +978,10 @@ class ProjectModel {
     });
   }
 
-  static async removeFile(db, FilePath, ProjectId) {
+  static async removeFile(db, FilePath, FolderId) {
     return new Promise((resolve, reject) => {
-      const query = `DELETE FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "FilePath" = $2`;
-      const values = [ProjectId, FilePath];
+      const query = `DELETE FROM public."ProjectFiles" WHERE "FolderId" = $1 AND "FilePath" = $2`;
+      const values = [FolderId, FilePath];
 
       db.query(query, values, (error, result) => {
         if (error) {
@@ -1008,10 +1008,23 @@ class ProjectModel {
     });
   }
 
-  static async getFilesByProjectId(db, ProjectId) {
+  static async getFoldersByProjectId(db, ProjectId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1`;
+      const query = `SELECT * FROM public."ProjectFolder" WHERE "ProjectId" = $1`;
       db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async getFilesByFolderId(db, FolderId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "FolderId" = $1`;
+      db.query(query, [FolderId], (error, result) => {
         if (error) {
           reject(error);
         } else {
@@ -1047,9 +1060,22 @@ class ProjectModel {
     });
   }
 
-  static async searchFilesByProjectIdAndName(db, FileName, ProjectId) {
+  static async searchFilesByProjectIdAndName(db, FileName, FolderId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "FileName" ILIKE '%${FileName}%'`;
+      const query = `SELECT * FROM public."ProjectFiles" WHERE "FolderId" = $1 AND "FileName" ILIKE '%${FileName}%'`;
+      db.query(query, [FolderId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async searchFolderByProjectIdAndName(db, FolderName, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFolder" WHERE "ProjectId" = $1 AND "FolderName" ILIKE '%${FolderName}%'`;
       db.query(query, [ProjectId], (error, result) => {
         if (error) {
           reject(error);
@@ -1215,6 +1241,19 @@ class ProjectModel {
           reject(error);
         } else {
           resolve(result);
+        }
+      });
+    });
+  }
+
+  static async addFolder(db, ProjectId, FolderName) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectFolder"("ProjectId", "FolderName", "CustomerVisible", "TeamVisible") VALUES ($1, $2, false, false) RETURNING *`;
+      db.query(query, [ProjectId, FolderName], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
         }
       });
     });
