@@ -11,6 +11,18 @@ class TicketController {
       res.status(500).send("Recupero delle tipologie dei ticket fallita");
     }
   }
+  static async getAllTicketStatusTypes(req, res, db) {
+    try {
+      const ticketTypes = await Ticket.getAllTicketStatusTypes(db);
+      res.status(200).json(ticketTypes);
+    } catch (error) {
+      console.error(
+        "Errore nel recupero delle tipologie degli stati ticket:",
+        error
+      );
+      res.status(500).send("Recupero delle tipologie dei ticket stati fallita");
+    }
+  }
 
   static async getProjectTicketOpen(req, res, db) {
     try {
