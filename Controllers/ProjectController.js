@@ -680,6 +680,18 @@ class ProjectController {
     }
   }
 
+  static async removeFolder(req, res, db) {
+    try {
+      const { FolderId, ProjectId } = req.query;
+
+      await Project.removeFolder(db, FolderId, ProjectId);
+      res.status(200).send("Cartella rimossa con successo.");
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      res.status(500).send("File upload failed");
+    }
+  }
+
   static async removeTaskFile(req, res, db) {
     try {
       const { TaskId, FilePath } = req.query;
@@ -982,6 +994,32 @@ class ProjectController {
     } catch (error) {
       console.error("Error adding folder:", error);
       res.status(500).send("Folder addition failed");
+    }
+  }
+
+  static async getFolderInfoByFolderId(req, res, db) {
+    try {
+      const FolderId = req.query.FolderId;
+      const folder = await Project.getFolderInfoByFolderId(db, FolderId);
+      res.status(200).json(folder);
+    } catch (error) {
+      console.error("Error getting folder info:", error);
+      res.status(500).send("Folder info retrieval failed");
+    }
+  }
+
+  static async updateFolder(req, res, db) {
+    try {
+      const FolderId = req.body.FolderId;
+      const FolderName = req.body.FolderName;
+      const ForClient = req.body.ForClient;
+      const ForTeam = req.body.ForTeam;
+
+      await Project.updateFolder(db, FolderId, FolderName, ForClient, ForTeam);
+      res.status(200).send("Cartella aggiornata con successo.");
+    } catch (error) {
+      console.error("Error updating folder:", error);
+      res.status(500).send("Folder update failed");
     }
   }
 }

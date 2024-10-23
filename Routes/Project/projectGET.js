@@ -219,6 +219,10 @@ const projectGET = (db) => {
     ProjectController.getChecklistsByTaskId(req, res, db);
   });
 
+  router.get("/GetFolderInfoByFolderId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFolderInfoByFolderId(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

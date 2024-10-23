@@ -993,6 +993,21 @@ class ProjectModel {
     });
   }
 
+  static async removeFolder(db, FolderId, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectFolder" WHERE "FolderId" = $1 AND "ProjectId" = $2`;
+      const values = [FolderId, ProjectId];
+
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
   static async removeTaskFile(db, FilePath, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."ProjectTaskFiles" WHERE "TaskId" = $1 AND "FilePath" = $2`;
@@ -1060,7 +1075,7 @@ class ProjectModel {
     });
   }
 
-  static async searchFilesByProjectIdAndName(db, FileName, FolderId) {
+  static async searchFilesByFolderIdAndName(db, FileName, FolderId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectFiles" WHERE "FolderId" = $1 AND "FileName" ILIKE '%${FileName}%'`;
       db.query(query, [FolderId], (error, result) => {
@@ -1256,6 +1271,36 @@ class ProjectModel {
           resolve(result.rows[0]);
         }
       });
+    });
+  }
+
+  static async getFolderInfoByFolderId(db, FolderId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFolder" WHERE "FolderId" = $1`;
+      db.query(query, [FolderId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async updateFolder(db, FolderId, FolderName, ForClient, ForTeam) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectFolder" SET "FolderName" = $1, "CustomerVisible" = $2, "TeamVisible" = $3 WHERE "FolderId" = $4`;
+      db.query(
+        query,
+        [FolderName, ForClient, ForTeam, FolderId],
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
     });
   }
 }

@@ -29,6 +29,10 @@ const projectUPDATE = (db) => {
   router.put("/UpdateComment", authenticateMiddleware, (req, res) => {
     ProjectController.updateComment(req, res, db);
   });
+
+  router.put("/UpdateFolder", authenticateMiddleware, (req, res) => {
+    ProjectController.updateFolder(req, res, db);
+  });
   return router;
 };
 
