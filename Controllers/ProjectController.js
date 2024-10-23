@@ -45,6 +45,16 @@ class ProjectController {
     }
   }
 
+  static async getAllProjectsTable(req, res, db) {
+    try {
+      const projects = await Project.getAllProjectsTable(db);
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Errore nel recupero dei progetti:", error);
+      res.status(500).send("Recupero dei progetti fallito");
+    }
+  }
+
   static async getProjectByIdAndName(req, res, db) {
     try {
       const ProjectId = req.query.ProjectId;
@@ -496,6 +506,17 @@ class ProjectController {
     try {
       const ProjectName = req.query.ProjectName;
       const projects = await Project.searchProjectByName(db, ProjectName);
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Errore nel recupero dei progetti:", error);
+      res.status(500).send("Recupero dei progetti fallita");
+    }
+  }
+
+  static async searchProjectByNameTable(req, res, db) {
+    try {
+      const ProjectName = req.query.ProjectName;
+      const projects = await Project.searchProjectByNameTable(db, ProjectName);
       res.status(200).json(projects);
     } catch (error) {
       console.error("Errore nel recupero dei progetti:", error);

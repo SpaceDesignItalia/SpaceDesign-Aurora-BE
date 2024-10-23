@@ -58,6 +58,27 @@ class ProjectModel {
     });
   }
 
+  static getAllProjectsTable(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectId", "ProjectName", "ProjectCreationDate", "ProjectEndDate", CONCAT("StafferName",' ',"StafferSurname") AS "ProjectManagerName", 
+      "StafferImageUrl", "RoleName", "StatusId", "StatusName", "CompanyId", "CompanyName"
+      FROM public."Project" 
+      INNER JOIN public."Staffer" s ON "ProjectManagerId" = s."StafferId" 
+      INNER JOIN public."StafferRole" USING ("StafferId") 
+      INNER JOIN public."Role" USING("RoleId") 
+      INNER JOIN public."Status" USING("StatusId")
+      INNER JOIN public."Company" USING("CompanyId")`;
+
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static getProjectByIdAndName(db, ProjectId, ProjectName) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "CompanyId", "ProjectBannerId", "ProjectBannerPath", 
@@ -735,6 +756,28 @@ class ProjectModel {
     });
   }
 
+  static searchProjectByNameTable(db, ProjectName) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectId", "ProjectName", "ProjectCreationDate", "ProjectEndDate", CONCAT("StafferName",' ',"StafferSurname") AS "ProjectManagerName", 
+      "StafferImageUrl", "RoleName", "StatusId", "StatusName", "CompanyId", "CompanyName"
+      FROM public."Project" 
+      INNER JOIN public."Staffer" s ON "ProjectManagerId" = s."StafferId" 
+      INNER JOIN public."StafferRole" USING ("StafferId") 
+      INNER JOIN public."Role" USING("RoleId") 
+      INNER JOIN public."Status" USING("StatusId")
+      INNER JOIN public."Company" USING("CompanyId") 
+      WHERE "ProjectName" ILIKE '%${ProjectName}%'`;
+
+      db.query(query, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static getProjectsByCustomerId(db, CustomerId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId","CompanyName", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "StatusId", "StatusName" FROM public."Customer"
@@ -775,27 +818,22 @@ class ProjectModel {
 
   static getProjectInTeam(db, StafferId) {
     return new Promise((resolve, reject) => {
-      const query = `WITH NotificationCounts AS (
-    SELECT 
-        public."Project"."ProjectId", 
-        public."Project"."ProjectName", 
-        public."Company"."CompanyName", 
-        COUNT(CASE WHEN public."NotificationExtraData"."IsRead" = false THEN public."NotificationInfo"."NotificationId" END) AS "NotificationCount",
-        bool_or(public."NotificationExtraData"."IsRead" = false) AS "HasUnread"
-    FROM public."ProjectTeam" 
-    INNER JOIN public."Project" USING("ProjectId") 
-    INNER JOIN public."Company" USING("CompanyId") 
-    LEFT JOIN public."NotificationExtraData" ON public."ProjectTeam"."StafferId" = public."NotificationExtraData"."UserId"
-    LEFT JOIN public."NotificationInfo" ON public."NotificationExtraData"."NotificationId" = public."NotificationInfo"."NotificationId" 
-          AND public."NotificationInfo"."ProjectId" = public."Project"."ProjectId"
-    WHERE public."ProjectTeam"."StafferId" = $1
-    GROUP BY public."Project"."ProjectId", 
-             public."Project"."ProjectName", 
-             public."Company"."CompanyName"
-)
-SELECT "ProjectId", "ProjectName", "CompanyName", "NotificationCount"
-FROM NotificationCounts
-WHERE ("HasUnread" = true OR "NotificationCount" = 0);`;
+      const query = `WITH NotificationCounts AS ( SELECT public."Project"."ProjectId", public."Project"."ProjectName", public."Company"."CompanyName", 
+      COUNT(CASE WHEN public."NotificationExtraData"."IsRead" = false THEN public."NotificationInfo"."NotificationId" END) AS "NotificationCount",
+      bool_or(public."NotificationExtraData"."IsRead" = false) AS "HasUnread"
+      FROM public."ProjectTeam" 
+      INNER JOIN public."Project" USING("ProjectId") 
+      INNER JOIN public."Company" USING("CompanyId") 
+      LEFT JOIN public."NotificationExtraData" ON public."ProjectTeam"."StafferId" = public."NotificationExtraData"."UserId"
+      LEFT JOIN public."NotificationInfo" ON public."NotificationExtraData"."NotificationId" = public."NotificationInfo"."NotificationId" 
+      AND public."NotificationInfo"."ProjectId" = public."Project"."ProjectId"
+      WHERE public."ProjectTeam"."StafferId" = $1
+      GROUP BY public."Project"."ProjectId", 
+      public."Project"."ProjectName", 
+      public."Company"."CompanyName")
+      SELECT "ProjectId", "ProjectName", "CompanyName", "NotificationCount"
+      FROM NotificationCounts
+      WHERE ("HasUnread" = true OR "NotificationCount" = 0);`;
 
       db.query(query, [StafferId], (error, result) => {
         if (error) {

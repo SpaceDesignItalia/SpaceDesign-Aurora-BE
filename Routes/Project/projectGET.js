@@ -23,6 +23,10 @@ const projectGET = (db) => {
     ProjectController.getAllProjects(req, res, db);
   });
 
+  router.get("/GetAllProjectsTable", authenticateMiddleware, (req, res) => {
+    ProjectController.getAllProjectsTable(req, res, db);
+  });
+
   router.get("/GetProjectByIdAndName", authenticateMiddleware, (req, res) => {
     ProjectController.getProjectByIdAndName(req, res, db);
   });
@@ -130,6 +134,14 @@ const projectGET = (db) => {
   router.get("/SearchProjectByName", authenticateMiddleware, (req, res) => {
     ProjectController.searchProjectByName(req, res, db);
   });
+
+  router.get(
+    "/SearchProjectByNameTable",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.searchProjectByNameTable(req, res, db);
+    }
+  );
 
   router.get("/GetFilesByProjectId", authenticateMiddleware, (req, res) => {
     ProjectController.getFilesByProjectId(req, res, db);
