@@ -1026,10 +1026,10 @@ class ProjectModel {
     });
   }
 
-  static async getFoldersByProjectId(db, ProjectId) {
+  static async getFoldersByUpFolderId(db, UpFolderId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectFolder" WHERE "ProjectId" = $1 AND "FolderName" <> 'Default'`;
-      db.query(query, [ProjectId], (error, result) => {
+      const query = `SELECT * FROM public."ProjectFolder" WHERE "UpFolderId" = $1 AND "FolderName" <> 'Default'`;
+      db.query(query, [UpFolderId], (error, result) => {
         if (error) {
           reject(error);
         } else {
@@ -1264,10 +1264,10 @@ class ProjectModel {
     });
   }
 
-  static async addFolder(db, ProjectId, FolderName) {
+  static async addFolder(db, ProjectId, FolderName, UpFolderId) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."ProjectFolder"("ProjectId", "FolderName", "CustomerVisible", "TeamVisible") VALUES ($1, $2, false, false) RETURNING *`;
-      db.query(query, [ProjectId, FolderName], (error, result) => {
+      const query = `INSERT INTO public."ProjectFolder"("ProjectId", "FolderName", "CustomerVisible", "TeamVisible", "UpFolderId") VALUES ($1, $2, false, false, $3) RETURNING *`;
+      db.query(query, [ProjectId, FolderName, UpFolderId], (error, result) => {
         if (error) {
           reject(error);
         } else {
@@ -1328,6 +1328,19 @@ class ProjectModel {
           reject(error);
         } else {
           resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async getFolderByFolderId(db, FolderId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFolder" WHERE "FolderId" = $1`;
+      db.query(query, [FolderId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
         }
       });
     });
