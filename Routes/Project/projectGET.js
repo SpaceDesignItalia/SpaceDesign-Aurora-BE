@@ -223,6 +223,18 @@ const projectGET = (db) => {
     ProjectController.getFolderInfoByFolderId(req, res, db);
   });
 
+  router.get("/GetDefaultProjectFolder", authenticateMiddleware, (req, res) => {
+    ProjectController.getDefaultProjectFolder(req, res, db);
+  });
+
+  router.get(
+    "/GetDefaultFilesByFolderId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getDefaultFilesByFolderId(req, res, db);
+    }
+  );
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

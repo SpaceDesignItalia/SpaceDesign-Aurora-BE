@@ -641,7 +641,6 @@ class ProjectController {
       const files = req.files;
       const { TaskId } = req.body;
 
-      console.log("Files:", files);
       const fileData = files.map((file, index) => ({
         fileName: file.originalname,
         filePath: `/${file.filename}`,
@@ -1020,6 +1019,30 @@ class ProjectController {
     } catch (error) {
       console.error("Error updating folder:", error);
       res.status(500).send("Folder update failed");
+    }
+  }
+
+  static async getDefaultProjectFolder(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      const folder = await Project.getDefaultProjectFolder(db, ProjectId);
+      res.status(200).json(folder);
+    } catch (error) {
+      console.error("Error adding default folder:", error);
+      res.status(500).send("Default folder addition failed");
+    }
+  }
+
+  static async getDefaultFilesByFolderId(req, res, db) {
+    try {
+      const FolderId = req.query.FolderId;
+
+      const files = await Project.getDefaultFilesByFolderId(db, FolderId);
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting default files:", error);
+      res.status(500).send("Default files retrieval failed");
     }
   }
 }
