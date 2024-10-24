@@ -143,8 +143,8 @@ const projectGET = (db) => {
     }
   );
 
-  router.get("/GetFoldersByProjectId", authenticateMiddleware, (req, res) => {
-    ProjectController.getFoldersByProjectId(req, res, db);
+  router.get("/GetFoldersByUpFolderId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFoldersByUpFolderId(req, res, db);
   });
 
   router.get("/GetFilesByFolderId", authenticateMiddleware, (req, res) => {
@@ -234,6 +234,10 @@ const projectGET = (db) => {
       ProjectController.getDefaultFilesByFolderId(req, res, db);
     }
   );
+
+  router.get("/GetFolderByFolderId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFolderByFolderId(req, res, db);
+  });
 
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };

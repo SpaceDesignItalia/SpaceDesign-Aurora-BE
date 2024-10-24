@@ -759,11 +759,11 @@ class ProjectController {
     }
   }
 
-  static async getFoldersByProjectId(req, res, db) {
+  static async getFoldersByUpFolderId(req, res, db) {
     try {
-      const ProjectId = req.query.ProjectId;
+      const UpFolderId = req.query.UpFolderId;
 
-      const files = await Project.getFoldersByProjectId(db, ProjectId);
+      const files = await Project.getFoldersByUpFolderId(db, UpFolderId);
       res.status(200).json(files);
     } catch (error) {
       console.error("Error getting files:", error);
@@ -987,8 +987,9 @@ class ProjectController {
     try {
       const ProjectId = req.body.ProjectId;
       const FolderName = req.body.FolderName;
+      const UpFolderId = req.body.UpFolderId;
 
-      await Project.addFolder(db, ProjectId, FolderName);
+      await Project.addFolder(db, ProjectId, FolderName, UpFolderId);
       res.status(200).send("Cartella aggiunta con successo.");
     } catch (error) {
       console.error("Error adding folder:", error);
@@ -1043,6 +1044,18 @@ class ProjectController {
     } catch (error) {
       console.error("Error getting default files:", error);
       res.status(500).send("Default files retrieval failed");
+    }
+  }
+
+  static async getFolderByFolderId(req, res, db) {
+    try {
+      const FolderId = req.query.FolderId;
+
+      const folder = await Project.getFolderByFolderId(db, FolderId);
+      res.status(200).json(folder);
+    } catch (error) {
+      console.error("Error getting folder:", error);
+      res.status(500).send("Folder retrieval failed");
     }
   }
 }
