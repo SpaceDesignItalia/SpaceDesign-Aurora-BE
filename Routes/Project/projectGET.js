@@ -143,8 +143,12 @@ const projectGET = (db) => {
     }
   );
 
-  router.get("/GetFilesByProjectId", authenticateMiddleware, (req, res) => {
-    ProjectController.getFilesByProjectId(req, res, db);
+  router.get("/GetFoldersByUpFolderId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFoldersByUpFolderId(req, res, db);
+  });
+
+  router.get("/GetFilesByFolderId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFilesByFolderId(req, res, db);
   });
 
   router.get("/GetFilesByTaskId", authenticateMiddleware, (req, res) => {
@@ -172,10 +176,18 @@ const projectGET = (db) => {
   );
 
   router.get(
-    "/SearchFilesByProjectIdAndName",
+    "/SearchFolderByProjectIdAndName",
     authenticateMiddleware,
     (req, res) => {
-      ProjectController.searchFilesByProjectIdAndName(req, res, db);
+      ProjectController.searchFolderByProjectIdAndName(req, res, db);
+    }
+  );
+
+  router.get(
+    "/SearchFilesByFolderIdAndName",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.searchFilesByFolderIdAndName(req, res, db);
     }
   );
 
@@ -205,6 +217,26 @@ const projectGET = (db) => {
 
   router.get("/GetChecklistsByTaskId", authenticateMiddleware, (req, res) => {
     ProjectController.getChecklistsByTaskId(req, res, db);
+  });
+
+  router.get("/GetFolderInfoByFolderId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFolderInfoByFolderId(req, res, db);
+  });
+
+  router.get("/GetDefaultProjectFolder", authenticateMiddleware, (req, res) => {
+    ProjectController.getDefaultProjectFolder(req, res, db);
+  });
+
+  router.get(
+    "/GetDefaultFilesByFolderId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getDefaultFilesByFolderId(req, res, db);
+    }
+  );
+
+  router.get("/GetFolderByFolderId", authenticateMiddleware, (req, res) => {
+    ProjectController.getFolderByFolderId(req, res, db);
   });
 
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
