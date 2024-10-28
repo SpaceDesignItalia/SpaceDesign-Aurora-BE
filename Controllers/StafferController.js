@@ -65,7 +65,43 @@ class StafferController {
       res.status(500).send("Recupero del dipendente fallita");
     }
   }
+  static async searchStafferByName(req, res, db) {
+    try {
+      const StafferName = req.query.StafferName;
+      const staffers = await Staffer.searchStafferByName(db, StafferName);
+      res.status(200).json(staffers);
+    } catch (error) {
+      console.error("Errore nel recupero dei dipendenti per nome:", error);
+      res.status(500).send("Recupero dei dipendenti per nome fallito");
+    }
+  }
 
+  static async searchStafferBySurname(req, res, db) {
+    try {
+      const StafferSurname = req.query.StafferSurname;
+      const staffers = await Staffer.searchStafferBySurname(db, StafferSurname);
+      res.status(200).json(staffers);
+    } catch (error) {
+      console.error("Errore nel recupero dei dipendenti per cognome:", error);
+      res.status(500).send("Recupero dei dipendenti per cognome fallito");
+    }
+  }
+
+  static async searchStafferByPhone(req, res, db) {
+    try {
+      const StafferPhone = req.query.StafferPhone;
+      const staffers = await Staffer.searchStafferByPhone(db, StafferPhone);
+      res.status(200).json(staffers);
+    } catch (error) {
+      console.error(
+        "Errore nel recupero dei dipendenti per numero di telefono:",
+        error
+      );
+      res
+        .status(500)
+        .send("Recupero dei dipendenti per numero di telefono fallito");
+    }
+  }
   static async addNewStaffer(req, res, db) {
     try {
       const StafferData = req.body.EmployeeData;

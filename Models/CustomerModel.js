@@ -66,6 +66,48 @@ class CustomerModel {
     });
   }
 
+  static searchCustomerByName(db, CustomerName) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "CustomerId", CONCAT("CustomerName",' ', "CustomerSurname") AS "CustomerFullName", "CustomerEmail", "CustomerPhone" 
+      FROM public."Customer" WHERE "CustomerName" LIKE $1`;
+      db.query(query, [`%${CustomerName}%`], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static searchCustomerBySurname(db, CustomerSurname) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "CustomerId", CONCAT("CustomerName",' ', "CustomerSurname") AS "CustomerFullName", "CustomerEmail", "CustomerPhone" 
+      FROM public."Customer" WHERE "CustomerSurname" LIKE $1`;
+      db.query(query, [`%${CustomerSurname}%`], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static searchCustomerByPhoneNumber(db, CustomerPhone) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "CustomerId", CONCAT("CustomerName",' ', "CustomerSurname") AS "CustomerFullName", "CustomerEmail", "CustomerPhone" 
+      FROM public."Customer" WHERE "CustomerPhone" LIKE $1`;
+      db.query(query, [`%${CustomerPhone}%`], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static addCustomer(db, customerData) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."Customer"("CustomerName", "CustomerSurname", "CustomerEmail", "CustomerPhone", "CustomerPassword")

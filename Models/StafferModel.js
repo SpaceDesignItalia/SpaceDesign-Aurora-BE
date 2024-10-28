@@ -113,6 +113,53 @@ class StafferModel {
       });
     });
   }
+  static searchStafferByName(db, StafferName) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "EmployeeFullName", 
+                     "StafferEmail", "StafferPhone" 
+                     FROM public."Staffer" 
+                     WHERE "StafferName" LIKE $1`;
+      db.query(query, [`%${StafferName}%`], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static searchStafferBySurname(db, StafferSurname) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "EmployeeFullName", 
+                     "StafferEmail", "StafferPhone" 
+                     FROM public."Staffer" 
+                     WHERE "StafferSurname" LIKE $1`;
+      db.query(query, [`%${StafferSurname}%`], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static searchStafferByPhone(db, StafferPhone) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "StafferId", CONCAT("StafferName", ' ', "StafferSurname") AS "EmployeeFullName", 
+                     "StafferEmail", "StafferPhone" 
+                     FROM public."Staffer" 
+                     WHERE "StafferPhone" LIKE $1`;
+      db.query(query, [`%${StafferPhone}%`], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
 
   static addNewStaffer(db, newStafferData, selectedRole) {
     return new Promise((resolve, reject) => {

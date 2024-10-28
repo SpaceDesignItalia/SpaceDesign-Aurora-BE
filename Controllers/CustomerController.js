@@ -50,6 +50,49 @@ class CustomerController {
       res.status(500).send("Recupero dei clienti fallita");
     }
   }
+  static async searchCustomerByName(req, res, db) {
+    try {
+      const CustomerName = req.query.CustomerName;
+      const customers = await Customer.searchCustomerByName(db, CustomerName);
+      res.status(200).json(customers);
+    } catch (error) {
+      console.error("Errore nel recupero dei clienti per nome:", error);
+      res.status(500).send("Recupero dei clienti per nome fallito");
+    }
+  }
+
+  static async searchCustomerBySurname(req, res, db) {
+    try {
+      const CustomerSurname = req.query.CustomerSurname;
+      const customers = await Customer.searchCustomerBySurname(
+        db,
+        CustomerSurname
+      );
+      res.status(200).json(customers);
+    } catch (error) {
+      console.error("Errore nel recupero dei clienti per cognome:", error);
+      res.status(500).send("Recupero dei clienti per cognome fallito");
+    }
+  }
+
+  static async searchCustomerByPhoneNumber(req, res, db) {
+    try {
+      const CustomerPhone = req.query.CustomerPhone;
+      const customers = await Customer.searchCustomerByPhoneNumber(
+        db,
+        CustomerPhone
+      );
+      res.status(200).json(customers);
+    } catch (error) {
+      console.error(
+        "Errore nel recupero dei clienti per numero di telefono:",
+        error
+      );
+      res
+        .status(500)
+        .send("Recupero dei clienti per numero di telefono fallito");
+    }
+  }
 
   static async addCustomer(req, res, db) {
     try {

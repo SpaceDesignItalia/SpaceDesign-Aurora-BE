@@ -1,4 +1,3 @@
-// stafferGET.js
 const express = require("express");
 const router = express.Router();
 const CustomerController = require("../../Controllers/CustomerController");
@@ -26,6 +25,22 @@ const companyGET = (db) => {
   router.get("/SearchCustomerByEmail", authenticateMiddleware, (req, res) => {
     CustomerController.searchCustomerByEmail(req, res, db);
   });
+
+  router.get("/SearchCustomerByName", authenticateMiddleware, (req, res) => {
+    CustomerController.searchCustomerByName(req, res, db);
+  });
+
+  router.get("/SearchCustomerBySurname", authenticateMiddleware, (req, res) => {
+    CustomerController.searchCustomerBySurname(req, res, db);
+  });
+
+  router.get(
+    "/SearchCustomerByPhoneNumber",
+    authenticateMiddleware,
+    (req, res) => {
+      CustomerController.searchCustomerByPhoneNumber(req, res, db);
+    }
+  );
 
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };

@@ -26,6 +26,19 @@ const stafferGET = (db) => {
   router.get("/SearchStafferByEmail", authenticateMiddleware, (req, res) => {
     StafferController.searchStafferByEmail(req, res, db);
   });
+
+  router.get("/SearchStafferByName", authenticateMiddleware, (req, res) => {
+    StafferController.searchStafferByName(req, res, db);
+  });
+
+  router.get("/SearchStafferBySurname", authenticateMiddleware, (req, res) => {
+    StafferController.searchStafferBySurname(req, res, db);
+  });
+
+  router.get("/SearchStafferByPhone", authenticateMiddleware, (req, res) => {
+    StafferController.searchStafferByPhone(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
