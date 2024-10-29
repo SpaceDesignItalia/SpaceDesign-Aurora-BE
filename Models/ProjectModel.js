@@ -61,13 +61,13 @@ class ProjectModel {
   static getAllProjectsTable(db) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId", "ProjectName", "ProjectCreationDate", "ProjectEndDate", CONCAT("StafferName",' ',"StafferSurname") AS "ProjectManagerName", 
-      "StafferImageUrl", "RoleName", "StatusId", "StatusName", "CompanyId", "CompanyName"
+      "StafferImageUrl", "RoleName", "StatusId", "StatusName", "CompanyId", "CompanyName", "UniqueCode"
       FROM public."Project" 
       INNER JOIN public."Staffer" s ON "ProjectManagerId" = s."StafferId" 
       INNER JOIN public."StafferRole" USING ("StafferId") 
       INNER JOIN public."Role" USING("RoleId") 
       INNER JOIN public."Status" USING("StatusId")
-      INNER JOIN public."Company" USING("CompanyId")`;
+      LEFT JOIN public."Company" USING("CompanyId")`;
 
       db.query(query, (error, result) => {
         if (error) {
@@ -768,7 +768,7 @@ class ProjectModel {
       INNER JOIN public."StafferRole" USING ("StafferId") 
       INNER JOIN public."Role" USING("RoleId") 
       INNER JOIN public."Status" USING("StatusId")
-      INNER JOIN public."Company" USING("CompanyId") 
+      LEFT JOIN public."Company" USING("CompanyId") 
       WHERE "ProjectName" ILIKE '%${ProjectName}%'`;
 
       db.query(query, (error, result) => {
@@ -785,7 +785,7 @@ class ProjectModel {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId","CompanyName", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "StatusId", "StatusName" FROM public."Customer"
 	    INNER JOIN public."CustomerCompany" USING("CustomerId")
-	    INNER JOIN public."Company" USING("CompanyId")
+	    LEFT JOIN public."Company" USING("CompanyId")
 	    INNER JOIN public."Project" USING("CompanyId")
 	    INNER JOIN public."Status" USING("StatusId") 
       WHERE "CustomerId" = $1`;
@@ -804,7 +804,7 @@ class ProjectModel {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId","CompanyName", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "StatusId", "StatusName" FROM public."Customer"
 	    INNER JOIN public."CustomerCompany" USING("CustomerId")
-	    INNER JOIN public."Company" USING("CompanyId")
+	    LEFT JOIN public."Company" USING("CompanyId")
 	    INNER JOIN public."Project" USING("CompanyId")
 	    INNER JOIN public."Status" USING("StatusId") 
       WHERE "CustomerId" = $1 AND "ProjectName" ILIKE '%${ProjectName}%'`;
@@ -821,20 +821,21 @@ class ProjectModel {
 
   static getProjectInTeam(db, StafferId) {
     return new Promise((resolve, reject) => {
-      const query = `WITH NotificationCounts AS ( SELECT public."Project"."ProjectId", public."Project"."ProjectName", public."Company"."CompanyName", 
+      const query = `WITH NotificationCounts AS ( SELECT public."Project"."ProjectId", public."Project"."ProjectName", public."Company"."CompanyName", public."Project"."UniqueCode", 
       COUNT(CASE WHEN public."NotificationExtraData"."IsRead" = false THEN public."NotificationInfo"."NotificationId" END) AS "NotificationCount",
       bool_or(public."NotificationExtraData"."IsRead" = false) AS "HasUnread"
       FROM public."ProjectTeam" 
       INNER JOIN public."Project" USING("ProjectId") 
-      INNER JOIN public."Company" USING("CompanyId") 
+      LEFT JOIN public."Company" USING("CompanyId") 
       LEFT JOIN public."NotificationExtraData" ON public."ProjectTeam"."StafferId" = public."NotificationExtraData"."UserId"
       LEFT JOIN public."NotificationInfo" ON public."NotificationExtraData"."NotificationId" = public."NotificationInfo"."NotificationId" 
       AND public."NotificationInfo"."ProjectId" = public."Project"."ProjectId"
       WHERE public."ProjectTeam"."StafferId" = $1
       GROUP BY public."Project"."ProjectId", 
       public."Project"."ProjectName", 
-      public."Company"."CompanyName")
-      SELECT "ProjectId", "ProjectName", "CompanyName", "NotificationCount"
+      public."Company"."CompanyName",
+      public."Project"."UniqueCode")
+      SELECT "ProjectId", "ProjectName", "CompanyName", "NotificationCount", "UniqueCode"
       FROM NotificationCounts
       WHERE ("HasUnread" = true OR "NotificationCount" = 0);`;
 
@@ -848,7 +849,13 @@ class ProjectModel {
     });
   }
 
-  static addTask(db, TaskData, FormattedDate, FormattedCreationDate) {
+  static addTask(
+    db,
+    TaskData,
+    FormattedDate,
+    FormattedCreationDate,
+    ProjectId
+  ) {
     return new Promise((resolve, reject) => {
       const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectTaskCreation", "ProjectId")
       VALUES ($1, $2, $3, $4, $5) RETURNING *`;
@@ -858,7 +865,7 @@ class ProjectModel {
         TaskData.ProjectTaskDescription,
         FormattedDate,
         FormattedCreationDate,
-        TaskData.ProjectId,
+        ProjectId,
       ];
 
       db.query(query, values, (error, result) => {
@@ -1337,6 +1344,21 @@ class ProjectModel {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectFolder" WHERE "FolderId" = $1`;
       db.query(query, [FolderId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async getProjectByUniqueCode(db, UniqueCode) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "Project"."ProjectId", "Project"."ProjectName", "Company"."CompanyName" FROM public."Project" 
+      LEFT JOIN public."Company" USING("CompanyId")
+      WHERE "UniqueCode" = $1`;
+      db.query(query, [UniqueCode], (error, result) => {
         if (error) {
           reject(error);
         } else {
