@@ -239,6 +239,10 @@ const projectGET = (db) => {
     ProjectController.getFolderByFolderId(req, res, db);
   });
 
+  router.get("/GetProjectByUniqueCode", authenticateMiddleware, (req, res) => {
+    ProjectController.getProjectByUniqueCode(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

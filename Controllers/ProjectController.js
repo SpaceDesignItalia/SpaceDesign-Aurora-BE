@@ -567,11 +567,13 @@ class ProjectController {
       const TaskData = req.body.TaskData;
       const FormattedDate = req.body.FormattedDate;
       const FormattedCreationDate = req.body.FormattedCreationDate;
+      const ProjectId = req.body.ProjectId;
       const Task = await Project.addTask(
         db,
         TaskData,
         FormattedDate,
-        FormattedCreationDate
+        FormattedCreationDate,
+        ProjectId
       );
       this.addMemberToTask(TaskData, Task.ProjectTaskId, db);
       this.addTagToTask(TaskData, Task.ProjectTaskId, db);
@@ -1056,6 +1058,18 @@ class ProjectController {
     } catch (error) {
       console.error("Error getting folder:", error);
       res.status(500).send("Folder retrieval failed");
+    }
+  }
+
+  static async getProjectByUniqueCode(req, res, db) {
+    try {
+      const UniqueCode = req.query.UniqueCode;
+
+      const project = await Project.getProjectByUniqueCode(db, UniqueCode);
+      res.status(200).json(project);
+    } catch (error) {
+      console.error("Error getting project:", error);
+      res.status(500).send("Project retrieval failed");
     }
   }
 }
