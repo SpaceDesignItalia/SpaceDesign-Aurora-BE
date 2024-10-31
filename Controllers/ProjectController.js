@@ -666,12 +666,15 @@ class ProjectController {
         FilePath
       );
 
-      fs.unlink(fullFilePath, (err) => {
-        if (err) {
-          console.error("Error deleting file:", err);
-          return res.status(500).send("Error deleting file");
-        }
-      });
+      if (fs.existsSync(fullFilePath)) {
+        fs.unlink(fullFilePath, (err) => {
+          if (err) {
+            console.error("Error deleting file:", err);
+          }
+        });
+      } else {
+        console.error("File not found");
+      }
 
       await Project.removeFile(db, FilePath, FolderId);
       res.status(200).send("File rimosso con successo.");
