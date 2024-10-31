@@ -1075,6 +1075,18 @@ class ProjectController {
       res.status(500).send("Project retrieval failed");
     }
   }
+
+  static async renameFile(req, res, db) {
+    try {
+      const { fileId, newName } = req.body;
+
+      await Project.renameFile(db, fileId, newName);
+      res.status(200).send("File rinominato con successo.");
+    } catch (error) {
+      console.error("Error renaming file:", error);
+      res.status(500).send("File rename failed");
+    }
+  }
 }
 
 module.exports = ProjectController;

@@ -33,6 +33,10 @@ const projectUPDATE = (db) => {
   router.put("/UpdateFolder", authenticateMiddleware, (req, res) => {
     ProjectController.updateFolder(req, res, db);
   });
+
+  router.put("/RenameFile", authenticateMiddleware, (req, res) => {
+    ProjectController.renameFile(req, res, db);
+  });
   return router;
 };
 

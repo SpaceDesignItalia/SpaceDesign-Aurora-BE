@@ -1367,6 +1367,19 @@ class ProjectModel {
       });
     });
   }
+
+  static async renameFile(db, FileId, newFileName) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectFiles" SET "FileName" = $1 WHERE "ProjectFileId" = $2`;
+      db.query(query, [newFileName, FileId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;
