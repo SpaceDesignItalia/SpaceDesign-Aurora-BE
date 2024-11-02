@@ -29,7 +29,7 @@ class ProjectModel {
 
   static getAllManagers(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "RoleName" FROM public."Staffer"
+      const query = `SELECT "StafferId", CONCAT("StafferName",' ',"StafferSurname") AS "StafferFullName", "StafferEmail", "RoleName", "StafferImageUrl" FROM public."Staffer"
       INNER JOIN public."StafferRole" USING("StafferId")
       INNER JOIN public."Role" USING("RoleId")
       WHERE "RoleName" = 'CEO' OR "RoleName" = 'Project Manager'`;
