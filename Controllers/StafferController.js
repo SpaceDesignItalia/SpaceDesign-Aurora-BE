@@ -72,16 +72,25 @@ class StafferController {
       const SelectedRole = req.body.SelectedRole;
 
       await Staffer.addNewStaffer(db, StafferData, SelectedRole);
+
+      // Sending welcome email if staffer is added successfully
       EmailService.sendStafferWelcomeMail(
         StafferData.EmployeeEmail,
         StafferData.EmployeeName,
         StafferData.EmployeeSurname,
         StafferData.EmployeePassword
       );
+
       res.status(200).send("Dipendente aggiunto con successo.");
     } catch (error) {
       console.error("Errore nell'aggiunta del dipendente:", error);
-      res.status(500).send("Aggiunta del dipendente fallita");
+
+      // Handle conflict error (409)
+      if (error.message === "Un dipendente con la stessa email esiste già.") {
+        res.status(409).send("Un dipendente con la stessa email esiste già.");
+      } else {
+        res.status(500).send("Aggiunta del dipendente fallita");
+      }
     }
   }
 
@@ -94,7 +103,20 @@ class StafferController {
       res.status(200).send("Dipendente modificato con successo.");
     } catch (error) {
       console.error("Errore nella modifica del dipendente:", error);
-      res.status(500).send("Modifica del dipendente fallita");
+
+      // Check if the error message indicates a conflict (409 status)
+      if (
+        error.message ===
+        "Conflict: Another staffer with the same email exists."
+      ) {
+        res
+          .status(409)
+          .send(
+            "Impossibile modificare il dipendente: un altro dipendente ha già la stessa email."
+          );
+      } else {
+        res.status(500).send("Modifica del dipendente fallita.");
+      }
     }
   }
 
