@@ -86,18 +86,29 @@ class CompanyController {
   static async updateCompanyData(req, res, db) {
     try {
       const CompanyData = req.body.CompanyData;
+
+      // Esegui l'aggiornamento dell'azienda
       await Company.updateCompanyData(db, CompanyData);
+
       res.status(200).send("Azienda modificata con successo.");
     } catch (error) {
-      console.error("Errore nel'aggiornamento dell'azienda:", error);
-      res.status(500).send("Aggiornamento dell'azienda fallita");
+      if (
+        error.message.includes(
+          "Il nome dell'azienda è già utilizzato da un'altra azienda."
+        )
+      ) {
+        return res.status(409).send(error.message); // Restituisce 409 se c'è un conflitto
+      }
+
+      console.error("Errore nell'aggiornamento dell'azienda:", error);
+      res.status(500).send("Aggiornamento dell'azienda fallito");
     }
   }
 
   static async deleteCompany(req, res, db) {
     try {
-      const CompanyData = req.query.CompanyData;
-      await Company.deleteCompany(db, CompanyData);
+      const CompanyId = req.query.CompanyId;
+      await Company.deleteCompany(db, CompanyId);
       res.status(200).send("Azienda eliminata con successo.");
     } catch (error) {
       console.error("Errore nell'eliminazione dell'azienda:", error);

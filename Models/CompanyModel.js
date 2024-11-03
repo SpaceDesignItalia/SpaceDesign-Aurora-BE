@@ -114,31 +114,53 @@ class CompanyModel {
 
   static updateCompanyData(db, CompanyData) {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE public."Company" SET "CompanyName" = $1, "CompanyAddress" = $2, "CompanyEmail" = $3, "CompanyPhone" = $4 WHERE "CompanyId" =  $5`;
+      // Prima query: verifica se esiste già un'azienda con lo stesso nome
+      const checkQuery = `SELECT "CompanyId" FROM public."Company" WHERE "CompanyName" = $1 AND "CompanyId" != $2`;
+      const checkValues = [CompanyData.CompanyName, CompanyData.CompanyId];
 
-      const values = [
-        CompanyData.CompanyName,
-        CompanyData.CompanyAddress,
-        CompanyData.CompanyEmail,
-        CompanyData.CompanyPhone,
-        CompanyData.CompanyId,
-      ];
-
-      db.query(query, values, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result.rows); // Restituisce eventuali righe risultanti, se necessario
+      db.query(checkQuery, checkValues, (checkError, checkResult) => {
+        if (checkError) {
+          return reject(checkError); // In caso di errore, restituisce subito l'errore
         }
+
+        // Se esiste un'azienda con lo stesso nome (diversa dall'attuale), rifiuta l'aggiornamento
+        if (checkResult.rows.length > 0) {
+          return reject(
+            new Error(
+              "Il nome dell'azienda è già utilizzato da un'altra azienda."
+            )
+          );
+        }
+
+        // Se non ci sono duplicati, procedi con l'aggiornamento
+        const updateQuery = `
+          UPDATE public."Company" 
+          SET "CompanyName" = $1, "CompanyAddress" = $2, "CompanyEmail" = $3, "CompanyPhone" = $4 
+          WHERE "CompanyId" = $5
+        `;
+        const updateValues = [
+          CompanyData.CompanyName,
+          CompanyData.CompanyAddress,
+          CompanyData.CompanyEmail,
+          CompanyData.CompanyPhone,
+          CompanyData.CompanyId,
+        ];
+
+        db.query(updateQuery, updateValues, (updateError, updateResult) => {
+          if (updateError) {
+            return reject(updateError); // Restituisce l'errore di aggiornamento, se presente
+          }
+          resolve(updateResult.rows); // Restituisce le righe risultanti, se necessario
+        });
       });
     });
   }
 
-  static deleteCompany(db, CompanyData) {
+  static deleteCompany(db, CompanyId) {
     return new Promise((resolve, reject) => {
       const query = `DELETE FROM public."Company" WHERE "CompanyId" = $1`;
 
-      db.query(query, [CompanyData.CompanyId], (error, result) => {
+      db.query(query, [CompanyId], (error, result) => {
         if (error) {
           reject(error);
         } else {
