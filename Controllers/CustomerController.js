@@ -55,6 +55,8 @@ class CustomerController {
     try {
       const customerData = req.body.CustomerData;
       await Customer.addCustomer(db, customerData);
+
+      // Send a welcome email upon successful customer creation
       EmailService.sendCustomerWelcomeMail(
         customerData.CustomerEmail,
         customerData.CustomerName,
@@ -63,8 +65,14 @@ class CustomerController {
       );
       res.status(200).send("Cliente aggiunto con successo.");
     } catch (error) {
-      console.error("Error nell'aggiungere il cliente:", error);
-      res.status(500).send("Aggiunta del cliente fallita.");
+      console.error("Errore nell'aggiungere il cliente:", error);
+
+      // Check for duplicate email error based on error message or custom error code
+      if (error.message === "Un cliente con questa email esiste già.") {
+        res.status(409).send("Esiste già un cliente con questa email.");
+      } else {
+        res.status(500).send("Aggiunta del cliente fallita.");
+      }
     }
   }
 
@@ -72,11 +80,22 @@ class CustomerController {
     try {
       const CustomerData = req.body.CustomerData;
       const OldCompanyId = req.body.OldCompanyId;
+
+      // Attempt to update customer data
       await Customer.updateCustomerData(db, CustomerData, OldCompanyId);
+
       res.status(200).send("Cliente modificato con successo.");
     } catch (error) {
-      console.error("Errore nel'aggiornamento del cliente:", error);
-      res.status(500).send("Aggiornamento del cliente fallita");
+      console.error("Errore nell'aggiornamento del cliente:", error);
+
+      // Check if the error is a 409 conflict error
+      if (error.statusCode === 409) {
+        // Send 409 Conflict status if email already exists
+        res.status(409).send("Email già in uso da un altro cliente.");
+      } else {
+        // Handle any other errors as a 500 Internal Server Error
+        res.status(500).send("Aggiornamento del cliente fallito.");
+      }
     }
   }
 
@@ -144,8 +163,9 @@ class CustomerController {
 
   static async deleteCustomer(req, res, db) {
     try {
-      const CustomerData = req.query.CustomerData;
-      await Customer.deleteCustomer(db, CustomerData);
+      const CustomerId = req.query.CustomerId;
+      console.log(CustomerId);
+      await Customer.deleteCustomer(db, CustomerId);
       res.status(200).send("Cliente eliminato con successo.");
     } catch (error) {
       console.error("Errore nell'eliminazione del cliente:", error);
