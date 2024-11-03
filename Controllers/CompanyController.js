@@ -64,11 +64,22 @@ class CompanyController {
   static async addCompany(req, res, db) {
     try {
       const companyData = req.body;
+
+      // Chiama il metodo per aggiungere l'azienda e gestisce il caso di duplicato
       await Company.addCompany(companyData, db);
+
+      // Risposta di successo
       res.status(200).send("Azienda aggiunta con successo.");
     } catch (error) {
-      console.error("Error nell'aggiungere l'azienda:", error);
-      res.status(500).send("Aggiunta dell'azienda fallita.");
+      console.error("Errore nell'aggiungere l'azienda:", error);
+
+      // Se l'errore è relativo al nome duplicato, risponde con 409 Conflict
+      if (error.message === "Un'azienda con questo nome esiste già.") {
+        res.status(409).send("Esiste già un'azienda con questo nome.");
+      } else {
+        // Altrimenti, restituisce un errore generico
+        res.status(500).send("Aggiunta dell'azienda fallita.");
+      }
     }
   }
 
