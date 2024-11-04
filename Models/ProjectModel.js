@@ -58,7 +58,7 @@ class ProjectModel {
     });
   }
 
-  static getAllProjectsTable(db) {
+  static getAllProjectsTable(db, StafferId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectId", "ProjectName", "ProjectCreationDate", "ProjectEndDate", CONCAT("StafferName",' ',"StafferSurname") AS "ProjectManagerName", 
       "StafferImageUrl", "RoleName", "StatusId", "StatusName", "CompanyId", "CompanyName", "UniqueCode"
@@ -66,10 +66,12 @@ class ProjectModel {
       INNER JOIN public."Staffer" s ON "ProjectManagerId" = s."StafferId" 
       INNER JOIN public."StafferRole" USING ("StafferId") 
       INNER JOIN public."Role" USING("RoleId") 
+      INNER JOIN public."ProjectTeam" USING("ProjectId")
       INNER JOIN public."Status" USING("StatusId")
-      LEFT JOIN public."Company" USING("CompanyId")`;
+      LEFT JOIN public."Company" USING("CompanyId")
+      WHERE public."ProjectTeam"."StafferId" = $1`;
 
-      db.query(query, (error, result) => {
+      db.query(query, [StafferId], (error, result) => {
         if (error) {
           reject(error);
         } else {

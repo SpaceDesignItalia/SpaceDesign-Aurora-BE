@@ -47,7 +47,8 @@ class ProjectController {
 
   static async getAllProjectsTable(req, res, db) {
     try {
-      const projects = await Project.getAllProjectsTable(db);
+      const StafferId = req.session.account.StafferId;
+      const projects = await Project.getAllProjectsTable(db, StafferId);
       res.status(200).json(projects);
     } catch (error) {
       console.error("Errore nel recupero dei progetti:", error);
