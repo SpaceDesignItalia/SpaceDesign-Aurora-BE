@@ -7,6 +7,18 @@ const fs = require("fs");
 const https = require("https");
 const createSocketServer = require("./socket"); // Importa il modulo socket
 
+const createAuthenticationRoutes = require("./Routes/Authentication/Authentication");
+const createStafferRoutes = require("./Routes/Staffer/Staffer");
+const createPermissionRoutes = require("./Routes/Permission/Permission");
+const createCompanyRoutes = require("./Routes/Company/Company");
+const createCustomerRoutes = require("./Routes/Customer/Customer");
+const createProjectRoutes = require("./Routes/Project/Project");
+const createChatRoutes = require("./Routes/Chat/Chat");
+const createTicketRoutes = require("./Routes/Ticket/Ticket");
+const createNotificationRoutes = require("./Routes/Notification/Notification");
+const createLeadRoutes = require("./Routes/Lead/Lead");
+const createFileiconRoutes = require("./Routes/FileIcon/Fileicon");
+
 // Percorso ai certificati
 const privateKey = fs.readFileSync("./SSL/privateKey.key", "utf8");
 const certificate = fs.readFileSync("./SSL/certificate.cer", "utf8");
