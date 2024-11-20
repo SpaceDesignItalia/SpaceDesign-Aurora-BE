@@ -230,45 +230,91 @@ class ProjectModel {
 
   static addProject(db, ProjectData) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."Project"("ProjectName", "ProjectDescription", "ProjectEndDate", "ProjectManagerId", "ProjectBannerId", "CompanyId")
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+      // Step 1: Check if a project with the same name already exists for the same company
+      const checkDuplicateQuery = `
+            SELECT "ProjectId" FROM public."Project"
+            WHERE "ProjectName" = $1 AND "CompanyId" = $2;
+        `;
 
-      const values = [
-        ProjectData.ProjectName,
-        ProjectData.ProjectDescription,
-        ProjectData.ProjectEndDate,
-        ProjectData.ProjectManagerId,
-        ProjectData.ProjectBannerId,
-        ProjectData.CompanyId,
-      ];
+      db.query(
+        checkDuplicateQuery,
+        [ProjectData.ProjectName, ProjectData.CompanyId],
+        (checkError, checkResult) => {
+          if (checkError) {
+            return reject(checkError);
+          }
 
-      db.query(query, values, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          const query = `INSERT INTO public."ProjectTeam" ("ProjectId", "StafferId") VALUES ($1, $2) RETURNING *`;
+          // If a project with the same name exists, reject with a conflict error
+          if (checkResult.rows.length > 0) {
+            const conflictError = new Error(
+              "A project with this name already exists for the specified company."
+            );
+            conflictError.statusCode = 409; // Conflict
+            return reject(conflictError);
+          }
 
-          const values = [
-            result.rows[0].ProjectId,
+          // Step 2: Insert the new project if no conflict
+          const insertProjectQuery = `
+                    INSERT INTO public."Project"("ProjectName", "ProjectDescription", "ProjectEndDate", "ProjectManagerId", "ProjectBannerId", "CompanyId")
+                    VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;
+                `;
+
+          const projectValues = [
+            ProjectData.ProjectName,
+            ProjectData.ProjectDescription,
+            ProjectData.ProjectEndDate,
             ProjectData.ProjectManagerId,
+            ProjectData.ProjectBannerId,
+            ProjectData.CompanyId,
           ];
 
-          db.query(query, values, (error, result) => {
-            if (error) {
-              reject(error);
-            } else {
-              const query = `INSERT INTO public."ProjectFolder" ("ProjectId", "FolderName", "CustomerVisible", "TeamVisible") VALUES ($1, 'Default', false, true) RETURNING *`;
-              db.query(query, [result.rows[0].ProjectId], (error, result) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(result.rows[0].ProjectId);
+          db.query(
+            insertProjectQuery,
+            projectValues,
+            (insertError, insertResult) => {
+              if (insertError) {
+                return reject(insertError);
+              }
+
+              const projectId = insertResult.rows[0].ProjectId;
+
+              // Step 3: Insert the project manager into the ProjectTeam
+              const insertTeamQuery = `
+                        INSERT INTO public."ProjectTeam" ("ProjectId", "StafferId")
+                        VALUES ($1, $2) RETURNING *;
+                    `;
+
+              db.query(
+                insertTeamQuery,
+                [projectId, ProjectData.ProjectManagerId],
+                (teamError, teamResult) => {
+                  if (teamError) {
+                    return reject(teamError);
+                  }
+
+                  // Step 4: Create a default folder for the project
+                  const insertFolderQuery = `
+                            INSERT INTO public."ProjectFolder" ("ProjectId", "FolderName", "CustomerVisible", "TeamVisible")
+                            VALUES ($1, 'Default', false, true) RETURNING *;
+                        `;
+
+                  db.query(
+                    insertFolderQuery,
+                    [projectId],
+                    (folderError, folderResult) => {
+                      if (folderError) {
+                        return reject(folderError);
+                      }
+
+                      resolve(projectId);
+                    }
+                  );
                 }
-              });
+              );
             }
-          });
+          );
         }
-      });
+      );
     });
   }
 
@@ -329,26 +375,60 @@ class ProjectModel {
 
   static updateProject(db, ProjectData) {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE public."Project" SET "ProjectName" = $1, "ProjectDescription" = $2, "ProjectCreationDate" = $3, 
-      "ProjectEndDate" = $4, "ProjectManagerId" = $5, "CompanyId" = $6, "StatusId" = $7 WHERE "ProjectId" = $8`;
+      // Step 1: Check for an existing project with the same name for the company, excluding the current project
+      const checkQuery = `
+          SELECT "ProjectId" FROM public."Project"
+          WHERE "ProjectName" = $1 
+          AND ("CompanyId" = $2 OR ("CompanyId" IS NULL AND $2 IS NULL))
+          AND "ProjectId" <> $3;
+        `;
 
-      const values = [
+      const checkValues = [
         ProjectData.ProjectName,
-        ProjectData.ProjectDescription,
-        ProjectData.ProjectCreationDate,
-        ProjectData.ProjectEndDate,
-        ProjectData.ProjectManagerId,
         ProjectData.CompanyId,
-        ProjectData.StatusId,
         ProjectData.ProjectId,
       ];
 
-      db.query(query, values, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result.rows);
+      db.query(checkQuery, checkValues, (checkErr, checkResult) => {
+        if (checkErr) {
+          return reject(checkErr);
         }
+
+        // If another project with the same name exists for the company, return a 409 error
+        if (checkResult.rows.length > 0) {
+          const conflictError = new Error(
+            "Un progetto con questo nome esiste già per l'azienda specificata."
+          );
+          conflictError.statusCode = 409; // Conflict
+          return reject(conflictError);
+        }
+
+        // Step 2: Proceed with the project update if no conflict
+        const updateQuery = `
+              UPDATE public."Project"
+              SET "ProjectName" = $1, "ProjectDescription" = $2, "ProjectCreationDate" = $3, 
+                  "ProjectEndDate" = $4, "ProjectManagerId" = $5, "CompanyId" = $6, "StatusId" = $7
+              WHERE "ProjectId" = $8;
+            `;
+
+        const updateValues = [
+          ProjectData.ProjectName,
+          ProjectData.ProjectDescription,
+          ProjectData.ProjectCreationDate,
+          ProjectData.ProjectEndDate,
+          ProjectData.ProjectManagerId,
+          ProjectData.CompanyId,
+          ProjectData.StatusId,
+          ProjectData.ProjectId,
+        ];
+
+        db.query(updateQuery, updateValues, (updateErr, result) => {
+          if (updateErr) {
+            reject(updateErr);
+          } else {
+            resolve(result.rows);
+          }
+        });
       });
     });
   }
