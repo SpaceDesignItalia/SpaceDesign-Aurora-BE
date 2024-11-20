@@ -3,26 +3,25 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
-const http = require("http");
-const createSocketServer = require("./socket"); // Import the socket module
+const fs = require("fs");
+const https = require("https");
+const createSocketServer = require("./socket"); // Importa il modulo socket
 
-// Main Routes declaration
-const createAuthenticationRoutes = require("./Routes/Authentication/Authentication");
-const createStafferRoutes = require("./Routes/Staffer/Staffer");
-const createPermissionRoutes = require("./Routes/Permission/Permission");
-const createCompanyRoutes = require("./Routes/Company/Company");
-const createCustomerRoutes = require("./Routes/Customer/Customer");
-const createProjectRoutes = require("./Routes/Project/Project");
-const createChatRoutes = require("./Routes/Chat/Chat");
-const createTicketRoutes = require("./Routes/Ticket/Ticket");
-const createNotificationRoutes = require("./Routes/Notification/Notification");
-const createLeadRoutes = require("./Routes/Lead/Lead");
-const createFileiconRoutes = require("./Routes/FileIcon/Fileicon");
+// Percorso ai certificati
+const privateKey = fs.readFileSync("./SSL/privateKey.key", "utf8");
+const certificate = fs.readFileSync("./SSL/certificate.cer", "utf8");
+const ca = fs.readFileSync("./SSL/SpaceDesignAurora.pem", "utf8");
+
+const credentials = {
+  key: privateKey,
+  cert: certificate,
+  ca: ca,
+};
 
 const app = express();
 app.use(express.static("public"));
 const PREFIX = "/API/v1";
-const PORT = 3000;
+const PORT = 443; // Porta HTTPS standard
 
 const db = require("./configs/Database");
 
@@ -48,11 +47,11 @@ app.use(
 );
 app.use(cookieParser());
 
-// Create HTTP server
-const server = http.createServer(app);
+// Crea il server HTTPS
+const server = https.createServer(credentials, app);
 
 // Initialize Socket.IO
-const io = createSocketServer(server); // Correct socket server initialization
+const io = createSocketServer(server);
 
 // Main routes
 app.use(PREFIX + "/Authentication", createAuthenticationRoutes(db));
@@ -67,9 +66,9 @@ app.use(PREFIX + "/Notification", createNotificationRoutes(db));
 app.use(PREFIX + "/Lead", createLeadRoutes(db));
 app.use(PREFIX + "/Fileicon", createFileiconRoutes());
 
-// Start the server
+// Avvia il server HTTPS
 server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`Server HTTPS listening on port ${PORT}`);
 });
 
 module.exports = server;
