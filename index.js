@@ -79,14 +79,4 @@ server.listen(PORT, () => {
   console.log(`Server HTTPS listening on port ${PORT}`);
 });
 
-// Crea un server HTTP per reindirizzare tutte le richieste a HTTPS
-http
-  .createServer((req, res) => {
-    res.writeHead(301, { Location: `https://${req.headers.host}${req.url}` });
-    res.end();
-  })
-  .listen(80, () => {
-    console.log("HTTP server listening on port 80, redirecting to HTTPS");
-  });
-
 module.exports = server;
