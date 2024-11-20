@@ -195,116 +195,187 @@ class PermissionModel {
 
   static async addRole(db, RoleData, RolePermissionData) {
     return new Promise((resolve, reject) => {
-      const insertRoleQuery = `
-        INSERT INTO public."Role" ("RoleName", "RoleDescription", "RolePriority")
-        VALUES ($1, $2, $3)
-        RETURNING "RoleId";
+      // Check for existing role with the same name
+      const checkRoleQuery = `
+        SELECT "RoleId" FROM public."Role" WHERE "RoleName" = $1;
       `;
 
-      const roleValues = [
-        RoleData.RoleName,
-        RoleData.RoleDescription,
-        RoleData.RolePriority,
-      ];
-
-      db.query(insertRoleQuery, roleValues, (roleError, roleResult) => {
-        if (roleError) {
-          return reject(roleError);
-        }
-
-        const newRoleId = roleResult.rows[0].RoleId;
-
-        const insertRolePermissionQuery = `
-          INSERT INTO public."RolePermission" ("RoleId", "PermissionId")
-          VALUES ($1, $2);
-        `;
-
-        const rolePermissionPromises = RolePermissionData.map((permission) => {
-          return new Promise((resolve, reject) => {
-            db.query(
-              insertRolePermissionQuery,
-              [newRoleId, permission.PermissionId],
-              (permissionError) => {
-                if (permissionError) {
-                  return reject(permissionError);
-                }
-                resolve();
-              }
-            );
-          });
-        });
-
-        Promise.all(rolePermissionPromises)
-          .then(() => {
-            resolve({ RoleId: newRoleId });
-          })
-          .catch((permissionError) => {
-            reject(permissionError);
-          });
-      });
-    });
-  }
-  static async updateRole(db, RoleId, RoleData, RolePermissionData) {
-    return new Promise((resolve, reject) => {
-      const updateRoleQuery = `
-        UPDATE public."Role"
-        SET "RoleName" = $1, "RoleDescription" = $2, "RolePriority" = $3
-        WHERE "RoleId" = $4;
-      `;
-
-      const roleValues = [
-        RoleData.RoleName,
-        RoleData.RoleDescription,
-        RoleData.RolePriority,
-        RoleId,
-      ];
-
-      db.query(updateRoleQuery, roleValues, (roleError) => {
-        if (roleError) {
-          return reject(roleError);
-        }
-
-        const deleteRolePermissionsQuery = `
-          DELETE FROM public."RolePermission"
-          WHERE "RoleId" = $1;
-        `;
-
-        db.query(deleteRolePermissionsQuery, [RoleId], (deleteError) => {
-          if (deleteError) {
-            return reject(deleteError);
+      db.query(
+        checkRoleQuery,
+        [RoleData.RoleName],
+        (checkError, checkResult) => {
+          if (checkError) {
+            return reject({
+              message: "Errore nel controllo del ruolo esistente.",
+              error: checkError,
+            });
           }
 
-          const insertRolePermissionQuery = `
+          // If a role with the same name exists, reject the promise
+          if (checkResult.rows.length > 0) {
+            return reject({ message: "Un ruolo con questo nome esiste già." });
+          }
+
+          // Insert the new role
+          const insertRoleQuery = `
+          INSERT INTO public."Role" ("RoleName", "RoleDescription", "RolePriority")
+          VALUES ($1, $2, $3)
+          RETURNING "RoleId";
+        `;
+
+          const roleValues = [
+            RoleData.RoleName,
+            RoleData.RoleDescription,
+            RoleData.RolePriority,
+          ];
+
+          db.query(insertRoleQuery, roleValues, (roleError, roleResult) => {
+            if (roleError) {
+              return reject({
+                message: "Errore durante l'inserimento del ruolo.",
+                error: roleError,
+              });
+            }
+
+            const newRoleId = roleResult.rows[0].RoleId;
+
+            // Insert role permissions
+            const insertRolePermissionQuery = `
             INSERT INTO public."RolePermission" ("RoleId", "PermissionId")
             VALUES ($1, $2);
           `;
 
-          const rolePermissionPromises = RolePermissionData.map(
-            (permission) => {
-              return new Promise((resolve, reject) => {
-                db.query(
-                  insertRolePermissionQuery,
-                  [RoleId, permission.PermissionId],
-                  (permissionError) => {
-                    if (permissionError) {
-                      return reject(permissionError);
+            const rolePermissionPromises = RolePermissionData.map(
+              (permission) => {
+                return new Promise((resolve, reject) => {
+                  db.query(
+                    insertRolePermissionQuery,
+                    [newRoleId, permission.PermissionId],
+                    (permissionError) => {
+                      if (permissionError) {
+                        return reject({
+                          message: "Errore durante l'inserimento dei permessi.",
+                          error: permissionError,
+                        });
+                      }
+                      resolve();
                     }
-                    resolve();
+                  );
+                });
+              }
+            );
+
+            Promise.all(rolePermissionPromises)
+              .then(() => {
+                resolve({ RoleId: newRoleId });
+              })
+              .catch((permissionError) => {
+                reject({
+                  message: "Errore durante l'inserimento dei permessi.",
+                  error: permissionError,
+                });
+              });
+          });
+        }
+      );
+    });
+  }
+
+  static async updateRole(db, RoleId, RoleData, RolePermissionData) {
+    return new Promise((resolve, reject) => {
+      // Step 1: Check if the new role name already exists (excluding the current RoleId)
+      const checkRoleNameQuery = `
+            SELECT "RoleId"
+            FROM public."Role"
+            WHERE "RoleName" = $1 AND "RoleId" != $2;
+        `;
+
+      db.query(
+        checkRoleNameQuery,
+        [RoleData.RoleName, RoleId],
+        (checkError, checkResult) => {
+          if (checkError) {
+            return reject(checkError);
+          } else if (checkResult.rows.length > 0) {
+            // Role name already in use by another role
+            const error = new Error(
+              "Conflict: Another role with the same name exists."
+            );
+            error.statusCode = 409; // Conflict
+            return reject(error);
+          } else {
+            // Step 2: Proceed with the update if no duplicate role name
+            const updateRoleQuery = `
+                    UPDATE public."Role"
+                    SET "RoleName" = $1, "RoleDescription" = $2, "RolePriority" = $3
+                    WHERE "RoleId" = $4;
+                `;
+            const roleValues = [
+              RoleData.RoleName,
+              RoleData.RoleDescription,
+              RoleData.RolePriority,
+              RoleId,
+            ];
+
+            db.query(
+              updateRoleQuery,
+              roleValues,
+              (updateError, updateResult) => {
+                if (updateError) {
+                  return reject(updateError);
+                }
+
+                // Step 3: Delete existing role permissions
+                const deleteRolePermissionsQuery = `
+                        DELETE FROM public."RolePermission"
+                        WHERE "RoleId" = $1;
+                    `;
+
+                db.query(
+                  deleteRolePermissionsQuery,
+                  [RoleId],
+                  (deleteError) => {
+                    if (deleteError) {
+                      return reject(deleteError);
+                    }
+
+                    // Step 4: Insert new role permissions
+                    const insertRolePermissionQuery = `
+                            INSERT INTO public."RolePermission" ("RoleId", "PermissionId")
+                            VALUES ($1, $2);
+                        `;
+
+                    const rolePermissionPromises = RolePermissionData.map(
+                      (permission) => {
+                        return new Promise((resolve, reject) => {
+                          db.query(
+                            insertRolePermissionQuery,
+                            [RoleId, permission.PermissionId],
+                            (permissionError) => {
+                              if (permissionError) {
+                                return reject(permissionError);
+                              }
+                              resolve();
+                            }
+                          );
+                        });
+                      }
+                    );
+
+                    Promise.all(rolePermissionPromises)
+                      .then(() => {
+                        resolve({ RoleId: RoleId });
+                      })
+                      .catch((permissionError) => {
+                        reject(permissionError);
+                      });
                   }
                 );
-              });
-            }
-          );
-
-          Promise.all(rolePermissionPromises)
-            .then(() => {
-              resolve({ RoleId: RoleId });
-            })
-            .catch((permissionError) => {
-              reject(permissionError);
-            });
-        });
-      });
+              }
+            );
+          }
+        }
+      );
     });
   }
 

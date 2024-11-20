@@ -24,6 +24,8 @@ const storage = multer.diskStorage({
   },
 });
 
+const upload = multer({ storage: storage });
+
 const projectPOST = (db) => {
   router.post("/AddProject", authenticateMiddleware, (req, res) => {
     ProjectController.addProject(req, res, db);
@@ -60,8 +62,6 @@ const projectPOST = (db) => {
   router.post("/AddTask", authenticateMiddleware, (req, res) => {
     ProjectController.addTask(req, res, db);
   });
-
-  const upload = multer({ storage: storage });
 
   router.post("/UploadFile", upload.array("files"), (req, res) => {
     ProjectController.uploadFiles(req, res, db);

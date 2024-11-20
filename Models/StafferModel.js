@@ -116,49 +116,73 @@ class StafferModel {
 
   static addNewStaffer(db, newStafferData, selectedRole) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."Staffer"("StafferName", "StafferSurname", "StafferEmail", "StafferPhone", "StafferPassword")
-            VALUES ($1, $2, $3, $4, $5) RETURNING *`;
-
-      const values = [
-        newStafferData.EmployeeName,
-        newStafferData.EmployeeSurname,
-        newStafferData.EmployeeEmail,
-        newStafferData.EmployeePhone,
-      ];
-
-      bcrypt.hash(
-        newStafferData.EmployeePassword,
-        10,
-        (hashError, hashedPassword) => {
-          if (hashError) {
-            console.error(
-              "Errore durante l'hashing della password:",
-              hashError
-            );
+      // Step 1: Check if the email already exists
+      const checkEmailQuery = `SELECT "StafferId" FROM public."Staffer" WHERE "StafferEmail" = $1`;
+      db.query(
+        checkEmailQuery,
+        [newStafferData.EmployeeEmail],
+        (error, result) => {
+          if (error) {
+            reject(error); // Handle query error
+            return;
           }
-          values.push(hashedPassword);
 
-          db.query(query, values, (error, result) => {
-            if (error) {
-              reject(error);
-            } else {
-              const StafferId = result.rows[0].StafferId;
+          // If a staffer with the same email already exists
+          if (result.rows.length > 0) {
+            reject(new Error("Un dipendente con la stessa email esiste già."));
+            return;
+          }
 
-              const query = `INSERT INTO public."StafferRole"("StafferId", "RoleId")
-                VALUES ($1, $2)`;
-              db.query(
-                query,
-                [StafferId, selectedRole.RoleId],
-                (error, result) => {
-                  if (error) {
-                    reject(error);
-                  } else {
-                    resolve(result.rows);
-                  }
+          // Step 2: If email does not exist, proceed to insert the new staffer
+          const insertQuery = `INSERT INTO public."Staffer"("StafferName", "StafferSurname", "StafferEmail", "StafferPhone", "StafferPassword")
+                VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+
+          const values = [
+            newStafferData.EmployeeName,
+            newStafferData.EmployeeSurname,
+            newStafferData.EmployeeEmail,
+            newStafferData.EmployeePhone,
+          ];
+
+          bcrypt.hash(
+            newStafferData.EmployeePassword,
+            10,
+            (hashError, hashedPassword) => {
+              if (hashError) {
+                console.error(
+                  "Errore durante l'hashing della password:",
+                  hashError
+                );
+                reject(hashError); // Reject if hashing fails
+                return;
+              }
+              values.push(hashedPassword);
+
+              // Step 3: Insert the new staffer
+              db.query(insertQuery, values, (error, result) => {
+                if (error) {
+                  reject(error);
+                  return;
                 }
-              );
+
+                const StafferId = result.rows[0].StafferId;
+                const roleInsertQuery = `INSERT INTO public."StafferRole"("StafferId", "RoleId")
+                        VALUES ($1, $2)`;
+
+                db.query(
+                  roleInsertQuery,
+                  [StafferId, selectedRole.RoleId],
+                  (error, result) => {
+                    if (error) {
+                      reject(error);
+                    } else {
+                      resolve(result.rows);
+                    }
+                  }
+                );
+              });
             }
-          });
+          );
         }
       );
     });
@@ -166,43 +190,74 @@ class StafferModel {
 
   static updateStaffer(db, newEmployeeData, selectedRole) {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE public."Staffer" SET "StafferName"= $1, "StafferSurname"= $2, "StafferEmail"= $3, "StafferPhone"= $4
-            WHERE "StafferId"= $5`;
+      // First, check if another user with the same email exists
+      const emailCheckQuery = `SELECT "StafferId" FROM public."Staffer" 
+                                  WHERE "StafferEmail" = $1 AND "StafferId" <> $2`;
 
-      const values = [
-        newEmployeeData.EmployeeName,
-        newEmployeeData.EmployeeSurname,
-        newEmployeeData.EmployeeEmail,
-        newEmployeeData.EmployeePhone,
-        newEmployeeData.EmployeeId,
-      ];
-      db.query(query, values, (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          const query = `SELECT "RoleId" FROM public."StafferRole" WHERE "StafferId" = $1`;
-          db.query(query, [newEmployeeData.EmployeeId], (error, result) => {
+      db.query(
+        emailCheckQuery,
+        [newEmployeeData.EmployeeEmail, newEmployeeData.EmployeeId],
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+
+          // If there is a result, it means an email conflict exists
+          if (result.rows.length > 0) {
+            return reject(
+              new Error("Conflict: Another staffer with the same email exists.")
+            );
+          }
+
+          // If no conflict, proceed to update the staffer details
+          const updateQuery = `UPDATE public."Staffer" SET "StafferName" = $1, 
+                                 "StafferSurname" = $2, "StafferEmail" = $3, 
+                                 "StafferPhone" = $4 WHERE "StafferId" = $5`;
+
+          const values = [
+            newEmployeeData.EmployeeName,
+            newEmployeeData.EmployeeSurname,
+            newEmployeeData.EmployeeEmail,
+            newEmployeeData.EmployeePhone,
+            newEmployeeData.EmployeeId,
+          ];
+
+          db.query(updateQuery, values, (error, result) => {
             if (error) {
-              reject(error);
-            } else {
-              if (result !== selectedRole) {
-                const query = `UPDATE public."StafferRole" SET "RoleId"= $1
-                WHERE "StafferId"= $2`;
-                const values = [selectedRole, newEmployeeData.EmployeeId];
-                db.query(query, values, (error, result) => {
-                  if (error) {
-                    reject(error);
-                  } else {
-                    resolve(result.affectedRows);
-                  }
-                });
-              } else {
-                resolve(result.affectedRows);
-              }
+              return reject(error);
             }
+
+            // Check if role needs to be updated
+            const roleCheckQuery = `SELECT "RoleId" FROM public."StafferRole" 
+                                         WHERE "StafferId" = $1`;
+
+            db.query(
+              roleCheckQuery,
+              [newEmployeeData.EmployeeId],
+              (error, result) => {
+                if (error) {
+                  return reject(error);
+                }
+
+                if (result.rows[0]?.RoleId !== selectedRole) {
+                  const updateRoleQuery = `UPDATE public."StafferRole" SET "RoleId" = $1 
+                                                  WHERE "StafferId" = $2`;
+
+                  const roleValues = [selectedRole, newEmployeeData.EmployeeId];
+                  db.query(updateRoleQuery, roleValues, (error, result) => {
+                    if (error) {
+                      return reject(error);
+                    }
+                    resolve(result.rowCount); // Return number of affected rows
+                  });
+                } else {
+                  resolve(result.rowCount); // No role change, just return the affected rows count
+                }
+              }
+            );
           });
         }
-      });
+      );
     });
   }
 

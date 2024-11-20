@@ -98,8 +98,12 @@ class PermissionController {
       await Permission.addRole(db, RoleData, RolePermissionData);
       res.status(200).send("Ruolo aggiunto con successo.");
     } catch (error) {
-      console.error("Error nell'aggiungere il ruolo:", error);
-      res.status(500).send("Aggiunta del ruolo fallita.");
+      if (error.message === "Un ruolo con questo nome esiste già.") {
+        res.status(409).send("Un ruolo con questo nome esiste già.");
+      } else {
+        console.error("Error nell'aggiungere il ruolo:", error);
+        res.status(500).send("Aggiunta del ruolo fallita.");
+      }
     }
   }
 
@@ -123,8 +127,20 @@ class PermissionController {
       await Permission.updateRole(db, RoleId, RoleData, RolePermissionData);
       res.status(200).send("Ruolo aggiornato con successo.");
     } catch (error) {
-      console.error("Error nell'aggiornare il ruolo:", error);
-      res.status(500).send("Aggiornamento del ruolo fallita.");
+      console.error("Errore nell'aggiornare il ruolo:", error);
+
+      // Check if the error message indicates a conflict (409 status)
+      if (
+        error.message === "Conflict: Another role with the same name exists."
+      ) {
+        res
+          .status(409)
+          .send(
+            "Impossibile aggiornare il ruolo: esiste già un ruolo con lo stesso nome."
+          );
+      } else {
+        res.status(500).send("Aggiornamento del ruolo fallito.");
+      }
     }
   }
 

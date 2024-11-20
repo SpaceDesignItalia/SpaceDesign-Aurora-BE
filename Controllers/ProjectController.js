@@ -194,19 +194,34 @@ class ProjectController {
     try {
       const ProjectData = req.body.ProjectData;
 
+      // Attempt to add the project
       const ProjectId = await Project.addProject(db, ProjectData);
       const ProjectManagerId = ProjectData.ProjectManagerId;
       const CompanyId = ProjectData.CompanyId;
+
+      // Create a conversation related to the new project
       const Conversation = await Project.createProjectConversation(
         db,
         ProjectId,
         ProjectManagerId,
         CompanyId
       );
+
+      // If successful, return the conversation data
       res.status(200).send(Conversation);
     } catch (error) {
       console.error("Errore nella creazione del progetto:", error);
-      res.status(500).send("Creazione del progetto fallito");
+
+      // Check if the error is a 409 Conflict (duplicate project name)
+      if (error.statusCode === 409) {
+        res
+          .status(409)
+          .send(
+            "Un progetto con questo nome esiste già per l'azienda specificata."
+          );
+      } else {
+        res.status(500).send("Creazione del progetto fallito");
+      }
     }
   }
 
@@ -215,6 +230,7 @@ class ProjectController {
       const ProjectLinkData = req.body.ProjectLinkData;
       await Project.addProjectLink(db, ProjectLinkData);
       const UserId = req.session.account.StafferId;
+      console.log(UserId);
       await NotifyMiddleware.ProjectNotification(
         db,
         UserId,
@@ -279,12 +295,19 @@ class ProjectController {
   static async updateProject(req, res, db) {
     try {
       const ProjectData = req.body.ProjectData;
-
       await Project.updateProject(db, ProjectData);
       res.status(200).send("Progetto aggiornato con successo.");
     } catch (error) {
       console.error("Errore nell'aggiornamento del progetto:", error);
-      res.status(500).send("Aggiornamento del progetto fallito");
+      if (error.statusCode === 409) {
+        res
+          .status(409)
+          .send(
+            "Un progetto con questo nome esiste già per l'azienda specificata."
+          );
+      } else {
+        res.status(500).send("Aggiornamento del progetto fallito");
+      }
     }
   }
 
