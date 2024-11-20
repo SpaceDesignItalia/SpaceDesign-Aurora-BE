@@ -21,15 +21,9 @@ const createNotificationRoutes = require("./Routes/Notification/Notification");
 const createLeadRoutes = require("./Routes/Lead/Lead");
 const createFileiconRoutes = require("./Routes/FileIcon/Fileicon");
 
-// Percorso ai certificati SSL
-const privateKey = fs.readFileSync("./SSL/privateKey.key", "utf8");
-const certificate = fs.readFileSync("./SSL/certificate.cer", "utf8");
-const ca = fs.readFileSync("./SSL/SpaceDesignAurora.pem", "utf8");
-
 const credentials = {
-  key: privateKey,
-  cert: certificate,
-  ca: ca,
+  key: fs.readFileSync("SSL/privateKey.key"),
+  cert: fs.readFileSync("SSL/SpaceDesignAurora.pem"),
 };
 
 const app = express();
