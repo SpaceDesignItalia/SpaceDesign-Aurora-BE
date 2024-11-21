@@ -5,8 +5,10 @@ const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const fs = require("fs");
 const https = require("https");
+const http = require("http");
 const createSocketServer = require("./socket"); // Importa il modulo socket
 
+// Importa le route
 const createAuthenticationRoutes = require("./Routes/Authentication/Authentication");
 const createStafferRoutes = require("./Routes/Staffer/Staffer");
 const createPermissionRoutes = require("./Routes/Permission/Permission");
@@ -19,28 +21,22 @@ const createNotificationRoutes = require("./Routes/Notification/Notification");
 const createLeadRoutes = require("./Routes/Lead/Lead");
 const createFileiconRoutes = require("./Routes/FileIcon/Fileicon");
 
-// Percorso ai certificati
-const privateKey = fs.readFileSync("./SSL/privateKey.key", "utf8");
-const certificate = fs.readFileSync("./SSL/certificate.cer", "utf8");
-const ca = fs.readFileSync("./SSL/SpaceDesignAurora.pem", "utf8");
-
 const credentials = {
-  key: privateKey,
-  cert: certificate,
-  ca: ca,
+  key: fs.readFileSync("SSL/privateKey.key"),
+  cert: fs.readFileSync("SSL/SpaceDesignAurora.pem"),
 };
 
 const app = express();
 app.use(express.static("public"));
 const PREFIX = "/API/v1";
-const PORT = 443; // Porta HTTPS standard
+const PORT = 3000; // Porta standard per HTTPS
 
 const db = require("./configs/Database");
 
-// Setup CORS
+// Configura CORS
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["https://localhost:5173", "https://localhost:5174"], // Aggiorna con gli URL HTTPS
     credentials: true,
   })
 );
@@ -62,10 +58,10 @@ app.use(cookieParser());
 // Crea il server HTTPS
 const server = https.createServer(credentials, app);
 
-// Initialize Socket.IO
+// Inizializza Socket.IO sul server HTTPS
 const io = createSocketServer(server);
 
-// Main routes
+// Definisci le route principali
 app.use(PREFIX + "/Authentication", createAuthenticationRoutes(db));
 app.use(PREFIX + "/Staffer", createStafferRoutes(db));
 app.use(PREFIX + "/Permission", createPermissionRoutes(db));
@@ -78,7 +74,7 @@ app.use(PREFIX + "/Notification", createNotificationRoutes(db));
 app.use(PREFIX + "/Lead", createLeadRoutes(db));
 app.use(PREFIX + "/Fileicon", createFileiconRoutes());
 
-// Avvia il server HTTPS
+// Avvia il server HTTPS sulla porta 443
 server.listen(PORT, () => {
   console.log(`Server HTTPS listening on port ${PORT}`);
 });
