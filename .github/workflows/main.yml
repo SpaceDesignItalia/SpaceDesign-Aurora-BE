@@ -31,10 +31,4 @@ jobs:
 
       - name: Start the server with PM2
         run: |
-          pm2 start index.js --watch --name "aurora-backend" --no-daemon  # Aggiungi --no-daemon per non eseguire in background
-
-      - name: Save PM2 process list and logs for debugging
-        run: |
-          pm2 save  # Salva il processo PM2 per la persistenza
-          pm2 list  # Mostra la lista dei processi
-          pm2 logs --lines 10  # Mostra gli ultimi 10 log per il debug
+          pm2 start index.js --watch --name "aurora-backend"
