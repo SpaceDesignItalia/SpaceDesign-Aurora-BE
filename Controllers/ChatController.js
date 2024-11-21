@@ -1,6 +1,6 @@
 // controller/PermissionController.js
 const Chat = require("../Models/ChatModel");
-const NotifyMiddelware = require("../Middlewares/Notification/NotifyMiddelware");
+const NotifyMiddelware = require("../middlewares/Notification/NotifyMiddelware");
 
 class ChatController {
   static async getConversationByStafferId(req, res, db) {
