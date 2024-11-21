@@ -36,7 +36,7 @@ const db = require("./configs/Database");
 // Configura CORS
 app.use(
   cors({
-    origin: ["https://localhost:5173", "https://localhost:5174"], // Aggiorna con gli URL HTTPS
+    origin: ["http://localhost:5173", "http://localhost:5174"], // Aggiorna con gli URL HTTPS
     credentials: true,
   })
 );
@@ -56,8 +56,8 @@ app.use(
 app.use(cookieParser());
 
 // Crea il server HTTPS
-const server = https.createServer(credentials, app);
-
+/* const server = https.createServer(credentials, app); */
+const server = http.createServer(app);
 // Inizializza Socket.IO sul server HTTPS
 const io = createSocketServer(server);
 
