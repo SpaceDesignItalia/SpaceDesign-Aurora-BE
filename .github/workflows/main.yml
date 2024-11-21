@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'  # Specifica la versione di Node.js desiderata
+          node-version: "16" # Specifica la versione di Node.js desiderata
 
       - name: Remove node_modules and package-lock.json
         run: |
@@ -26,11 +26,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Start the server with PM2
-        run: pm2 start index.js --watch
+      - name: Install PM2 globally
+        run: npm install -g pm2
 
-      - name: Save PM2 process list and log files for debugging
+      - name: Start the server with PM2
         run: |
+          pm2 start index.js --watch --name "aurora-backend"
           pm2 save
-          pm2 list
-          pm2 logs --lines 10
