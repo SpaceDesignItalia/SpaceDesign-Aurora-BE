@@ -36,7 +36,11 @@ const db = require("./configs/Database");
 // Configura CORS
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"], // Aggiorna con gli URL HTTPS
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://app.spacedesign-italia.it",
+    ], // Aggiorna con gli URL HTTPS
     credentials: true,
   })
 );
