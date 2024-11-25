@@ -20,7 +20,7 @@ jobs:
 
       - name: Package application
         run: |
-          tar -czf app.tar.gz . # Comprime l'app per il trasferimento
+          tar --exclude='.git' --exclude='node_modules' --exclude='app.tar.gz' -czf app.tar.gz .
 
       - name: Upload files via SFTP
         env:
