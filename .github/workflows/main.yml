@@ -1,0 +1,48 @@
+name: Deploy Spacedesign Aurora API
+
+on:
+  push:
+    branches:
+      - main  # Esegui il deploy solo quando fai push sulla branch "main"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # Usa la versione del tuo progetto Express
+
+      # Step 3: Install dependencies (for safety, though not necessary if all done on server)
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Deploy to server via SSH and start with PM2
+      - name: Deploy to server via SSH and start with PM2
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.PLESK_SFTP_SERVER }}
+          username: ${{ secrets.PLESK_SFTP_USERNAME }}
+          password: ${{ secrets.PLESK_SFTP_PASSWORD }}  # Usa la password o una chiave privata
+          port: 22  # Porta SSH, di solito 22
+          script: |
+            # Naviga alla directory di destinazione sul server
+            cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
+            
+            # Copia i file del progetto nel server
+            rsync -av --exclude='.git' --exclude='node_modules' ./ /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
+
+            # Installa le dipendenze direttamente sul server
+            npm install
+
+            # Riavvia l'app con PM2
+            pm2 stop spacedesign-aurora-api || true  # Ferma il processo precedente se esiste
+            pm2 start index.js --name "spacedesign-aurora-api" --watch  # Usa il nuovo nome per l'app
+            pm2 save  # Salva la configurazione di PM2
