@@ -50,5 +50,4 @@ jobs:
             # (Facoltativo) Installa le dipendenze
             npm install
             # (Facoltativo) Usa PM2 per avviare l'app
-            pm2 delete api-spacedesign || true  # Elimina qualsiasi processo con lo stesso nome
             pm2 start index.js --name api-spacedesign  # Avvia il server Express con PM2
