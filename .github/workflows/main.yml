@@ -1,41 +1,52 @@
-name: Deploy Spacedesign Aurora API
+name: Deploy Express App
 
 on:
   push:
     branches:
-      - main
+      - main # Modifica se usi un altro branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Deploy to server via SSH and start with PM2
-        uses: appleboy/ssh-action@master
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          host: ${{ secrets.PLESK_SFTP_SERVER }}
-          username: ${{ secrets.PLESK_SFTP_USERNAME }}
-          password: ${{ secrets.PLESK_SFTP_PASSWORD }}
-          port: 22
-          debug: true
-          script: |
-            echo "=== SSH Connection Test ==="
-            hostname
-            whoami
+          node-version: "18" # Specifica la versione di Node.js che stai usando
 
-            echo "=== Navigating to target directory ==="
-            cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it || { echo "Directory not found"; exit 1; }
+      - name: Package application
+        run: |
+          tar -czf app.tar.gz . # Comprime l'app per il trasferimento
 
-            echo "=== Synchronizing files ==="
-            rsync -av --exclude='.git' --exclude='node_modules' ./ .
+      - name: Upload files via SFTP
+        env:
+          SFTP_SERVER: ${{ secrets.PLESK_SFTP_SERVER }}
+          SFTP_USERNAME: ${{ secrets.PLESK_SFTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.PLESK_SFTP_PASSWORD }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y lftp
+          lftp -u "$SFTP_USERNAME","$SFTP_PASSWORD" sftp://$SFTP_SERVER <<EOF
+            set ssl:verify-certificate no
+            cd ../var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
+            put app.tar.gz
+            bye
+          EOF
 
-            echo "=== Installing dependencies ==="
-            npm install || { echo "npm install failed"; exit 1; }
-
-            echo "=== Restarting app with PM2 ==="
-            pm2 stop spacedesign-aurora-api || true
-            pm2 start index.js --name "spacedesign-aurora-api" --watch || { echo "PM2 failed to start"; exit 1; }
-            pm2 save
+      - name: Extract files and start app with PM2
+        env:
+          SFTP_SERVER: ${{ secrets.PLESK_SFTP_SERVER }}
+          SFTP_USERNAME: ${{ secrets.PLESK_SFTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.PLESK_SFTP_PASSWORD }}
+        run: |
+          sudo apt-get update && sudo apt-get install -y sshpass
+          sshpass -p "$SFTP_PASSWORD" ssh -o StrictHostKeyChecking=no "$SFTP_USERNAME"@"$SFTP_SERVER" <<EOF
+            cd ../var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
+            tar -xzf app.tar.gz
+            npm install
+            pm2 delete api-spacedesign || true  # Rimuove eventuali processi esistenti con lo stesso nome
+            pm2 start ./index.js --name api-spacedesign
+          EOF
