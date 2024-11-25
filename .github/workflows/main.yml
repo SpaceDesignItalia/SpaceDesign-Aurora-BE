@@ -3,42 +3,39 @@ name: Deploy Spacedesign Aurora API
 on:
   push:
     branches:
-      - main # Esegui il deploy solo quando viene eseguito un push su "main"
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code
       - name: Check out code
         uses: actions/checkout@v2
 
-      # Step 2: Set up Node.js (opzionale se richiesto per build locali)
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16" # Specifica la versione richiesta dal progetto
-
-      # Step 3: Deploy to server via SSH
       - name: Deploy to server via SSH and start with PM2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.PLESK_SFTP_SERVER }}
           username: ${{ secrets.PLESK_SFTP_USERNAME }}
           password: ${{ secrets.PLESK_SFTP_PASSWORD }}
-          port: 22 # Porta SSH, di default è 22
-          debug: true # Attiva il debug per maggiori dettagli nei log
+          port: 22
+          debug: true
           script: |
-            # Passa alla directory del progetto sul server
-            cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it || exit 1
+            echo "=== SSH Connection Test ==="
+            hostname
+            whoami
 
-            # Sincronizza i file dal repository al server
-            rsync -av --exclude='.git' --exclude='node_modules' ./ /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
+            echo "=== Navigating to target directory ==="
+            cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it || { echo "Directory not found"; exit 1; }
 
-            # Installa le dipendenze sul server
-            npm install
+            echo "=== Synchronizing files ==="
+            rsync -av --exclude='.git' --exclude='node_modules' ./ .
 
-            # Gestisci il processo Express con PM2
-            pm2 stop spacedesign-aurora-api || true  # Ferma eventuali processi esistenti
-            pm2 start index.js --name "spacedesign-aurora-api" --watch  # Avvia con PM2
+            echo "=== Installing dependencies ==="
+            npm install || { echo "npm install failed"; exit 1; }
+
+            echo "=== Restarting app with PM2 ==="
+            pm2 stop spacedesign-aurora-api || true
+            pm2 start index.js --name "spacedesign-aurora-api" --watch || { echo "PM2 failed to start"; exit 1; }
+            pm2 save
