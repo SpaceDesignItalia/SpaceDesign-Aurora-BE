@@ -3,7 +3,7 @@ name: Deploy Spacedesign Aurora API
 on:
   push:
     branches:
-      - main  # Esegui il deploy solo quando fai push sulla branch "main"
+      - main # Esegui il deploy solo quando fai push sulla branch "main"
 
 jobs:
   deploy:
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'  # Usa la versione del tuo progetto Express
+          node-version: "16" # Usa la versione del tuo progetto Express
 
       # Step 3: Install dependencies (for safety, though not necessary if all done on server)
       - name: Install dependencies
@@ -30,12 +30,13 @@ jobs:
         with:
           host: ${{ secrets.PLESK_SFTP_SERVER }}
           username: ${{ secrets.PLESK_SFTP_USERNAME }}
-          password: ${{ secrets.PLESK_SFTP_PASSWORD }}  # Usa la password o una chiave privata
-          port: 22  # Porta SSH, di solito 22
+          password: ${{ secrets.PLESK_SFTP_PASSWORD }}
+          port: 22 # Porta SSH, di solito 22
+          debug: true # Attiva la modalità debug per output dettagliato
           script: |
             # Naviga alla directory di destinazione sul server
             cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
-            
+
             # Copia i file del progetto nel server
             rsync -av --exclude='.git' --exclude='node_modules' ./ /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
 
