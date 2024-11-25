@@ -3,7 +3,7 @@ name: Deploy Spacedesign Aurora API
 on:
   push:
     branches:
-      - main # Esegui il deploy solo quando fai push sulla branch "main"
+      - main # Esegui il deploy solo quando viene eseguito un push su "main"
 
 jobs:
   deploy:
@@ -14,36 +14,35 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      # Step 2: Set up Node.js
+      # Step 2: Set up Node.js (opzionale se richiesto per build locali)
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16" # Usa la versione del tuo progetto Express
+          node-version: "16" # Specifica la versione richiesta dal progetto
 
-      # Step 3: Install dependencies (for safety, though not necessary if all done on server)
-      - name: Install dependencies
-        run: npm install
-
-      # Step 4: Deploy to server via SSH and start with PM2
+      # Step 3: Deploy to server via SSH
       - name: Deploy to server via SSH and start with PM2
-        uses: appleboy/ssh-action@v0.1.8
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.PLESK_SFTP_SERVER }}
           username: ${{ secrets.PLESK_SFTP_USERNAME }}
           password: ${{ secrets.PLESK_SFTP_PASSWORD }}
-          port: 22 # Porta SSH, di solito 22
-          debug: true # Attiva la modalità debug per output dettagliato
+          port: 22 # Porta SSH, di default è 22
+          debug: true # Attiva il debug per maggiori dettagli nei log
           script: |
-            # Naviga alla directory di destinazione sul server
-            cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
+            echo "=== Inizio del deploy sul server ==="
 
-            # Copia i file del progetto nel server
+            # Passa alla directory del progetto sul server
+            cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it || exit 1
+
+            # Sincronizza i file dal repository al server
             rsync -av --exclude='.git' --exclude='node_modules' ./ /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
 
-            # Installa le dipendenze direttamente sul server
+            # Installa le dipendenze sul server
             npm install
 
-            # Riavvia l'app con PM2
-            pm2 stop spacedesign-aurora-api || true  # Ferma il processo precedente se esiste
-            pm2 start index.js --name "spacedesign-aurora-api" --watch  # Usa il nuovo nome per l'app
-            pm2 save  # Salva la configurazione di PM2
+            # Gestisci il processo Express con PM2
+            pm2 stop spacedesign-aurora-api || true  # Ferma eventuali processi esistenti
+            pm2 start index.js --name "spacedesign-aurora-api" --watch  # Avvia con PM2
+
+            echo "=== Deploy completato con successo ==="
