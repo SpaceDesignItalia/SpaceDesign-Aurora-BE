@@ -30,8 +30,6 @@ jobs:
           port: 22 # Porta SSH, di default è 22
           debug: true # Attiva il debug per maggiori dettagli nei log
           script: |
-            echo "=== Inizio del deploy sul server ==="
-
             # Passa alla directory del progetto sul server
             cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it || exit 1
 
@@ -44,5 +42,3 @@ jobs:
             # Gestisci il processo Express con PM2
             pm2 stop spacedesign-aurora-api || true  # Ferma eventuali processi esistenti
             pm2 start index.js --name "spacedesign-aurora-api" --watch  # Avvia con PM2
-
-            echo "=== Deploy completato con successo ==="
