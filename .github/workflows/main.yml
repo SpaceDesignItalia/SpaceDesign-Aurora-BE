@@ -1,52 +1,54 @@
-name: Deploy Express App
+name: Deploy Express Project to Plesk via SFTP
 
 on:
   push:
     branches:
-      - main # Modifica se usi un altro branch
+      - main # Esegui il deploy solo quando fai push sulla branch "main"
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # Step 1: Check out the code
+      - name: Check out code
+        uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          node-version: "18" # Specifica la versione di Node.js che stai usando
+          node-version: "16" # Usa la versione che preferisci o quella del tuo progetto
 
-      - name: Package application
-        run: |
-          tar --exclude='.git' --exclude='node_modules' --exclude='app.tar.gz' -czf app.tar.gz .
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
 
-      - name: Upload files via SFTP
-        env:
-          SFTP_SERVER: ${{ secrets.PLESK_SFTP_SERVER }}
-          SFTP_USERNAME: ${{ secrets.PLESK_SFTP_USERNAME }}
-          SFTP_PASSWORD: ${{ secrets.PLESK_SFTP_PASSWORD }}
-        run: |
-          sudo apt-get update && sudo apt-get install -y lftp
-          lftp -u "$SFTP_USERNAME","$SFTP_PASSWORD" sftp://$SFTP_SERVER <<EOF
-            set ssl:verify-certificate no
-            cd ../var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
-            put app.tar.gz
-            bye
-          EOF
+      # Step 4: Upload the project to Plesk via SFTP
+      - name: Upload project to Plesk via SFTP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PLESK_SFTP_SERVER }}
+          username: ${{ secrets.PLESK_SFTP_USERNAME }}
+          password: ${{ secrets.PLESK_SFTP_PASSWORD }}
+          port: 22 # Porta SFTP
+          source: "./*" # Carica il contenuto del progetto
+          target: "/var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it" # Percorso su Plesk
+          rm: true # Rimuove i file esistenti nella cartella target prima di caricare quelli nuovi
 
-      - name: Extract files and start app with PM2
-        env:
-          SFTP_SERVER: ${{ secrets.PLESK_SFTP_SERVER }}
-          SFTP_USERNAME: ${{ secrets.PLESK_SFTP_USERNAME }}
-          SFTP_PASSWORD: ${{ secrets.PLESK_SFTP_PASSWORD }}
-        run: |
-          sudo apt-get update && sudo apt-get install -y sshpass
-          sshpass -p "$SFTP_PASSWORD" ssh -o StrictHostKeyChecking=no "$SFTP_USERNAME"@"$SFTP_SERVER" <<EOF
-            cd ../var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
-            tar -xzf app.tar.gz
+      # Step 5: Execute commands via SSH to install dependencies and start the app with PM2
+      - name: Execute commands via SSH on Plesk
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.PLESK_SFTP_SERVER }}
+          username: ${{ secrets.PLESK_SFTP_USERNAME }}
+          password: ${{ secrets.PLESK_SFTP_PASSWORD }}
+          port: 22
+          script: |
+            # Cambia nella directory dell'applicazione
+            cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
+            # (Facoltativo) Installa le dipendenze
             npm install
-            pm2 delete api-spacedesign || true  # Rimuove eventuali processi esistenti con lo stesso nome
-            pm2 start ./index.js --name api-spacedesign
-          EOF
+            # (Facoltativo) Usa PM2 per avviare l'app
+            pm2 delete api-spacedesign || true  # Elimina qualsiasi processo con lo stesso nome
+            pm2 start index.js --name api-spacedesign  # Avvia il server Express con PM2
