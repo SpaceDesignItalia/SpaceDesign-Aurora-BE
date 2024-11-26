@@ -4,7 +4,7 @@ const { Pool } = require("pg");
 const db = new Pool({
   user: "spacedesigndev",
   host: "lab.spacedesign-italia.it",
-  database: "SpaceDesignAurora-Development",
+  database: "SpaceDesignAurora-Develop",
   password: "imusRbRLPsStwgZa",
 });
 
