@@ -60,8 +60,8 @@ app.use(
 app.use(cookieParser());
 
 // Crea il server HTTPS
-/* const server = https.createServer(credentials, app); */
-const server = http.createServer(app);
+const server = https.createServer(credentials, app);
+/* const server = http.createServer(app); */
 // Inizializza Socket.IO sul server HTTPS
 const io = createSocketServer(server);
 
