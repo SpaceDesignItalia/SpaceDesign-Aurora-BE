@@ -1141,6 +1141,21 @@ class ProjectModel {
     });
   }
 
+  static async getFilesByFolderIdForCustomer(db, FolderId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" 
+      INNER JOIN public."ProjectFolder" USING("FolderId")
+      WHERE "FolderId" = $1 AND "CustomerVisible" = true`;
+      db.query(query, [FolderId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static async getFilesByTaskId(db, TaskId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectTaskFiles" WHERE "TaskId" = $1`;
@@ -1154,10 +1169,10 @@ class ProjectModel {
     });
   }
 
-  static async getFilesByProjectIdForCustomer(db, ProjectId) {
+  static async getFoldersByUpFolderIdForCustomer(db, UpFolderId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "ForClient" = true`;
-      db.query(query, [ProjectId], (error, result) => {
+      const query = `SELECT * FROM public."ProjectFolder" WHERE "UpFolderId" = $1 AND "FolderName" <> 'Default' AND "CustomerVisible" = true`;
+      db.query(query, [UpFolderId], (error, result) => {
         if (error) {
           reject(error);
         } else {

@@ -812,11 +812,26 @@ class ProjectController {
     }
   }
 
-  static async getFilesByProjectIdForCustomer(req, res, db) {
+  static async getFoldersByUpFolderIdForCustomer(req, res, db) {
     try {
-      const ProjectId = req.query.ProjectId;
+      const UpFolderId = req.query.UpFolderId;
 
-      const files = await Project.getFilesByProjectIdForCustomer(db, ProjectId);
+      const files = await Project.getFoldersByUpFolderIdForCustomer(
+        db,
+        UpFolderId
+      );
+      res.status(200).json(files);
+    } catch (error) {
+      console.error("Error getting files:", error);
+      res.status(500).send("File retrieval failed");
+    }
+  }
+
+  static async getFilesByFolderIdForCustomer(req, res, db) {
+    try {
+      const FolderId = req.query.FolderId;
+
+      const files = await Project.getFilesByFolderIdForCustomer(db, FolderId);
       res.status(200).json(files);
     } catch (error) {
       console.error("Error getting files:", error);
