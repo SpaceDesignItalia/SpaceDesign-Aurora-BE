@@ -156,10 +156,18 @@ const projectGET = (db) => {
   });
 
   router.get(
-    "/GetFilesByProjectIdForCustomer",
+    "/GetFoldersByUpFolderIdForCustomer",
     authenticateMiddleware,
     (req, res) => {
-      ProjectController.getFilesByProjectIdForCustomer(req, res, db);
+      ProjectController.getFoldersByUpFolderIdForCustomer(req, res, db);
+    }
+  );
+
+  router.get(
+    "/GetFilesByFolderIdForCustomer",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getFilesByFolderIdForCustomer(req, res, db);
     }
   );
 

@@ -865,7 +865,7 @@ class ProjectModel {
 
   static getProjectsByCustomerId(db, CustomerId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "ProjectId","CompanyName", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "StatusId", "StatusName" FROM public."Customer"
+      const query = `SELECT "ProjectId","CompanyName", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "StatusId", "StatusName", "UniqueCode" FROM public."Customer"
 	    INNER JOIN public."CustomerCompany" USING("CustomerId")
 	    LEFT JOIN public."Company" USING("CompanyId")
 	    INNER JOIN public."Project" USING("CompanyId")
@@ -1141,6 +1141,21 @@ class ProjectModel {
     });
   }
 
+  static async getFilesByFolderIdForCustomer(db, FolderId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectFiles" 
+      INNER JOIN public."ProjectFolder" USING("FolderId")
+      WHERE "FolderId" = $1 AND "CustomerVisible" = true`;
+      db.query(query, [FolderId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static async getFilesByTaskId(db, TaskId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectTaskFiles" WHERE "TaskId" = $1`;
@@ -1154,10 +1169,10 @@ class ProjectModel {
     });
   }
 
-  static async getFilesByProjectIdForCustomer(db, ProjectId) {
+  static async getFoldersByUpFolderIdForCustomer(db, UpFolderId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectFiles" WHERE "ProjectId" = $1 AND "ForClient" = true`;
-      db.query(query, [ProjectId], (error, result) => {
+      const query = `SELECT * FROM public."ProjectFolder" WHERE "UpFolderId" = $1 AND "FolderName" <> 'Default' AND "CustomerVisible" = true`;
+      db.query(query, [UpFolderId], (error, result) => {
         if (error) {
           reject(error);
         } else {
@@ -1437,8 +1452,13 @@ class ProjectModel {
 
   static async getProjectByUniqueCode(db, UniqueCode) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "Project"."ProjectId", "Project"."ProjectName", "Company"."CompanyName" FROM public."Project" 
-      LEFT JOIN public."Company" USING("CompanyId")
+      const query = `SELECT "ProjectId", "ProjectName", "ProjectDescription", "ProjectCreationDate", "ProjectEndDate", "CompanyId", "ProjectBannerId", "ProjectBannerPath", 
+      "StatusName", "ProjectManagerId", "StafferImageUrl", CONCAT("StafferName", ' ', "StafferSurname") AS "ProjectManagerFullName", "StafferEmail" AS "ProjectManagerEmail", "RoleName" FROM public."Project" 
+      INNER JOIN public."ProjectBanner" USING("ProjectBannerId")
+		  INNER JOIN public."Status" USING("StatusId")
+			INNER JOIN public."Staffer" ON "ProjectManagerId" = "StafferId"
+      INNER JOIN public."StafferRole" USING("StafferId")
+      INNER JOIN public."Role" USING("RoleId")
       WHERE "UniqueCode" = $1`;
       db.query(query, [UniqueCode], (error, result) => {
         if (error) {
