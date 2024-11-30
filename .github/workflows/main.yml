@@ -34,7 +34,7 @@ jobs:
           port: 22 # Porta SFTP
           source: "./*" # Carica il contenuto del progetto
           target: "/var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it" # Percorso su Plesk
-          rm: true # Rimuove i file esistenti nella cartella target prima di caricare quelli nuovi
+          rm: false # Non rimuove i file esistenti nella cartella target prima di caricare quelli nuovi
 
       # Step 5: Execute commands via SSH on Plesk
       - name: Execute commands via SSH on Plesk
