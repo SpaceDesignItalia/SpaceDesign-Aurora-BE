@@ -37,7 +37,11 @@ const db = require("./configs/Database");
 // Configura CORS
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"], // Aggiorna con gli URL HTTPS
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://app.spacedesign-italia.it",
+    ], // Aggiorna con gli URL HTTPS
     credentials: true,
   })
 );
@@ -46,7 +50,7 @@ app.use(
 app.use(bodyParser.json());
 app.use(
   session({
-    secret: "T^pX#z1$0%V@l2&nHbO8yGcLsAaE!WuPq4Rv7*3Sd9MwYjNfCmKgJiBkD5F",
+    secret: process.env.ENCRYPT_KEY,
     saveUninitialized: false,
     resave: false,
     cookie: {
