@@ -7,6 +7,7 @@ const fs = require("fs");
 const https = require("https");
 const http = require("http");
 const createSocketServer = require("./socket"); // Importa il modulo socket
+require("dotenv").config();
 
 // Importa le route
 const createAuthenticationRoutes = require("./Routes/Authentication/Authentication");

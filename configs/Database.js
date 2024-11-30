@@ -2,17 +2,10 @@
 const { Pool } = require("pg");
 
 const db = new Pool({
-  user: "spacedesigndev",
-  host: "lab.spacedesign-italia.it",
-  database: "SpaceDesignAurora-Develop",
-  password: "imusRbRLPsStwgZa",
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
 });
-
-/*const db = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "SpaceDesignAurora",
-  password: "1234",
-});*/
 
 module.exports = db;
