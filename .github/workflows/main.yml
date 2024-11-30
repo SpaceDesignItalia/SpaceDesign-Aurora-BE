@@ -56,4 +56,4 @@ jobs:
 
             # Avvia o riavvia il server con PM2
             pm2 delete api-spacedesign || true  # Elimina qualsiasi processo con lo stesso nome (se esiste)
-            pm2 start index.js --name api-spacedesign  # Avvia il server Express con PM2
+            pm2 start index.js --name api-spacedesign --watch  # Avvia il server Express con PM2
