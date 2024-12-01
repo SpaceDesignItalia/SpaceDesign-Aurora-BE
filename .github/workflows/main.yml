@@ -1,40 +1,59 @@
-name: Deploy SpaceDesign Aurora BE
+name: Deploy Express Project to Plesk via SFTP
 
 on:
   push:
     branches:
-      - main
+      - main # Esegui il deploy solo quando fai push sulla branch "main"
 
 jobs:
-  deploy:
-    runs-on: self-hosted
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      # Step 1: Check out the code
+      - name: Check out code
         uses: actions/checkout@v2
 
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16" # Specifica la versione di Node.js desiderata
+          node-version: "16" # Usa la versione che preferisci o quella del tuo progetto
 
-      - name: Remove node_modules and package-lock.json
-        run: |
-          rm -rf node_modules
-          rm -f package-lock.json
-
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm install
 
-      - name: Install PM2 globally
-        run: npm install -g pm2 # Assicurati che PM2 sia installato
+      # Step 4: Upload the project to Plesk via SFTP
+      - name: Upload project to Plesk via SFTP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PLESK_SFTP_SERVER }}
+          username: ${{ secrets.PLESK_SFTP_USERNAME }}
+          password: ${{ secrets.PLESK_SFTP_PASSWORD }}
+          port: 22 # Porta SFTP
+          source: "./*" # Carica il contenuto del progetto
+          target: "/var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it" # Percorso su Plesk
+          rm: false # Non rimuove i file esistenti nella cartella target prima di caricare quelli nuovi
 
-      - name: Start the server with PM2
-        run: |
-          pm2 start index.js --watch --name "aurora-backend" --no-daemon  # Aggiungi --no-daemon per non eseguire in background
+      # Step 5: Execute commands via SSH on Plesk
+      - name: Execute commands via SSH on Plesk
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.PLESK_SFTP_SERVER }}
+          username: ${{ secrets.PLESK_SFTP_USERNAME }}
+          password: ${{ secrets.PLESK_SFTP_PASSWORD }}
+          port: 22
+          script: |
+            # Cambia nella directory dell'applicazione
+            cd /var/www/vhosts/spacedesign-italia.it/api.spacedesign-italia.it
 
-      - name: Save PM2 process list and logs for debugging
-        run: |
-          pm2 save  # Salva il processo PM2 per la persistenza
-          pm2 list  # Mostra la lista dei processi
-          pm2 logs --lines 10  # Mostra gli ultimi 10 log per il debug
+            # Elimina node_modules e package-lock.json
+            rm -rf node_modules package-lock.json
+
+            # Reinstalla le dipendenze
+            npm install
+
+            # Avvia o riavvia il server con PM2
+            pm2 delete api-spacedesign || true  # Elimina qualsiasi processo con lo stesso nome (se esiste)
+            pm2 start index.js --name api-spacedesign --watch  # Avvia il server Express con PM2
