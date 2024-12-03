@@ -67,7 +67,6 @@ if (process.env.ENVIRONMENT === "development") {
 } else {
   server = https.createServer(credentials, app);
 }
-/* const server = http.createServer(app); */
 // Inizializza Socket.IO sul server HTTPS
 const io = createSocketServer(server);
 
@@ -85,8 +84,14 @@ app.use(PREFIX + "/Lead", createLeadRoutes(db));
 app.use(PREFIX + "/Fileicon", createFileiconRoutes());
 
 // Avvia il server HTTPS sulla porta 443
-server.listen(PORT, () => {
-  console.log(`Server HTTPS listening on port ${PORT}`);
-});
+if (process.env.ENVIRONMENT === "development") {
+  server.listen(PORT, () => {
+    console.log(`DEVELOPMENT Server HTTP listening on port ${PORT}`);
+  });
+} else {
+  server.listen(PORT, () => {
+    console.log(`PRODUCTION Server HTTPS listening on port ${PORT}`);
+  });
+}
 
 module.exports = server;
