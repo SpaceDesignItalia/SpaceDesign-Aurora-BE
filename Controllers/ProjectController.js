@@ -1126,6 +1126,18 @@ class ProjectController {
       res.status(500).send("File rename failed");
     }
   }
+
+  static async refineText(req, res) {
+    try {
+      const { text } = req.body;
+
+      const refinedText = await Project.refineText(text);
+      res.status(200).send(refinedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
 }
 
 module.exports = ProjectController;

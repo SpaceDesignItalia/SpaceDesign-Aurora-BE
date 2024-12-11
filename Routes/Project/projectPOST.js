@@ -87,6 +87,10 @@ const projectPOST = (db) => {
     ProjectController.addFolder(req, res, db);
   });
 
+  router.post("/RefineText", authenticateMiddleware, (req, res) => {
+    ProjectController.refineText(req, res);
+  });
+
   return router;
 };
 

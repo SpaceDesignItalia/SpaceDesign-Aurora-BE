@@ -61,8 +61,12 @@ app.use(
 app.use(cookieParser());
 
 // Crea il server HTTPS
-const server = https.createServer(credentials, app);
-/* const server = http.createServer(app); */
+let server;
+if (process.env.ENVIRONMENT === "development") {
+  server = http.createServer(app);
+} else {
+  server = https.createServer(credentials, app);
+}
 // Inizializza Socket.IO sul server HTTPS
 const io = createSocketServer(server);
 
@@ -80,8 +84,53 @@ app.use(PREFIX + "/Lead", createLeadRoutes(db));
 app.use(PREFIX + "/Fileicon", createFileiconRoutes());
 
 // Avvia il server HTTPS sulla porta 443
-server.listen(PORT, () => {
-  console.log(`Server HTTPS listening on port ${PORT}`);
-});
+(async () => {
+  const chalk = (await import("chalk")).default;
+
+  const BOX_WIDTH = 50;
+
+  // Funzione per creare una box chiusa con bordi superiori, laterali e inferiori
+  const createBox = (title, port, environment) => {
+    const borderTop = "╔" + "═".repeat(BOX_WIDTH - 2) + "╗";
+    const borderBottom = "╚" + "═".repeat(BOX_WIDTH - 2) + "╝";
+    const padding = BOX_WIDTH - 4;
+
+    const titleLine = `║ ${title
+      .padStart((padding + title.length) / 2, " ")
+      .padEnd(padding, " ")} ║`;
+
+    const portLine = `║ ${`Porta: ${port}`
+      .padStart((padding + `Porta: ${port}`.length) / 2, " ")
+      .padEnd(padding, " ")} ║`;
+
+    const environmentLine = `║ ${`Ambiente: ${environment}`
+      .padStart((padding + `Ambiente: ${environment}`.length) / 2, " ")
+      .padEnd(padding, " ")} ║`;
+
+    const poweredByLine = `║ ${"Powered By 🚀 Space Design Italia "
+      .padStart((padding + "Powered By 🚀 Space Design Italia".length) / 2, " ")
+      .padEnd(padding, " ")} ║`;
+
+    return `\n${chalk.white(borderTop)}\n${chalk.whiteBright(
+      titleLine
+    )}\n${chalk.greenBright(portLine)}\n${chalk.yellowBright(
+      environmentLine
+    )}\n${chalk.cyanBright(poweredByLine)}\n${chalk.white(borderBottom)}`;
+  };
+
+  // Ambiente di sviluppo o produzione
+  const environment =
+    process.env.ENVIRONMENT === "development" ? "DEVELOPMENT" : "PRODUCTION";
+
+  if (process.env.ENVIRONMENT === "development") {
+    server.listen(PORT, () => {
+      console.log(createBox("🚧 DEVELOPMENT Server", PORT, environment));
+    });
+  } else {
+    server.listen(PORT, () => {
+      console.log(createBox("🏭 PRODUCTION Server", PORT, environment));
+    });
+  }
+})();
 
 module.exports = server;
