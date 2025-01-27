@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const NotifyMiddleware = require("../middlewares/Notification/NotifyMiddelware");
 const TicketController = require("./TicketController");
+const EmailService = require("../middlewares/EmailService/EmailService");
 
 class ProjectController {
   static async getAllStatus(req, res, db) {
@@ -375,6 +376,18 @@ class ProjectController {
       const ProjectTaskId = req.body.ProjectTaskId;
       const ProjectTaskStatusId = req.body.ProjectTaskStatusId;
       await Project.updateTaskStatus(db, ProjectTaskId, ProjectTaskStatusId);
+
+      const EmailData = await Project.getTicketTaskStatusChangeMailData(
+        db,
+        ProjectTaskId
+      );
+
+      EmailService.sendTicketTaskStatusChangeMail(
+        EmailData.CompanyEmail,
+        EmailData.CompanyName,
+        EmailData.ProjectTicketTitle,
+        EmailData.ProjectTaskStatusName
+      );
       res.status(200).send("Stato del task aggiornato con successo.");
     } catch (error) {
       console.error("Errore nell'aggiornamento dello stato del task:", error);

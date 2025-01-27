@@ -605,7 +605,6 @@ class ProjectModel {
   static updateTaskStatus(db, ProjectTaskId, ProjectTaskStatusId) {
     return new Promise((resolve, reject) => {
       const query = `UPDATE public."ProjectTask" SET "ProjectTaskStatusId" = $1 WHERE "ProjectTaskId" = $2`;
-
       const values = [ProjectTaskStatusId, ProjectTaskId];
 
       db.query(query, values, (error, result) => {
@@ -912,7 +911,7 @@ class ProjectModel {
       LEFT JOIN public."NotificationExtraData" ON public."ProjectTeam"."StafferId" = public."NotificationExtraData"."UserId"
       LEFT JOIN public."NotificationInfo" ON public."NotificationExtraData"."NotificationId" = public."NotificationInfo"."NotificationId" 
       AND public."NotificationInfo"."ProjectId" = public."Project"."ProjectId"
-      WHERE public."ProjectTeam"."StafferId" = $1
+      WHERE public."ProjectTeam"."StafferId" = $1 AND public."Project"."StatusId" <> 3
       GROUP BY public."Project"."ProjectId", 
       public."Project"."ProjectName", 
       public."Company"."CompanyName",
@@ -1536,6 +1535,25 @@ class ProjectModel {
       INNER JOIN public."ProjectTicket" USING("ProjectTaskId")
       WHERE "ProjectTicketId" = $1`;
       db.query(query, [TicketId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async getTicketTaskStatusChangeMailData(db, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectTaskStatusName", "CompanyName", "CompanyEmail", "ProjectTicketTitle" FROM public."ProjectTask"
+      INNER JOIN public."ProjectTaskStatus" USING("ProjectTaskStatusId")
+      INNER JOIN public."Project" USING("ProjectId")
+      INNER JOIN public."Company" USING("CompanyId")
+      INNER JOIN public."ProjectTicket" USING("ProjectTaskId")
+      WHERE "ProjectTaskId" = $1`;
+
+      db.query(query, [TaskId], (error, result) => {
         if (error) {
           reject(error);
         } else {
