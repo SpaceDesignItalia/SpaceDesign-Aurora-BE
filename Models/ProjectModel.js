@@ -1528,6 +1528,22 @@ class ProjectModel {
       );
     }
   }
+
+  static async getTaskStatusByTicketId(db, TicketId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectTaskStatusName" FROM public."ProjectTaskStatus" 
+      INNER JOIN public."ProjectTask" USING("ProjectTaskStatusId")
+      INNER JOIN public."ProjectTicket" USING("ProjectTaskId")
+      WHERE "ProjectTicketId" = $1`;
+      db.query(query, [TicketId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

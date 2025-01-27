@@ -251,6 +251,10 @@ const projectGET = (db) => {
     ProjectController.getProjectByUniqueCode(req, res, db);
   });
 
+  router.get("/GetTaskStatusByTicketId", authenticateMiddleware, (req, res) => {
+    ProjectController.getTaskStatusByTicketId(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

@@ -3,6 +3,7 @@ const Project = require("../Models/ProjectModel");
 const path = require("path");
 const fs = require("fs");
 const NotifyMiddleware = require("../middlewares/Notification/NotifyMiddelware");
+const TicketController = require("./TicketController");
 
 class ProjectController {
   static async getAllStatus(req, res, db) {
@@ -231,7 +232,6 @@ class ProjectController {
       const ProjectLinkData = req.body.ProjectLinkData;
       await Project.addProjectLink(db, ProjectLinkData);
       const UserId = req.session.account.StafferId;
-      console.log(UserId);
       await NotifyMiddleware.ProjectNotification(
         db,
         UserId,
@@ -601,6 +601,16 @@ class ProjectController {
       );
       this.addMemberToTask(TaskData, Task.ProjectTaskId, db);
       this.addTagToTask(TaskData, Task.ProjectTaskId, db);
+
+      if (req.body.TicketId) {
+        await TicketController.addTaskToTicket(
+          req,
+          res,
+          db,
+          Task.ProjectTaskId,
+          req.body.TicketId
+        );
+      }
       res.status(200).json(Task.ProjectTaskId);
     } catch (error) {
       console.error("Errore nella creazione del task:", error);
@@ -1136,6 +1146,18 @@ class ProjectController {
     } catch (error) {
       console.error("Error refining text:", error);
       res.status(500).send("Text refinement failed");
+    }
+  }
+
+  static async getTaskStatusByTicketId(req, res, db) {
+    try {
+      const TicketId = req.query.ProjectTicketId;
+
+      const status = await Project.getTaskStatusByTicketId(db, TicketId);
+      res.status(200).json(status);
+    } catch (error) {
+      console.error("Error getting task status:", error);
+      res.status(500).send("Task status retrieval failed");
     }
   }
 }

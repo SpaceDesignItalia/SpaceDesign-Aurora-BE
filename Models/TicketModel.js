@@ -83,6 +83,20 @@ class TicketModel {
       });
     });
   }
+
+  static addTaskToTicket(db, taskId, ticketId) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTicket" SET "ProjectTaskId" = $1 WHERE "ProjectTicketId" = $2`;
+      const values = [taskId, ticketId];
+      db.query(query, values, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
 }
 
 module.exports = TicketModel;
