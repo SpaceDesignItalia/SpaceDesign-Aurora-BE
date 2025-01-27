@@ -91,6 +91,14 @@ const projectPOST = (db) => {
     ProjectController.refineText(req, res);
   });
 
+  router.post("/UpdateProjectCode", authenticateMiddleware, (req, res) => {
+    ProjectController.updateProjectCode(req, res, db);
+  });
+
+  router.post("/AddCodeShareTab", authenticateMiddleware, (req, res) => {
+    ProjectController.addCodeShareTab(req, res, db);
+  });
+
   return router;
 };
 

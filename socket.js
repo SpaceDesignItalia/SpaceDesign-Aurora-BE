@@ -78,6 +78,10 @@ const createSocketServer = (httpServer) => {
     socket.on("get-users", () => {
       io.emit("get-users", onlineUsers);
     });
+
+    socket.on("share-code-update", () => {
+      io.emit("share-code-update");
+    });
   });
 
   return io;

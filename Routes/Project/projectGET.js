@@ -255,6 +255,14 @@ const projectGET = (db) => {
     ProjectController.getTaskStatusByTicketId(req, res, db);
   });
 
+  router.get("/GetCodeShareTabs", authenticateMiddleware, (req, res) => {
+    ProjectController.getCodeShareTabs(req, res, db);
+  });
+
+  router.get("/GetCodeShareCode", authenticateMiddleware, (req, res) => {
+    ProjectController.getCodeShareCode(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
