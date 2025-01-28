@@ -1627,6 +1627,19 @@ class ProjectModel {
       });
     });
   }
+
+  static async deleteCodeShareTab(db, ProjectCodeShareId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectCodeShare" WHERE "ProjectCodeShareId" = $1`;
+      db.query(query, [ProjectCodeShareId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

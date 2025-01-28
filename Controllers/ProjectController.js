@@ -1239,6 +1239,18 @@ class ProjectController {
       res.status(500).send("Code share screenshot upload failed");
     }
   }
+
+  static async deleteCodeShareTab(req, res, db) {
+    try {
+      const ProjectCodeShareId = req.query.ProjectCodeShareId;
+
+      await Project.deleteCodeShareTab(db, ProjectCodeShareId);
+      res.status(200).send("Tab eliminato con successo.");
+    } catch (error) {
+      console.error("Error deleting code share tab:", error);
+      res.status(500).send("Code share tab deletion failed");
+    }
+  }
 }
 
 module.exports = ProjectController;
