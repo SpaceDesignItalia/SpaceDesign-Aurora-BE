@@ -1562,6 +1562,97 @@ class ProjectModel {
       });
     });
   }
+
+  static async getCodeShareTabs(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ProjectCodeShareId", "ProjectCodeShareName", "ImageURL", "Code" FROM public."ProjectCodeShare" WHERE "ProjectId" = $1`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async addCodeShareTab(db, ProjectId, TabName) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectCodeShare"("ProjectId", "ProjectCodeShareName", "Code") VALUES ($1, $2, '// Insert code here')`;
+      db.query(query, [ProjectId, TabName], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async updateProjectCode(db, ProjectCodeShareId, Code) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectCodeShare" SET "Code" = $1 WHERE "ProjectCodeShareId" = $2`;
+      db.query(query, [Code, ProjectCodeShareId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async getCodeShareCode(db, ProjectCodeShareId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "Code" FROM public."ProjectCodeShare" WHERE "ProjectCodeShareId" = $1`;
+      db.query(query, [ProjectCodeShareId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async uploadCodeShareScreenshot(db, ProjectCodeShareId, filePath) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectCodeShare" SET "ImageURL" = $1 WHERE "ProjectCodeShareId" = $2`;
+      db.query(query, [filePath, ProjectCodeShareId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async deleteCodeShareTab(db, ProjectCodeShareId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectCodeShare" WHERE "ProjectCodeShareId" = $1`;
+      db.query(query, [ProjectCodeShareId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async getOldFilePath(db, ProjectCodeShareId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ImageURL" FROM public."ProjectCodeShare" WHERE "ProjectCodeShareId" = $1`;
+      db.query(query, [ProjectCodeShareId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows.length > 0 ? result.rows[0].ImageURL : null);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

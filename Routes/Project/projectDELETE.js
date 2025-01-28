@@ -61,6 +61,10 @@ const projectDELETE = (db) => {
     ProjectController.deleteTaskCheckbox(req, res, db);
   });
 
+  router.delete("/DeleteCodeShareTab", authenticateMiddleware, (req, res) => {
+    ProjectController.deleteCodeShareTab(req, res, db);
+  });
+
   return router;
 };
 

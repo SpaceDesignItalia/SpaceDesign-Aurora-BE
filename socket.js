@@ -2,6 +2,7 @@
 const { Server } = require("socket.io");
 
 let onlineUsers = [];
+let onlineUsersOnCodeShare = [];
 
 const createSocketServer = (httpServer) => {
   const io = new Server(httpServer, {
@@ -62,8 +63,12 @@ const createSocketServer = (httpServer) => {
 
     socket.on("disconnect", () => {
       onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+      onlineUsersOnCodeShare = onlineUsersOnCodeShare.filter(
+        (user) => user.socketId !== socket.id
+      );
       // send all online users to all users
       io.emit("get-users", onlineUsers);
+      io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
     });
 
     socket.on("offline", () => {
@@ -77,6 +82,35 @@ const createSocketServer = (httpServer) => {
 
     socket.on("get-users", () => {
       io.emit("get-users", onlineUsers);
+    });
+
+    socket.on("share-code-update", () => {
+      io.emit("share-code-update");
+    });
+
+    socket.on("join-code-share", (codeShareId, userId) => {
+      socket.join(codeShareId);
+      if (!onlineUsersOnCodeShare.some((user) => user.userId === userId)) {
+        onlineUsersOnCodeShare.push({
+          userId: userId,
+          codeShareId: codeShareId,
+          socketId: socket.id,
+        });
+      }
+
+      io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
+    });
+
+    socket.on("get-users-on-code-share", () => {
+      io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
+    });
+
+    socket.on("leave-code-share", (codeShareId, userId) => {
+      socket.leave(codeShareId);
+      onlineUsersOnCodeShare = onlineUsersOnCodeShare.filter(
+        (user) => user.userId !== userId
+      );
+      io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
     });
   });
 

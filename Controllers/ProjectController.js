@@ -1173,6 +1173,118 @@ class ProjectController {
       res.status(500).send("Task status retrieval failed");
     }
   }
+
+  static async updateProjectCode(req, res, db) {
+    try {
+      const ProjectCodeShareId = req.body.ProjectCodeShareId;
+      const ProjectCode = req.body.ProjectCode;
+
+      await Project.updateProjectCode(db, ProjectCodeShareId, ProjectCode);
+      res.status(200).send("Codice del progetto aggiornato con successo.");
+    } catch (error) {
+      console.error(
+        "Errore nell'aggiornamento del codice del progetto:",
+        error
+      );
+      res.status(500).send("Aggiornamento del codice del progetto fallito");
+    }
+  }
+
+  static async getCodeShareTabs(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      const tabs = await Project.getCodeShareTabs(db, ProjectId);
+      res.status(200).json(tabs);
+    } catch (error) {
+      console.error("Error getting share code tabs:", error);
+      res.status(500).send("Share code tabs retrieval failed");
+    }
+  }
+
+  static async addCodeShareTab(req, res, db) {
+    try {
+      const { ProjectId, ProjectCodeShareName } = req.body;
+
+      await Project.addCodeShareTab(db, ProjectId, ProjectCodeShareName);
+      res.status(200).send("Tab aggiunto con successo.");
+    } catch (error) {
+      console.error("Error adding code share tab:", error);
+      res.status(500).send("Code share tab addition failed");
+    }
+  }
+
+  static async getCodeShareCode(req, res, db) {
+    try {
+      const ProjectCodeShareId = req.query.ProjectCodeShareId;
+
+      const code = await Project.getCodeShareCode(db, ProjectCodeShareId);
+      res.status(200).json(code);
+    } catch (error) {
+      console.error("Error getting share code:", error);
+      res.status(500).send("Share code retrieval failed");
+    }
+  }
+
+  static async uploadCodeShareScreenshot(req, res, db) {
+    try {
+      const { ProjectCodeShareId } = req.body;
+      const file = req.file;
+      const filePath = file ? `/${file.filename}` : null;
+
+      // Recupera il vecchio percorso dell'immagine dal database
+      const oldFilePath = await Project.getOldFilePath(db, ProjectCodeShareId);
+
+      // Se c'era un vecchio file, eliminalo
+      if (oldFilePath) {
+        const oldFilePathFull = path.join(
+          __dirname,
+          "..",
+          "public/codeShare",
+          oldFilePath
+        ); // Corretta la directory
+        if (fs.existsSync(oldFilePathFull)) {
+          fs.unlinkSync(oldFilePathFull); // Elimina il file dal filesystem
+        }
+      }
+
+      // Carica il nuovo file nel database
+      await Project.uploadCodeShareScreenshot(db, ProjectCodeShareId, filePath);
+
+      res.status(200).send("Screenshot caricato con successo.");
+    } catch (error) {
+      console.error("Error uploading code share screenshot:", error);
+      res.status(500).send("Code share screenshot upload failed");
+    }
+  }
+
+  static async deleteCodeShareTab(req, res, db) {
+    try {
+      const ProjectCodeShareId = req.query.ProjectCodeShareId;
+
+      // Recupera il vecchio percorso dell'immagine dal database
+      const oldFilePath = await Project.getOldFilePath(db, ProjectCodeShareId);
+
+      // Se c'era un vecchio file, eliminalo
+      if (oldFilePath) {
+        const oldFilePathFull = path.join(
+          __dirname,
+          "..",
+          "public/codeShare",
+          oldFilePath
+        ); // Corretta la directory
+        if (fs.existsSync(oldFilePathFull)) {
+          fs.unlinkSync(oldFilePathFull); // Elimina il file dal filesystem
+        }
+      }
+
+      await Project.deleteCodeShareTab(db, ProjectCodeShareId);
+      res.status(200).send("Tab eliminato con successo.");
+    } catch (error) {
+      console.error("Error deleting code share tab:", error);
+      res.status(500).send("Code share tab deletion failed");
+    }
+  }
 }
 
 module.exports = ProjectController;
