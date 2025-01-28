@@ -60,13 +60,13 @@ class StafferModel {
   static getStafferById(db, StafferId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "StafferId" AS "EmployeeId", "StafferName" AS "EmployeeName", "StafferSurname" AS "EmployeeSurname", 
-      "StafferEmail" AS "EmployeeEmail", "StafferPhone" AS "EmployeePhone" FROM public."Staffer" WHERE "StafferId" = $1`;
+      "StafferEmail" AS "EmployeeEmail", "StafferPhone" AS "EmployeePhone", "StafferImageUrl" AS "EmployeeImageUrl" FROM public."Staffer" WHERE "StafferId" = $1`;
 
       db.query(query, [StafferId], (error, result) => {
         if (error) {
           reject(error);
         } else {
-          resolve(result.rows);
+          resolve(result.rows[0]);
         }
       });
     });

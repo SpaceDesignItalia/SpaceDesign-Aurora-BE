@@ -24,6 +24,24 @@ const storage = multer.diskStorage({
   },
 });
 
+const uploadDirCodeShare = "./public/codeShare";
+if (!fs.existsSync(uploadDirCodeShare)) {
+  fs.mkdirSync(uploadDirCodeShare, { recursive: true });
+}
+
+const codeShareStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDirCodeShare);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+  },
+});
+
+const codeShareUpload = multer({ storage: codeShareStorage });
+
 const upload = multer({ storage: storage });
 
 const projectPOST = (db) => {
@@ -98,6 +116,14 @@ const projectPOST = (db) => {
   router.post("/AddCodeShareTab", authenticateMiddleware, (req, res) => {
     ProjectController.addCodeShareTab(req, res, db);
   });
+
+  router.post(
+    "/UploadCodeShareScreenshot",
+    codeShareUpload.single("file"),
+    (req, res) => {
+      ProjectController.uploadCodeShareScreenshot(req, res, db);
+    }
+  );
 
   return router;
 };

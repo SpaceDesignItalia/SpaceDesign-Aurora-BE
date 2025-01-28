@@ -1225,6 +1225,20 @@ class ProjectController {
       res.status(500).send("Share code retrieval failed");
     }
   }
+
+  static async uploadCodeShareScreenshot(req, res, db) {
+    try {
+      const { ProjectCodeShareId } = req.body;
+      const file = req.file;
+      const filePath = file ? `/${file.filename}` : null;
+
+      await Project.uploadCodeShareScreenshot(db, ProjectCodeShareId, filePath);
+      res.status(200).send("Screenshot caricato con successo.");
+    } catch (error) {
+      console.error("Error uploading code share screenshot:", error);
+      res.status(500).send("Code share screenshot upload failed");
+    }
+  }
 }
 
 module.exports = ProjectController;

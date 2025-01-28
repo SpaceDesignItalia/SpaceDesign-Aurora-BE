@@ -1565,7 +1565,7 @@ class ProjectModel {
 
   static async getCodeShareTabs(db, ProjectId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "ProjectCodeShareId", "ProjectCodeShareName", "Code" FROM public."ProjectCodeShare" WHERE "ProjectId" = $1`;
+      const query = `SELECT "ProjectCodeShareId", "ProjectCodeShareName", "ImageURL", "Code" FROM public."ProjectCodeShare" WHERE "ProjectId" = $1`;
       db.query(query, [ProjectId], (error, result) => {
         if (error) {
           reject(error);
@@ -1610,6 +1610,19 @@ class ProjectModel {
           reject(error);
         } else {
           resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static async uploadCodeShareScreenshot(db, ProjectCodeShareId, filePath) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectCodeShare" SET "ImageURL" = $1 WHERE "ProjectCodeShareId" = $2`;
+      db.query(query, [filePath, ProjectCodeShareId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
         }
       });
     });
