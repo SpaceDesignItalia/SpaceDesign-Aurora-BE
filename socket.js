@@ -1,120 +1,192 @@
-// socket.js
-const { Server } = require("socket.io");
+const { Server } = require("socket.io")
 
-let onlineUsers = [];
-let onlineUsersOnCodeShare = [];
+let onlineUsers = []
+let onlineUsersOnCodeShare = []
+const videoRoomParticipants = {} // Track participants per project room
+const videoWindows = new Map() // Track video windows by userId and projectId
 
 const createSocketServer = (httpServer) => {
   const io = new Server(httpServer, {
     cors: {
-      origin: [
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "https://app.spacedesign-italia.it",
-      ],
+      origin: ["http://localhost:5173", "http://localhost:5174", "https://app.spacedesign-italia.it"],
       methods: ["GET", "POST"],
       credentials: true,
     },
-  });
+    pingTimeout: 5000,
+    pingInterval: 2000,
+  })
 
   io.on("connection", (socket) => {
+    // Quando un client si connette, invia l'attuale stato delle stanze video
+    socket.emit("initial-video-participants", videoRoomParticipants)
+
     socket.on("join", (conversationId) => {
-      socket.join(conversationId);
-    });
+      socket.join(conversationId)
+    })
 
     socket.on("message", (conversationId) => {
-      io.to(conversationId).emit("message-update", conversationId);
-    });
+      io.to(conversationId).emit("message-update", conversationId)
+    })
 
     socket.on("task-news", (ProjectId) => {
-      io.to(ProjectId).emit("task-update", ProjectId);
-    });
+      io.to(ProjectId).emit("task-update", ProjectId)
+    })
 
     socket.on("file-update", (ProjectId) => {
-      io.to(ProjectId).emit("file-update", ProjectId);
-    });
+      io.to(ProjectId).emit("file-update", ProjectId)
+    })
 
     socket.on("join-notifications", (userId) => {
-      socket.join(userId);
-    });
+      socket.join(userId)
+    })
 
     socket.on("delete-notifications", (userId) => {
-      io.to(userId).emit("delete-notifications");
-    });
+      io.to(userId).emit("delete-notifications")
+    })
+
+    socket.on("join-video-room", (projectId, userId) => {
+      // Initialize the room if it doesn't exist
+      if (!videoRoomParticipants[projectId]) {
+        videoRoomParticipants[projectId] = new Set()
+      }
+
+      // Add the participant with their userId
+      videoRoomParticipants[projectId].add(userId)
+      // Store both userId and projectId for this socket
+      videoWindows.set(socket.id, { userId, projectId })
+
+      // Emit updated count to all clients
+      io.emit("video-participants-update", {
+        projectId: projectId,
+        count: videoRoomParticipants[projectId].size,
+        participants: Array.from(videoRoomParticipants[projectId]),
+      })
+    })
+
+    socket.on("leave-video-room", (projectId, userId) => {
+      handleUserLeaveVideo(projectId, userId, io)
+      videoWindows.delete(socket.id)
+    })
+
+    socket.on("check-video-room", (projectId) => {
+      const count = videoRoomParticipants[projectId]?.size || 0
+      const participants = videoRoomParticipants[projectId] ? Array.from(videoRoomParticipants[projectId]) : []
+
+      socket.emit("video-participants-update", {
+        projectId: projectId,
+        count: count,
+        participants: participants,
+      })
+    })
+
+    socket.on("ping-video-presence", (projectId, userId) => {
+      // Aggiorna il timestamp dell'ultimo ping per questo utente
+      if (videoWindows.has(socket.id)) {
+        videoWindows.get(socket.id).lastPing = Date.now()
+      }
+    })
 
     function sendNotification(userId) {
-      io.to(userId).emit("newNotification");
+      io.to(userId).emit("newNotification")
     }
 
-    module.exports.sendNotification = sendNotification;
+    module.exports.sendNotification = sendNotification
 
     socket.on("new-user-add", (newUserId) => {
       if (!onlineUsers.some((user) => user.userId === newUserId)) {
-        // if user is not added before
         onlineUsers.push({
           userId: newUserId,
           status: "online",
           socketId: socket.id,
-        });
+        })
       }
-      // send all active users to new user
-      io.emit("get-users", onlineUsers);
-    });
+      io.emit("get-users", onlineUsers)
+    })
 
     socket.on("disconnect", () => {
-      onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-      onlineUsersOnCodeShare = onlineUsersOnCodeShare.filter(
-        (user) => user.socketId !== socket.id
-      );
-      // send all online users to all users
-      io.emit("get-users", onlineUsers);
-      io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
-    });
+      // Gestisci la disconnessione dalla video chat
+      const videoSession = videoWindows.get(socket.id)
+      if (videoSession) {
+        const { projectId, userId } = videoSession
+        handleUserLeaveVideo(projectId, userId, io)
+        videoWindows.delete(socket.id)
+      }
+
+      // Gestisci la disconnessione generale
+      onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id)
+      onlineUsersOnCodeShare = onlineUsersOnCodeShare.filter((user) => user.socketId !== socket.id)
+
+      io.emit("get-users", onlineUsers)
+      io.emit("get-users-on-code-share", onlineUsersOnCodeShare)
+    })
 
     socket.on("offline", () => {
-      // remove user from active users
-      onlineUsers = onlineUsers.map((user) =>
-        user.socketId === socket.id ? { ...user, status: "offline" } : user
-      );
-      // send all online users to all users
-      io.emit("get-users", onlineUsers);
-    });
+      onlineUsers = onlineUsers.map((user) => (user.socketId === socket.id ? { ...user, status: "offline" } : user))
+      io.emit("get-users", onlineUsers)
+    })
 
     socket.on("get-users", () => {
-      io.emit("get-users", onlineUsers);
-    });
+      io.emit("get-users", onlineUsers)
+    })
 
     socket.on("share-code-update", () => {
-      io.emit("share-code-update");
-    });
+      io.emit("share-code-update")
+    })
 
     socket.on("join-code-share", (codeShareId, userId) => {
-      socket.join(codeShareId);
+      socket.join(codeShareId)
       if (!onlineUsersOnCodeShare.some((user) => user.userId === userId)) {
         onlineUsersOnCodeShare.push({
           userId: userId,
           codeShareId: codeShareId,
           socketId: socket.id,
-        });
+        })
       }
 
-      io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
-    });
+      io.emit("get-users-on-code-share", onlineUsersOnCodeShare)
+    })
 
     socket.on("get-users-on-code-share", () => {
-      io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
-    });
+      io.emit("get-users-on-code-share", onlineUsersOnCodeShare)
+    })
 
     socket.on("leave-code-share", (codeShareId, userId) => {
-      socket.leave(codeShareId);
-      onlineUsersOnCodeShare = onlineUsersOnCodeShare.filter(
-        (user) => user.userId !== userId
-      );
-      io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
-    });
-  });
+      socket.leave(codeShareId)
+      onlineUsersOnCodeShare = onlineUsersOnCodeShare.filter((user) => user.userId !== userId)
+      io.emit("get-users-on-code-share", onlineUsersOnCodeShare)
+    })
+  })
 
-  return io;
-};
+  // Cleanup inattivi ogni 5 secondi
+  setInterval(() => {
+    const now = Date.now()
+    for (const [socketId, session] of videoWindows.entries()) {
+      if (session.lastPing && now - session.lastPing > 5000) {
+        const { projectId, userId } = session
+        handleUserLeaveVideo(projectId, userId, io)
+        videoWindows.delete(socketId)
+      }
+    }
+  }, 5000)
 
-module.exports = createSocketServer;
+  return io
+}
+
+function handleUserLeaveVideo(projectId, userId, io) {
+  if (videoRoomParticipants[projectId]) {
+    videoRoomParticipants[projectId].delete(userId)
+
+    if (videoRoomParticipants[projectId].size === 0) {
+      delete videoRoomParticipants[projectId]
+    }
+
+    io.emit("video-participants-update", {
+      projectId: projectId,
+      count: videoRoomParticipants[projectId]?.size || 0,
+      participants: videoRoomParticipants[projectId] ? Array.from(videoRoomParticipants[projectId]) : [],
+    })
+  }
+}
+
+module.exports = createSocketServer
+
