@@ -1640,6 +1640,19 @@ class ProjectModel {
       });
     });
   }
+
+  static async getOldFilePath(db, ProjectCodeShareId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "ImageURL" FROM public."ProjectCodeShare" WHERE "ProjectCodeShareId" = $1`;
+      db.query(query, [ProjectCodeShareId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows.length > 0 ? result.rows[0].ImageURL : null);
+        }
+      });
+    });
+  }
 }
 
 module.exports = ProjectModel;

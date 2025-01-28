@@ -1232,7 +1232,25 @@ class ProjectController {
       const file = req.file;
       const filePath = file ? `/${file.filename}` : null;
 
+      // Recupera il vecchio percorso dell'immagine dal database
+      const oldFilePath = await Project.getOldFilePath(db, ProjectCodeShareId);
+
+      // Se c'era un vecchio file, eliminalo
+      if (oldFilePath) {
+        const oldFilePathFull = path.join(
+          __dirname,
+          "..",
+          "public/codeShare",
+          oldFilePath
+        ); // Corretta la directory
+        if (fs.existsSync(oldFilePathFull)) {
+          fs.unlinkSync(oldFilePathFull); // Elimina il file dal filesystem
+        }
+      }
+
+      // Carica il nuovo file nel database
       await Project.uploadCodeShareScreenshot(db, ProjectCodeShareId, filePath);
+
       res.status(200).send("Screenshot caricato con successo.");
     } catch (error) {
       console.error("Error uploading code share screenshot:", error);
@@ -1243,6 +1261,22 @@ class ProjectController {
   static async deleteCodeShareTab(req, res, db) {
     try {
       const ProjectCodeShareId = req.query.ProjectCodeShareId;
+
+      // Recupera il vecchio percorso dell'immagine dal database
+      const oldFilePath = await Project.getOldFilePath(db, ProjectCodeShareId);
+
+      // Se c'era un vecchio file, eliminalo
+      if (oldFilePath) {
+        const oldFilePathFull = path.join(
+          __dirname,
+          "..",
+          "public/codeShare",
+          oldFilePath
+        ); // Corretta la directory
+        if (fs.existsSync(oldFilePathFull)) {
+          fs.unlinkSync(oldFilePathFull); // Elimina il file dal filesystem
+        }
+      }
 
       await Project.deleteCodeShareTab(db, ProjectCodeShareId);
       res.status(200).send("Tab eliminato con successo.");
