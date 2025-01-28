@@ -10,7 +10,8 @@ class StafferModel {
           s."StafferEmail" AS "EmployeeEmail", 
           s."StafferPhone" AS "EmployeePhone", 
           s."CreationTime" AS "EmployeeCreationTime",
-          r."RoleName" AS "RoleName"
+          r."RoleName" AS "RoleName",
+          s."StafferImageUrl" AS "EmployeeImageUrl"
         FROM 
           public."Staffer" s
         LEFT JOIN 
@@ -101,7 +102,7 @@ class StafferModel {
   static searchStafferByEmail(db, EmployeeEmail) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "StafferId" AS "EmployeeId", CONCAT("StafferName", ' ', "StafferSurname") "EmployeeFullName", "StafferEmail" AS "EmployeeEmail", 
-      "StafferPhone" AS "EmployeePhone" FROM public."Staffer" 
+      "StafferPhone" AS "EmployeePhone", "StafferImageUrl" AS "EmployeeImageUrl" FROM public."Staffer" 
       WHERE "StafferEmail" LIKE '%${EmployeeEmail}%'`;
 
       db.query(query, (err, result) => {

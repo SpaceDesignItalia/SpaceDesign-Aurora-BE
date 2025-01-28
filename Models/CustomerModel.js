@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 class CustomerModel {
   static getAllCustomers(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "CustomerId", CONCAT("CustomerName", ' ', "CustomerSurname") "CustomerFullName", "CustomerEmail", "CustomerPhone"
+      const query = `SELECT "CustomerId", CONCAT("CustomerName", ' ', "CustomerSurname") "CustomerFullName", "CustomerEmail", "CustomerPhone", "CustomerImageUrl"
       FROM public."Customer";`;
 
       db.query(query, (error, result) => {
