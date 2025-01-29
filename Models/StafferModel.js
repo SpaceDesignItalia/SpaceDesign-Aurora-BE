@@ -356,6 +356,39 @@ class StafferModel {
       });
     });
   }
+
+  static getStafferProjectsForModal(db, EmployeeId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          p."ProjectId", 
+          p."ProjectName", 
+          p."ProjectDescription", 
+          p."ProjectEndDate", 
+          c."CompanyImageUrl",
+          COUNT(pt."ProjectTaskId") AS "ProjectTaskCount"
+        FROM 
+          public."Project" p
+        INNER JOIN 
+          public."Company" c ON p."CompanyId" = c."CompanyId"
+        LEFT JOIN 
+          public."ProjectTask" pt ON p."ProjectId" = pt."ProjectId"
+        LEFT JOIN 
+          public."ProjectTaskTeam" ptt ON pt."ProjectTaskId" = ptt."ProjectTaskId"
+        WHERE 
+          ptt."StafferId" = $1 AND p."StatusId" <> 3
+        GROUP BY 
+          p."ProjectId", c."CompanyImageUrl"
+      `;
+      db.query(query, [EmployeeId], (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
 }
 
 module.exports = StafferModel;
