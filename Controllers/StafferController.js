@@ -195,6 +195,17 @@ class StafferController {
       res.status(500).send("Cancellazione del dipendente fallita");
     }
   }
+
+  static async getStafferProjectsForModal(req, res, db) {
+    try {
+      const EmployeeId = req.query.EmployeeId;
+      const projects = await Staffer.getStafferProjectsForModal(db, EmployeeId);
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Errore nel recupero dei progetti del dipendente:", error);
+      res.status(500).send("Recupero dei progetti del dipendente fallita");
+    }
+  }
 }
 
 module.exports = StafferController;

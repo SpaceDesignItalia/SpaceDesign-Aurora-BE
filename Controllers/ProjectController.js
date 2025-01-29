@@ -1285,6 +1285,28 @@ class ProjectController {
       res.status(500).send("Code share tab deletion failed");
     }
   }
+
+  static async archiveTask(req, res, db) {
+    try {
+      const TaskId = req.body.ProjectTaskId;
+      await Project.archiveTask(db, TaskId);
+      res.status(200).send("Task archiviato con successo.");
+    } catch (error) {
+      console.error("Error archiving task:", error);
+      res.status(500).send("Task archiving failed");
+    }
+  }
+
+  static async getArchivedTasksByProjectId(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      const tasks = await Project.getArchivedTasksByProjectId(db, ProjectId);
+      res.status(200).json(tasks);
+    } catch (error) {
+      console.error("Error getting archived tasks:", error);
+      res.status(500).send("Archived tasks retrieval failed");
+    }
+  }
 }
 
 module.exports = ProjectController;

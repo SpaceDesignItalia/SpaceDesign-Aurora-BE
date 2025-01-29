@@ -576,7 +576,7 @@ class ProjectModel {
 
   static getTasksByProjectId(db, ProjectId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectId" = $1`;
+      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectId" = $1 AND "IsArchived" = false`;
 
       db.query(query, [ProjectId], (error, result) => {
         if (error) {
@@ -1649,6 +1649,32 @@ class ProjectModel {
           reject(error);
         } else {
           resolve(result.rows.length > 0 ? result.rows[0].ImageURL : null);
+        }
+      });
+    });
+  }
+
+  static async archiveTask(db, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTask" SET "IsArchived" = true WHERE "ProjectTaskId" = $1`;
+      db.query(query, [TaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async getArchivedTasksByProjectId(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectId" = $1 AND "IsArchived" = true`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
         }
       });
     });

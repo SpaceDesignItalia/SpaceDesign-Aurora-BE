@@ -263,6 +263,14 @@ const projectGET = (db) => {
     ProjectController.getCodeShareCode(req, res, db);
   });
 
+  router.get(
+    "/GetArchivedTasksByProjectId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getArchivedTasksByProjectId(req, res, db);
+    }
+  );
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
