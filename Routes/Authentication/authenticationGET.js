@@ -7,10 +7,10 @@ const authenticateMiddleware = require("../../middlewares/EmailService/Authentic
 const authenticationGET = (db) => {
   // Definisci le route POST qui
 
-  router.get("/CheckSession", authenticateMiddleware, (req, res) => {
+  router.get("/CheckSession", (req, res) => {
     AuthenticationController.CheckSession(req, res);
   });
-  router.get("/GetSessionData", authenticateMiddleware, (req, res) => {
+  router.get("/GetSessionData", (req, res) => {
     AuthenticationController.GetSessionData(req, res);
   });
 
