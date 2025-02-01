@@ -115,6 +115,23 @@ class CalendarController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  static async updateEvent(req, res, db) {
+    try {
+      const { Partecipants, Tag, EventData } = req.body;
+      console.log(Partecipants, Tag, EventData);
+      const event = await Calendar.updateEvent(
+        Partecipants,
+        Tag,
+        EventData,
+        db
+      );
+      res.status(200).json(event);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = CalendarController;

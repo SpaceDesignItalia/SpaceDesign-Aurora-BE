@@ -154,6 +154,70 @@ class CalendarModel {
       });
     });
   }
+
+  static updateEvent(partecipants, tag, eventData, db) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."Event" SET "EventTitle" = $1, "EventDescription" = $2, 
+      "EventEndDate" = $3, "EventStartDate" = $4, "EventStartTime" = $5, "EventEndTime" = $6, 
+      "EventLocation" = $7, "EventTagId" = $8 
+      WHERE "EventId" = $9;`;
+      db.query(
+        query,
+        [
+          eventData.EventTitle,
+          eventData.EventDescription,
+          eventData.EventEndDate,
+          eventData.EventStartDate,
+          eventData.EventStartTime,
+          eventData.EventEndTime,
+          eventData.EventLocation,
+          tag,
+          eventData.EventId,
+        ],
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result.rows);
+
+            const deletePartecipantsQuery = `DELETE FROM public."EventPartecipant" WHERE "EventId" = $1;`;
+            db.query(
+              deletePartecipantsQuery,
+              [eventData.EventId],
+              (error, result) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(result.rows);
+                }
+              }
+            );
+
+            for (const partecipant of partecipants) {
+              const partecipantQuery = `INSERT INTO public."EventPartecipant" 
+              ("EventId", "EventPartecipantEmail", "EventPartecipantRole") 
+              VALUES ($1, $2, $3);`;
+              db.query(
+                partecipantQuery,
+                [
+                  eventData.EventId,
+                  partecipant.EventPartecipantEmail,
+                  partecipant.EventPartecipantRole,
+                ],
+                (error, result) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(result.rows);
+                  }
+                }
+              );
+            }
+          }
+        }
+      );
+    });
+  }
 }
 
 module.exports = CalendarModel;
