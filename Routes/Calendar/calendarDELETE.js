@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const CalendarController = require("../../Controllers/CalendarController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const calendarDELETE = (db) => {
   router.delete(

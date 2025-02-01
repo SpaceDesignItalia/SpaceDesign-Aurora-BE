@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const Calendar = require("../Models/CalendarModel");
+const EmailService = require("../middlewares/EmailService/EmailService");
 
 class CalendarController {
   static async getEventTags(req, res, db) {
@@ -16,6 +17,40 @@ class CalendarController {
     try {
       const { EventData } = req.body;
       const event = await Calendar.addEvent(EventData, db);
+
+      const partecipants = await Calendar.getPartecipantsByEventId(
+        event.EventId,
+        db
+      );
+
+      console.log("partecipants:", partecipants);
+
+      for (const partecipant of partecipants) {
+        EmailService.sendNewEventMail(
+          partecipant.EventPartecipantEmail,
+          EventData.EventTitle,
+          EventData.EventStartDate,
+          EventData.EventEndDate,
+          EventData.EventStartTime,
+          EventData.EventEndTime,
+          EventData.EventDescription,
+          EventData.EventLocation,
+          partecipants,
+          process.env.FRONTEND_URL +
+            "/comunications/calendar/" +
+            event.EventId +
+            "/" +
+            partecipant.EventPartecipantEmail +
+            "/accept",
+          process.env.FRONTEND_URL +
+            "/comunications/calendar/" +
+            event.EventId +
+            "/" +
+            partecipant.EventPartecipantEmail +
+            "/reject"
+        );
+      }
+
       res.status(200).json(event);
     } catch (error) {
       console.error(error);
@@ -47,7 +82,6 @@ class CalendarController {
   static async getEventByEventId(req, res, db) {
     try {
       const { eventId } = req.query;
-      console.log(eventId);
       const event = await Calendar.getEventByEventId(eventId, db);
 
       if (event) {
@@ -55,6 +89,7 @@ class CalendarController {
           eventId,
           db
         );
+        console.log("partecipants:", partecipants);
         const attachments = await Calendar.getAttachmentsByEventId(eventId, db);
         event.EventPartecipants = partecipants;
         event.EventAttachments = attachments;
@@ -92,8 +127,6 @@ class CalendarController {
     try {
       const { EventAttachmentId, EventAttachmentUrl } = req.query;
 
-      console.log(EventAttachmentId, EventAttachmentUrl);
-
       const fullFilePath = path.join(
         __dirname,
         "../public/uploads/calendarFiles",
@@ -124,7 +157,6 @@ class CalendarController {
   static async updateEvent(req, res, db) {
     try {
       const { Partecipants, Tag, EventData } = req.body;
-      console.log(Partecipants, Tag, EventData);
       const event = await Calendar.updateEvent(
         Partecipants,
         Tag,

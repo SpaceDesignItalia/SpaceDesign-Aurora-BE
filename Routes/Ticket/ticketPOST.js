@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const TicketController = require("../../Controllers/TicketController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const ticketPOST = (db) => {
   // Definisci le route POST qui

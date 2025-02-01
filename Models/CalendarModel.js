@@ -37,27 +37,26 @@ class CalendarModel {
           EventData.EventEndTime,
           EventData.EventLocation,
         ],
-        (error, result) => {
+        async (error, result) => {
           if (error) {
             reject(error);
           } else {
-            const partecipantsQuery = `INSERT INTO public."EventPartecipant" ("EventId", "EventPartecipantEmail", "EventPartecipantRole") VALUES ($1, $2, $3);`;
-            for (const partecipant of EventData.EventPartecipants) {
-              db.query(
-                partecipantsQuery,
-                [
-                  eventId,
-                  partecipant.EventPartecipantEmail,
-                  partecipant.EventPartecipantRole,
-                ],
-                (error, result) => {
-                  if (error) {
-                    reject(error);
-                  } else {
-                    resolve(result.rows);
-                  }
+            try {
+              const partecipantsQuery = `INSERT INTO public."EventPartecipant" ("EventId", "EventPartecipantEmail", "EventPartecipantRole") VALUES ($1, $2, $3)`;
+              const promises = EventData.EventPartecipants.map(
+                (partecipant) => {
+                  return db.query(partecipantsQuery, [
+                    eventId,
+                    partecipant.EventPartecipantEmail,
+                    partecipant.EventPartecipantRole,
+                  ]);
                 }
               );
+
+              await Promise.all(promises);
+              resolve({ EventId: eventId });
+            } catch (err) {
+              reject(err);
             }
           }
         }
@@ -98,6 +97,7 @@ class CalendarModel {
   }
 
   static getPartecipantsByEventId(eventId, db) {
+    console.log("eventId:", eventId);
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."EventPartecipant" WHERE "EventId" = $1;`;
       db.query(query, [eventId], (error, result) => {
