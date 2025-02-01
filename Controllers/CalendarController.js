@@ -49,11 +49,16 @@ class CalendarController {
       const { eventId } = req.query;
       console.log(eventId);
       const event = await Calendar.getEventByEventId(eventId, db);
-      const partecipants = await Calendar.getPartecipantsByEventId(eventId, db);
-      const attachments = await Calendar.getAttachmentsByEventId(eventId, db);
-      event.EventPartecipants = partecipants;
-      event.EventAttachments = attachments;
-      console.log(event);
+
+      if (event) {
+        const partecipants = await Calendar.getPartecipantsByEventId(
+          eventId,
+          db
+        );
+        const attachments = await Calendar.getAttachmentsByEventId(eventId, db);
+        event.EventPartecipants = partecipants;
+        event.EventAttachments = attachments;
+      }
       res.status(200).json(event);
     } catch (error) {
       console.error(error);
@@ -126,6 +131,35 @@ class CalendarController {
         EventData,
         db
       );
+      res.status(200).json(event);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  static async deleteEvent(req, res, db) {
+    try {
+      const { EventId } = req.query;
+      const files = await Calendar.getAttachmentsByEventId(EventId, db);
+      for (const file of files) {
+        const fullFilePath = path.join(
+          __dirname,
+          "../public/uploads/calendarFiles",
+          file.EventAttachmentUrl
+        );
+        if (fs.existsSync(fullFilePath)) {
+          fs.unlink(fullFilePath, (err) => {
+            if (err) {
+              console.error("Error deleting file:", err);
+            }
+          });
+        } else {
+          console.error("File not found");
+        }
+      }
+
+      const event = await Calendar.deleteEvent(EventId, db);
       res.status(200).json(event);
     } catch (error) {
       console.error(error);

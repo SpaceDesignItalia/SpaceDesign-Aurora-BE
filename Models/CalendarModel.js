@@ -218,6 +218,19 @@ class CalendarModel {
       );
     });
   }
+
+  static deleteEvent(eventId, db) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."Event" WHERE "EventId" = $1;`;
+      db.query(query, [eventId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
 }
 
 module.exports = CalendarModel;

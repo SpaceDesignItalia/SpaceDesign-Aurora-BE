@@ -12,6 +12,10 @@ const calendarDELETE = (db) => {
     }
   );
 
+  router.delete("/DeleteEvent", authenticateMiddleware, (req, res) => {
+    CalendarController.deleteEvent(req, res, db);
+  });
+
   return router;
 };
 
