@@ -66,18 +66,89 @@ class CalendarModel {
   }
 
   static getEventsByEmail(email, db) {
-    console.log(email);
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."Event" 
-      LEFT JOIN public."EventAttachment" ON "EventAttachment"."EventId" = "Event"."EventId"
       INNER JOIN public."EventTag" ON "EventTag"."EventTagId" = "Event"."EventTagId"
-      LEFT JOIN public."EventPartecipant" ON "EventPartecipant"."EventId" = "Event"."EventId"
-      WHERE "EventPartecipant"."EventPartecipantEmail" = $1;`;
+      INNER JOIN public."EventPartecipant" ON "EventPartecipant"."EventId" = "Event"."EventId"
+      WHERE "EventPartecipant"."EventPartecipantEmail" = $1
+      GROUP BY "Event"."EventId", "EventTag"."EventTagId", "EventPartecipant"."EventPartecipantId";`;
       db.query(query, [email], (error, result) => {
         if (error) {
           reject(error);
         } else {
-          console.log(result.rows);
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getEventByEventId(eventId, db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."Event" 
+      INNER JOIN public."EventTag" ON "EventTag"."EventTagId" = "Event"."EventTagId"
+      WHERE "Event"."EventId" = $1;`;
+      db.query(query, [eventId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows[0]);
+        }
+      });
+    });
+  }
+
+  static getPartecipantsByEventId(eventId, db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."EventPartecipant" WHERE "EventId" = $1;`;
+      db.query(query, [eventId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getAttachmentsByEventId(eventId, db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."EventAttachment" WHERE "EventId" = $1;`;
+      db.query(query, [eventId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static uploadEventAttachment(eventId, fileData, db) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."EventAttachment" ("EventId", "EventAttachmentName", "EventAttachmentUrl") VALUES ($1, $2, $3);`;
+      for (const file of fileData) {
+        db.query(
+          query,
+          [eventId, file.fileName, file.filePath],
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result.rows);
+            }
+          }
+        );
+      }
+    });
+  }
+
+  static deleteEventAttachment(eventAttachmentId, db) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."EventAttachment" WHERE "EventAttachmentId" = $1;`;
+      db.query(query, [eventAttachmentId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
           resolve(result.rows);
         }
       });

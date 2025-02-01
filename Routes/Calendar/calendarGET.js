@@ -12,6 +12,10 @@ const calendarGET = (db) => {
     CalendarController.getEventsByEmail(req, res, db);
   });
 
+  router.get("/GetEventByEventId", authenticateMiddleware, (req, res) => {
+    CalendarController.getEventByEventId(req, res, db);
+  });
+
   return router;
 };
 
