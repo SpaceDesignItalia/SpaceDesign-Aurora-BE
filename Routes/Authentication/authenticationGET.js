@@ -2,15 +2,15 @@
 const express = require("express");
 const router = express.Router();
 const AuthenticationController = require("../../Controllers/AuthenticationController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const authenticationGET = (db) => {
   // Definisci le route POST qui
 
-  router.get("/CheckSession", authenticateMiddleware, (req, res) => {
+  router.get("/CheckSession", (req, res) => {
     AuthenticationController.CheckSession(req, res);
   });
-  router.get("/GetSessionData", authenticateMiddleware, (req, res) => {
+  router.get("/GetSessionData", (req, res) => {
     AuthenticationController.GetSessionData(req, res);
   });
 

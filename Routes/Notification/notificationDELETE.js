@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const NotificationController = require("../../Controllers/NotificationController");
-const authMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const notificationDELETE = (db) => {
   router.delete("/DeleteNotification", authMiddleware, (req, res) => {

@@ -5,7 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const router = express.Router();
 const CustomerController = require("../../Controllers/CustomerController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 // Ensure the upload directory exists
 const uploadDir = "./public/profileIcons";

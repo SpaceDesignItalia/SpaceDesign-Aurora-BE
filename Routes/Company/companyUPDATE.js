@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const CompanyController = require("../../Controllers/CompanyController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const companyUPDATE = (db) => {
   // Definisci le route GET qui

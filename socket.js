@@ -37,7 +37,6 @@ const createSocketServer = (httpServer) => {
     });
 
     socket.on("file-update", (ProjectId) => {
-      console.log("file-update", ProjectId);
       io.emit("file-update", ProjectId);
     });
 
@@ -167,6 +166,14 @@ const createSocketServer = (httpServer) => {
         (user) => user.userId !== userId
       );
       io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
+    });
+
+    socket.on("calendar-update", () => {
+      io.emit("calendar-update");
+    });
+
+    socket.on("event-update", (eventId) => {
+      io.emit("event-update", eventId);
     });
   });
 
