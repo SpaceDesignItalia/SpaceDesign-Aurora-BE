@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const ProjectController = require("../../Controllers/ProjectController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const projectUPDATE = (db) => {
   // Definisci le route UPDATE qui
@@ -36,6 +36,10 @@ const projectUPDATE = (db) => {
 
   router.put("/RenameFile", authenticateMiddleware, (req, res) => {
     ProjectController.renameFile(req, res, db);
+  });
+
+  router.put("/ArchiveTask", authenticateMiddleware, (req, res) => {
+    ProjectController.archiveTask(req, res, db);
   });
   return router;
 };

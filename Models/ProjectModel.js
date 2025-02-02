@@ -576,7 +576,7 @@ class ProjectModel {
 
   static getTasksByProjectId(db, ProjectId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectId" = $1`;
+      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectId" = $1 AND "IsArchived" = false`;
 
       db.query(query, [ProjectId], (error, result) => {
         if (error) {
@@ -902,7 +902,7 @@ class ProjectModel {
 
   static getProjectInTeam(db, StafferId) {
     return new Promise((resolve, reject) => {
-      const query = `WITH NotificationCounts AS ( SELECT public."Project"."ProjectId", public."Project"."ProjectName", public."Company"."CompanyName", public."Project"."UniqueCode", 
+      const query = `WITH NotificationCounts AS ( SELECT public."Project"."ProjectId", public."Project"."ProjectName", public."Company"."CompanyImageUrl", public."Company"."CompanyName", public."Project"."UniqueCode", 
       COUNT(CASE WHEN public."NotificationExtraData"."IsRead" = false THEN public."NotificationInfo"."NotificationId" END) AS "NotificationCount",
       bool_or(public."NotificationExtraData"."IsRead" = false) AS "HasUnread"
       FROM public."ProjectTeam" 
@@ -914,9 +914,10 @@ class ProjectModel {
       WHERE public."ProjectTeam"."StafferId" = $1 AND public."Project"."StatusId" <> 3
       GROUP BY public."Project"."ProjectId", 
       public."Project"."ProjectName", 
+      public."Company"."CompanyImageUrl",
       public."Company"."CompanyName",
       public."Project"."UniqueCode")
-      SELECT "ProjectId", "ProjectName", "CompanyName", "NotificationCount", "UniqueCode"
+      SELECT "ProjectId", "ProjectName", "CompanyImageUrl", "CompanyName", "NotificationCount", "UniqueCode"
       FROM NotificationCounts
       WHERE ("HasUnread" = true OR "NotificationCount" = 0);`;
 
@@ -1649,6 +1650,32 @@ class ProjectModel {
           reject(error);
         } else {
           resolve(result.rows.length > 0 ? result.rows[0].ImageURL : null);
+        }
+      });
+    });
+  }
+
+  static async archiveTask(db, TaskId) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTask" SET "IsArchived" = true WHERE "ProjectTaskId" = $1`;
+      db.query(query, [TaskId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  static async getArchivedTasksByProjectId(db, ProjectId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectId" = $1 AND "IsArchived" = true`;
+      db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
         }
       });
     });

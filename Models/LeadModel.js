@@ -198,7 +198,6 @@ class LeadModel {
               reject(error);
             }
             resolve(result);
-            console.log("Contatto eliminato");
           });
         });
       });
