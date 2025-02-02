@@ -23,8 +23,6 @@ class CalendarController {
         db
       );
 
-      console.log("partecipants:", partecipants);
-
       for (const partecipant of partecipants) {
         EmailService.sendNewEventMail(
           partecipant.EventPartecipantEmail,
@@ -89,7 +87,6 @@ class CalendarController {
           eventId,
           db
         );
-        console.log("partecipants:", partecipants);
         const attachments = await Calendar.getAttachmentsByEventId(eventId, db);
         event.EventPartecipants = partecipants;
         event.EventAttachments = attachments;
@@ -192,6 +189,23 @@ class CalendarController {
       }
 
       const event = await Calendar.deleteEvent(EventId, db);
+      res.status(200).json(event);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  static async updateEventPartecipantStatus(req, res, db) {
+    try {
+      const { EventId, EventPartecipantEmail, EventPartecipantStatus } =
+        req.body;
+      const event = await Calendar.updateEventPartecipantStatus(
+        EventId,
+        EventPartecipantEmail,
+        EventPartecipantStatus,
+        db
+      );
       res.status(200).json(event);
     } catch (error) {
       console.error(error);

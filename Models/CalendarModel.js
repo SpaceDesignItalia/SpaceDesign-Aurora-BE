@@ -97,7 +97,6 @@ class CalendarModel {
   }
 
   static getPartecipantsByEventId(eventId, db) {
-    console.log("eventId:", eventId);
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."EventPartecipant" WHERE "EventId" = $1;`;
       db.query(query, [eventId], (error, result) => {
@@ -229,6 +228,28 @@ class CalendarModel {
           resolve(result.rows);
         }
       });
+    });
+  }
+
+  static updateEventPartecipantStatus(
+    eventId,
+    partecipantEmail,
+    partecipantStatus,
+    db
+  ) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."EventPartecipant" SET "EventPartecipantStatus" = $1 WHERE "EventId" = $2 AND "EventPartecipantEmail" = $3;`;
+      db.query(
+        query,
+        [partecipantStatus, eventId, partecipantEmail],
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result.rows);
+          }
+        }
+      );
     });
   }
 }

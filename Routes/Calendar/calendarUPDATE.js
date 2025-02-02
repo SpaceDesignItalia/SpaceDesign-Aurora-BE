@@ -8,6 +8,14 @@ const calendarUPDATE = (db) => {
     CalendarController.updateEvent(req, res, db);
   });
 
+  router.put(
+    "/UpdateEventPartecipantStatus",
+    authenticateMiddleware,
+    (req, res) => {
+      CalendarController.updateEventPartecipantStatus(req, res, db);
+    }
+  );
+
   return router;
 };
 

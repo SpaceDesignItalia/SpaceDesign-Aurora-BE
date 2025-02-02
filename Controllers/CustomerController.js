@@ -164,7 +164,6 @@ class CustomerController {
   static async deleteCustomer(req, res, db) {
     try {
       const CustomerId = req.query.CustomerId;
-      console.log(CustomerId);
       await Customer.deleteCustomer(db, CustomerId);
       res.status(200).send("Cliente eliminato con successo.");
     } catch (error) {
