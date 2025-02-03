@@ -1529,6 +1529,53 @@ class ProjectModel {
     }
   }
 
+  static async refineEventDescription(eventDescription) {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Sei un assistente specializzato nella raffinazione di descrizioni di eventi da calendario in modo conciso e professionale.",
+              },
+              {
+                role: "user",
+                content: `Raffina la seguente descrizione dell'evento mantenendola sintetica ma chiara. Migliora la leggibilità e la professionalità del linguaggio senza alterare le informazioni essenziali. Se necessario, struttura il testo con elenchi (<ul>) solo per punti davvero importanti. Non aggiungere informazioni e mantieni la brevità: ${eventDescription}`,
+              },
+            ],
+            max_tokens: 300, // Ridotto per mantenere la sintesi
+            temperature: 0.3, // Ridotto ulteriormente per risposte più consistenti
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Errore sconosciuto");
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error("Errore durante la chiamata a OpenAI:", error);
+      throw new Error(
+        error.message ||
+          "Errore sconosciuto durante la comunicazione con OpenAI"
+      );
+    }
+  }
+
   static async refineProjectDescription(projectDescription) {
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 

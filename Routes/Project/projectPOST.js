@@ -129,6 +129,10 @@ const projectPOST = (db) => {
     }
   );
 
+  router.post("/RefineEventDescription", authenticateMiddleware, (req, res) => {
+    ProjectController.refineEventDescription(req, res);
+  });
+
   router.post("/UpdateProjectCode", authenticateMiddleware, (req, res) => {
     ProjectController.updateProjectCode(req, res, db);
   });
