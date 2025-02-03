@@ -53,16 +53,19 @@ class CustomerController {
 
   static async addCustomer(req, res, db) {
     try {
-      const customerData = req.body.CustomerData;
+      const customerData = {
+        ...req.body.CustomerData,
+      };
       await Customer.addCustomer(db, customerData);
 
-      // Send a welcome email upon successful customer creation
-      EmailService.sendCustomerWelcomeMail(
-        customerData.CustomerEmail,
-        customerData.CustomerName,
-        customerData.CustomerSurname,
-        customerData.CustomerPassword
-      );
+      if (customerData.isActive) {
+        EmailService.sendCustomerWelcomeMail(
+          customerData.CustomerEmail,
+          customerData.CustomerName,
+          customerData.CustomerSurname,
+          customerData.CustomerPassword
+        );
+      }
       res.status(200).send("Cliente aggiunto con successo.");
     } catch (error) {
       console.error("Errore nell'aggiungere il cliente:", error);
@@ -81,8 +84,26 @@ class CustomerController {
       const CustomerData = req.body.CustomerData;
       const OldCompanyId = req.body.OldCompanyId;
 
+      // Prima otteniamo i dati attuali del cliente per confrontare isActive
+      const currentCustomerData = await Customer.getCustomerById(
+        db,
+        CustomerData.CustomerId
+      );
+      const wasInactive =
+        currentCustomerData[0] && !currentCustomerData[0].isActive;
+
       // Attempt to update customer data
       await Customer.updateCustomerData(db, CustomerData, OldCompanyId);
+
+      // Se il cliente era inattivo e ora è attivo, invia la mail
+      if (wasInactive && CustomerData.isActive) {
+        EmailService.sendCustomerWelcomeMail(
+          CustomerData.CustomerEmail,
+          CustomerData.CustomerName,
+          CustomerData.CustomerSurname,
+          CustomerData.CustomerPassword
+        );
+      }
 
       res.status(200).send("Cliente modificato con successo.");
     } catch (error) {
@@ -90,10 +111,8 @@ class CustomerController {
 
       // Check if the error is a 409 conflict error
       if (error.statusCode === 409) {
-        // Send 409 Conflict status if email already exists
         res.status(409).send("Email già in uso da un altro cliente.");
       } else {
-        // Handle any other errors as a 500 Internal Server Error
         res.status(500).send("Aggiornamento del cliente fallito.");
       }
     }
@@ -127,10 +146,10 @@ class CustomerController {
         req.session.account.CustomerImageUrl = newProfilePic.filename;
       }
 
-      res.status(200).send("Dipendente modificato con successo.");
+      res.status(200).send("Cliente modificato con successo.");
     } catch (error) {
-      console.error("Errore nella modifica del dipendente:", error);
-      res.status(500).send("Modifica del dipendente fallita");
+      console.error("Errore nella modifica del cliente:", error);
+      res.status(500).send("Modifica del cliente fallita");
     }
   }
 
