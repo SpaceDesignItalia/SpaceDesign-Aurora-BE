@@ -1162,6 +1162,18 @@ class ProjectController {
     }
   }
 
+  static async refineEventDescription(req, res) {
+    try {
+      const { eventDescription } = req.body;
+
+      const refinedText = await Project.refineText(eventDescription);
+      res.status(200).send(refinedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
+
   static async refineProjectDescription(req, res) {
     try {
       const { text } = req.body;
