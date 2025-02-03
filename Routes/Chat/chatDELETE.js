@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const ChatController = require("../../Controllers/ChatController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const chatDELETE = (db) => {
   // Definisci le route GET qui

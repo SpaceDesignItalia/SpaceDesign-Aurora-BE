@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const LeadController = require("../../Controllers/LeadController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const leadPOST = (db) => {
   router.post("/ContactFormSubmit", authenticateMiddleware, (req, res) => {

@@ -21,6 +21,7 @@ const createTicketRoutes = require("./Routes/Ticket/Ticket");
 const createNotificationRoutes = require("./Routes/Notification/Notification");
 const createLeadRoutes = require("./Routes/Lead/Lead");
 const createFileiconRoutes = require("./Routes/FileIcon/Fileicon");
+const createCalendarRoutes = require("./Routes/Calendar/Calendar");
 
 const credentials = {
   key: fs.readFileSync("SSL/privateKey.key"),
@@ -82,7 +83,7 @@ app.use(PREFIX + "/Ticket", createTicketRoutes(db));
 app.use(PREFIX + "/Notification", createNotificationRoutes(db));
 app.use(PREFIX + "/Lead", createLeadRoutes(db));
 app.use(PREFIX + "/Fileicon", createFileiconRoutes());
-
+app.use(PREFIX + "/Calendar", createCalendarRoutes(db));
 // Avvia il server HTTPS sulla porta 443
 (async () => {
   const chalk = (await import("chalk")).default;

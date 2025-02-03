@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const ProjectController = require("../../Controllers/ProjectController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const projectUPDATE = (db) => {
   // Definisci le route UPDATE qui

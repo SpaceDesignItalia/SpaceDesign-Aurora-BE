@@ -194,5 +194,61 @@ class EmailService {
       }
     });
   }
+
+  static sendNewEventMail(
+    email,
+    eventName,
+    eventStartDate,
+    eventEndDate,
+    eventStartTime,
+    eventEndTime,
+    eventDescription,
+    eventLocation,
+    partecipants,
+    acceptUrl,
+    rejectUrl
+  ) {
+    const emailTemplatePath = path.join(
+      __dirname,
+      "EmailTemplate/NewEventTemplate.html"
+    );
+    const emailTemplate = fs.readFileSync(emailTemplatePath, "utf-8");
+
+    let partecipantsString = "";
+    for (const partecipant of partecipants) {
+      partecipantsString += partecipant.EventPartecipantEmail + "<br />";
+    }
+
+    let htmlContent = emailTemplate
+      .replace("${eventName}", eventName)
+      .replace(
+        "${eventStartDate}",
+        eventStartDate == eventEndDate
+          ? eventStartDate.split("T")[0] + " " + eventStartTime
+          : eventStartDate.split("T")[0] + " - " + eventEndDate.split("T")[0]
+      )
+      .replace("${eventDescription}", eventDescription)
+      .replace("${acceptUrl}", acceptUrl)
+      .replace("${rejectUrl}", rejectUrl)
+      .replace("${partecipants}", partecipantsString)
+      .replace("${eventLocation}", eventLocation);
+
+    const sendNewEventMail = {
+      from: `Space Design Italia <${mailData.mail}>`,
+      to: email,
+      subject: "Nuovo evento",
+      text:
+        "Ciao! L'evento " + eventName + " è stato aggiunto al tuo calendario.",
+      html: htmlContent,
+    };
+
+    transporter.sendMail(sendNewEventMail, (error, info) => {
+      if (error) {
+        return console.log(error);
+      } else {
+        console.log("Email inviata con successo a " + email);
+      }
+    });
+  }
 }
 module.exports = EmailService;

@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const StafferController = require("../../Controllers/StafferController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const stafferPOST = (db) => {
   // Definisci le route POST qui
