@@ -4,7 +4,7 @@ const EmailService = require("../middlewares/EmailService/EmailService");
 class CustomerModel {
   static getAllCustomers(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "CustomerId", CONCAT("CustomerName", ' ', "CustomerSurname") "CustomerFullName", "CustomerEmail", "CustomerPhone", "CustomerImageUrl", "isActive"
+      const query = `SELECT "CustomerId", CONCAT("CustomerName", ' ', "CustomerSurname") "CustomerFullName", "CustomerEmail", "CustomerPhone", "CustomerImageUrl", "IsActive"
       FROM public."Customer";`;
 
       db.query(query, (error, result) => {
@@ -19,7 +19,7 @@ class CustomerModel {
 
   static getCustomerById(db, CustomerId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "CustomerId", "CustomerName", "CustomerSurname", "CustomerEmail", "CustomerPhone", "CompanyId", "isActive"
+      const query = `SELECT "CustomerId", "CustomerName", "CustomerSurname", "CustomerEmail", "CustomerPhone", "CompanyId", "IsActive"
       FROM public."Customer"
       LEFT JOIN public."CustomerCompany" USING("CustomerId")
       WHERE "CustomerId" = $1;`;
@@ -54,7 +54,7 @@ class CustomerModel {
 
   static searchCustomerByEmail(db, CustomerEmail) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "CustomerId", CONCAT("CustomerName",' ', "CustomerSurname") "CustomerFullName", "CustomerEmail", "CustomerPhone", "isActive" 
+      const query = `SELECT "CustomerId", CONCAT("CustomerName",' ', "CustomerSurname") "CustomerFullName", "CustomerEmail", "CustomerPhone", "IsActive" 
       FROM public."Customer" WHERE "CustomerEmail" LIKE '%${CustomerEmail}%'`;
 
       db.query(query, (error, result) => {
@@ -93,8 +93,8 @@ class CustomerModel {
           let insertQuery;
           let values;
 
-          if (customerData.isActive) {
-            insertQuery = `INSERT INTO public."Customer"("CustomerName", "CustomerSurname", "CustomerEmail", "CustomerPhone", "isActive", "CustomerPassword")
+          if (customerData.IsActive) {
+            insertQuery = `INSERT INTO public."Customer"("CustomerName", "CustomerSurname", "CustomerEmail", "CustomerPhone", "IsActive", "CustomerPassword")
                           VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
 
             bcrypt.hash(
@@ -114,7 +114,7 @@ class CustomerModel {
                   customerData.CustomerSurname,
                   customerData.CustomerEmail,
                   customerData.CustomerPhone,
-                  customerData.isActive,
+                  customerData.IsActive,
                   hashedPassword,
                 ];
 
@@ -140,8 +140,8 @@ class CustomerModel {
               }
             );
           } else {
-            // Se isActive è false, non creiamo la password
-            insertQuery = `INSERT INTO public."Customer"("CustomerName", "CustomerSurname", "CustomerEmail", "CustomerPhone", "isActive")
+            // Se IsActive è false, non creiamo la password
+            insertQuery = `INSERT INTO public."Customer"("CustomerName", "CustomerSurname", "CustomerEmail", "CustomerPhone", "IsActive")
                           VALUES ($1, $2, $3, $4, $5) RETURNING *`;
 
             values = [
@@ -149,7 +149,7 @@ class CustomerModel {
               customerData.CustomerSurname,
               customerData.CustomerEmail,
               customerData.CustomerPhone,
-              customerData.isActive,
+              customerData.IsActive,
             ];
 
             db.query(insertQuery, values, (error, result) => {
@@ -184,8 +184,8 @@ class CustomerModel {
         return reject(new Error("CustomerId non valido"));
       }
 
-      // Prima verifichiamo lo stato attuale di isActive
-      const checkCurrentStateQuery = `SELECT "isActive", "CustomerName", "CustomerSurname", "CustomerEmail" FROM public."Customer" WHERE "CustomerId" = $1`;
+      // Prima verifichiamo lo stato attuale di IsActive
+      const checkCurrentStateQuery = `SELECT "IsActive", "CustomerName", "CustomerSurname", "CustomerEmail" FROM public."Customer" WHERE "CustomerId" = $1`;
       db.query(
         checkCurrentStateQuery,
         [CustomerData.CustomerId],
@@ -198,10 +198,10 @@ class CustomerModel {
             return reject(new Error("Cliente non trovato"));
           }
 
-          const wasInactive = !stateResult.rows[0].isActive;
-          const becomingActive = wasInactive && CustomerData.isActive;
+          const wasInactive = !stateResult.rows[0].IsActive;
+          const becomingActive = wasInactive && CustomerData.IsActive;
           const becomingInactive =
-            stateResult.rows[0].isActive && !CustomerData.isActive;
+            stateResult.rows[0].IsActive && !CustomerData.IsActive;
 
           // Step 1: Check if email already exists (excluding the current CustomerId)
           const checkEmailQuery = `SELECT "CustomerId" FROM public."Customer" WHERE "CustomerEmail" = $1 AND "CustomerId" != $2`;
@@ -236,7 +236,7 @@ class CustomerModel {
                                      "CustomerSurname" = $2, 
                                      "CustomerEmail" = $3, 
                                      "CustomerPhone" = $4,
-                                     "isActive" = $5,
+                                     "IsActive" = $5,
                                      "CustomerPassword" = $6
                                  WHERE "CustomerId" = $7 RETURNING *`;
 
@@ -245,7 +245,7 @@ class CustomerModel {
                         CustomerData.CustomerSurname,
                         CustomerData.CustomerEmail,
                         CustomerData.CustomerPhone,
-                        CustomerData.isActive,
+                        CustomerData.IsActive,
                         hashedPassword,
                         CustomerData.CustomerId,
                       ];
@@ -280,7 +280,7 @@ class CustomerModel {
                                      "CustomerSurname" = $2, 
                                      "CustomerEmail" = $3, 
                                      "CustomerPhone" = $4,
-                                     "isActive" = $5,
+                                     "IsActive" = $5,
                                      "CustomerPassword" = ${
                                        becomingInactive
                                          ? "NULL"
@@ -293,7 +293,7 @@ class CustomerModel {
                     CustomerData.CustomerSurname,
                     CustomerData.CustomerEmail,
                     CustomerData.CustomerPhone,
-                    CustomerData.isActive,
+                    CustomerData.IsActive,
                     CustomerData.CustomerId,
                   ];
 
@@ -392,7 +392,7 @@ class CustomerModel {
                         "CustomerSurname" = $2, 
                         "CustomerEmail" = $3, 
                         "CustomerPhone" = $4,
-                        "isActive" = $5
+                        "IsActive" = $5
                     WHERE "CustomerId" = $6`;
 
       const values = [
@@ -400,7 +400,7 @@ class CustomerModel {
         newCustomerData.CustomerSurname,
         newCustomerData.CustomerEmail,
         newCustomerData.CustomerPhone,
-        newCustomerData.isActive,
+        newCustomerData.IsActive,
         newCustomerData.CustomerId,
       ];
 

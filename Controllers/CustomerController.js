@@ -58,7 +58,7 @@ class CustomerController {
       };
       await Customer.addCustomer(db, customerData);
 
-      if (customerData.isActive) {
+      if (customerData.IsActive) {
         EmailService.sendCustomerWelcomeMail(
           customerData.CustomerEmail,
           customerData.CustomerName,
@@ -84,19 +84,19 @@ class CustomerController {
       const CustomerData = req.body.CustomerData;
       const OldCompanyId = req.body.OldCompanyId;
 
-      // Prima otteniamo i dati attuali del cliente per confrontare isActive
+      // Prima otteniamo i dati attuali del cliente per confrontare IsActive
       const currentCustomerData = await Customer.getCustomerById(
         db,
         CustomerData.CustomerId
       );
       const wasInactive =
-        currentCustomerData[0] && !currentCustomerData[0].isActive;
+        currentCustomerData[0] && !currentCustomerData[0].IsActive;
 
       // Attempt to update customer data
       await Customer.updateCustomerData(db, CustomerData, OldCompanyId);
 
       // Se il cliente era inattivo e ora è attivo, invia la mail
-      if (wasInactive && CustomerData.isActive) {
+      if (wasInactive && CustomerData.IsActive) {
         EmailService.sendCustomerWelcomeMail(
           CustomerData.CustomerEmail,
           CustomerData.CustomerName,
