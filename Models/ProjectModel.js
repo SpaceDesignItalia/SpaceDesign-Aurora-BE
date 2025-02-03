@@ -1481,8 +1481,7 @@ class ProjectModel {
       });
     });
   }
-
-  static async refineText(text) {
+  static async refineText(taskText) {
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
     try {
@@ -1499,15 +1498,16 @@ class ProjectModel {
             messages: [
               {
                 role: "system",
-                content: "You are a helpful assistant.",
+                content:
+                  "You are a helpful assistant specialized in refining and formatting task descriptions.",
               },
               {
                 role: "user",
-                content: `Riscrivi il seguente testo in modo più formale e completo, utilizzando stili, liste e elenchi del html: ${text}`,
+                content: `Riscrivi il testo seguente in modo più chiaro e formale solo se necessario. Mantieni un linguaggio professionale e preciso, senza aggiungere dettagli superflui. Se il testo è particolarmente lungo, **obbligatoriamente** riorganizzalo utilizzando titoli (<h2>, <h3>) ed elenchi puntati o numerati (<ul>, <ol>) per migliorarne la leggibilità. Se il testo è già chiaro e conciso, limitati a migliorarne la scorrevolezza senza modificarne la struttura. Assicurati di usare "le task" e non "i task". Mantieni il testo sintetico e ben strutturato: ${taskText}`,
               },
             ],
-            max_tokens: 100,
-            temperature: 0.7,
+            max_tokens: 500, // Aumentato il numero di token per permettere una descrizione più dettagliata
+            temperature: 0.5, // Abbassato il valore per una risposta più focalizzata e meno creativa
           }),
         }
       );
