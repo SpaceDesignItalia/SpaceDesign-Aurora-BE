@@ -245,8 +245,6 @@ class EmailService {
     transporter.sendMail(sendNewEventMail, (error, info) => {
       if (error) {
         return console.log(error);
-      } else {
-        console.log("Email inviata con successo a " + email);
       }
     });
   }

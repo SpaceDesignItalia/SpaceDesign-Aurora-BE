@@ -52,6 +52,10 @@ const stafferUPDATE = (db) => {
     StafferController.updateStafferPassword(req, res, db);
   });
 
+  router.put("/UpdateStafferAttendance", authenticateMiddleware, (req, res) => {
+    StafferController.updateStafferAttendance(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
