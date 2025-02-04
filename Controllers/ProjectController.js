@@ -1162,6 +1162,54 @@ class ProjectController {
     }
   }
 
+  static async refineEventDescription(req, res) {
+    try {
+      const { eventDescription } = req.body;
+
+      const refinedText = await Project.refineText(eventDescription);
+      res.status(200).send(refinedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
+
+  static async refineProjectDescription(req, res) {
+    try {
+      const { text } = req.body;
+
+      const refinedText = await Project.refineProjectDescription(text);
+      res.status(200).send(refinedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
+
+  static async refineRoleDescription(req, res) {
+    try {
+      const { text } = req.body;
+
+      const refinedText = await Project.refineRoleDescription(text);
+      res.status(200).send(refinedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
+
+  static async generateRoleDescription(req, res) {
+    try {
+      const { roleName } = req.body;
+
+      const generatedText = await Project.generateRoleDescription(roleName);
+      res.status(200).send(generatedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
+
   static async getTaskStatusByTicketId(req, res, db) {
     try {
       const TicketId = req.query.ProjectTicketId;

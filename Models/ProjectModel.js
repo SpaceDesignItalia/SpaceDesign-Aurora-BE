@@ -1482,8 +1482,7 @@ class ProjectModel {
       });
     });
   }
-
-  static async refineText(text) {
+  static async refineText(taskText) {
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
     try {
@@ -1500,15 +1499,16 @@ class ProjectModel {
             messages: [
               {
                 role: "system",
-                content: "You are a helpful assistant.",
+                content:
+                  "You are a helpful assistant specialized in refining and formatting task descriptions.",
               },
               {
                 role: "user",
-                content: `Riscrivi il seguente testo in modo più formale e completo, utilizzando stili, liste e elenchi del html: ${text}`,
+                content: `Riscrivi il testo seguente in modo più chiaro e formale solo se necessario. Mantieni un linguaggio professionale e preciso, senza aggiungere dettagli superflui. Se il testo è particolarmente lungo, **obbligatoriamente** riorganizzalo utilizzando titoli (<h2>, <h3>) ed elenchi puntati o numerati (<ul>, <ol>) per migliorarne la leggibilità. Se il testo è già chiaro e conciso, limitati a migliorarne la scorrevolezza senza modificarne la struttura. Assicurati di usare "le task" e non "i task". Mantieni il testo sintetico e ben strutturato: ${taskText}`,
               },
             ],
-            max_tokens: 100,
-            temperature: 0.7,
+            max_tokens: 500, // Aumentato il numero di token per permettere una descrizione più dettagliata
+            temperature: 0.5, // Abbassato il valore per una risposta più focalizzata e meno creativa
           }),
         }
       );
@@ -1529,22 +1529,193 @@ class ProjectModel {
     }
   }
 
-  static async getTaskStatusByTicketId(db, TicketId) {
-    return new Promise((resolve, reject) => {
-      const query = `SELECT "ProjectTaskStatusName" FROM public."ProjectTaskStatus" 
-      INNER JOIN public."ProjectTask" USING("ProjectTaskStatusId")
-      INNER JOIN public."ProjectTicket" USING("ProjectTaskId")
-      WHERE "ProjectTicketId" = $1`;
-      db.query(query, [TicketId], (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result.rows[0]);
+  static async refineEventDescription(eventDescription) {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Sei un assistente specializzato nella raffinazione di descrizioni di eventi da calendario in modo conciso e professionale.",
+              },
+              {
+                role: "user",
+                content: `Raffina la seguente descrizione dell'evento mantenendola sintetica ma chiara. Migliora la leggibilità e la professionalità del linguaggio senza alterare le informazioni essenziali. Se necessario, struttura il testo con elenchi (<ul>) solo per punti davvero importanti. Non aggiungere informazioni e mantieni la brevità: ${eventDescription}`,
+              },
+            ],
+            max_tokens: 300, // Ridotto per mantenere la sintesi
+            temperature: 0.3, // Ridotto ulteriormente per risposte più consistenti
+          }),
         }
-      });
-    });
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Errore sconosciuto");
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error("Errore durante la chiamata a OpenAI:", error);
+      throw new Error(
+        error.message ||
+          "Errore sconosciuto durante la comunicazione con OpenAI"
+      );
+    }
   }
 
+  static async refineProjectDescription(projectDescription) {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Sei un assistente che migliora le descrizioni di progetto, rendendole più chiare e professionali. Rispondi esclusivamente con la descrizione migliorata, senza alcun testo aggiuntivo. Caratteri massimi: 250",
+              },
+              {
+                role: "user",
+                content: `Riscrivi il seguente testo in modo chiaro e professionale, mantenendo tutte le informazioni essenziali. La descrizione deve essere sintetica ma completa, evitando dettagli superflui. Mantieni uno stile formale e scorrevole, senza modificare il significato del contenuto. Rispondi solo con la descrizione migliorata e nient'altro. Testo da migliorare: ${projectDescription}`,
+              },
+            ],
+            max_tokens: 250,
+            temperature: 0.5,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Errore sconosciuto");
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error("Errore durante la chiamata a OpenAI:", error);
+      throw new Error(
+        error.message ||
+          "Errore sconosciuto durante la comunicazione con OpenAI"
+      );
+    }
+  }
+
+  static async refineRoleDescription(roleDescription) {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Sei un assistente esperto nella redazione di descrizioni professionali di ruoli. Riscrivi il seguente testo in modo sintetico, chiaro e formale, mantenendo tutte le informazioni essenziali e migliorandone la fluidità. Evita ripetizioni, dettagli superflui o modifiche di significato. Rispondi esclusivamente con la descrizione migliorata, senza alcun testo aggiuntivo. Caratteri massimi: 250",
+              },
+              {
+                role: "user",
+                content: `Testo da migliorare: ${roleDescription}, caratteri massimi: 250`,
+              },
+            ],
+            max_tokens: 250,
+            temperature: 0.5,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Errore sconosciuto");
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error("Errore durante la chiamata a OpenAI:", error);
+      throw new Error(
+        error.message ||
+          "Errore sconosciuto durante la comunicazione con OpenAI"
+      );
+    }
+  }
+
+  static async generateRoleDescription(roleName) {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "gpt-4",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Sei un assistente esperto nella redazione di descrizioni professionali di ruoli. Genera una descrizione sintetica, chiara e formale per il ruolo specificato, mantenendo tutte le informazioni essenziali e migliorandone la fluidità. Evita ripetizioni, dettagli superflui o modifiche di significato. Rispondi esclusivamente con la descrizione migliorata, senza alcun testo aggiuntivo. Sii sintetico al massimo. Descrizione corta massimo 250 caratteri",
+              },
+              {
+                role: "user",
+                content: `Genera una descrizione per il ruolo: ${roleName}`,
+              },
+            ],
+            max_tokens: 250,
+            temperature: 0.5,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Errore sconosciuto");
+      }
+
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error("Errore durante la chiamata a OpenAI:", error);
+      throw new Error(
+        error.message ||
+          "Errore sconosciuto durante la comunicazione con OpenAI"
+      );
+    }
+  }
   static async getTicketTaskStatusChangeMailData(db, TaskId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectTaskStatusName", "CompanyName", "CompanyEmail", "ProjectTicketTitle" FROM public."ProjectTask"

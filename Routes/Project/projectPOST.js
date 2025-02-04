@@ -109,6 +109,30 @@ const projectPOST = (db) => {
     ProjectController.refineText(req, res);
   });
 
+  router.post(
+    "/RefineProjectDescription",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.refineProjectDescription(req, res);
+    }
+  );
+
+  router.post("/RefineRoleDescription", authenticateMiddleware, (req, res) => {
+    ProjectController.refineRoleDescription(req, res);
+  });
+
+  router.post(
+    "/GenerateRoleDescriptionFromName",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.generateRoleDescription(req, res);
+    }
+  );
+
+  router.post("/RefineEventDescription", authenticateMiddleware, (req, res) => {
+    ProjectController.refineEventDescription(req, res);
+  });
+
   router.post("/UpdateProjectCode", authenticateMiddleware, (req, res) => {
     ProjectController.updateProjectCode(req, res, db);
   });
