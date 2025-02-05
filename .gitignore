@@ -26,4 +26,4 @@ dist-ssr
 *.sw?
 
 # Ignora correttamente la cartella .SSL
-SSL/
+SSL/node_modules/
