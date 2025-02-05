@@ -175,6 +175,10 @@ const createSocketServer = (httpServer) => {
     socket.on("event-update", (eventId) => {
       io.emit("event-update", eventId);
     });
+
+    socket.on("employee-attendance-update", () => {
+      io.emit("employee-attendance-update");
+    });
   });
 
   // Cleanup inattivi ogni 5 secondi

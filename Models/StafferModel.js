@@ -17,7 +17,8 @@ class StafferModel {
         LEFT JOIN 
           public."StafferRole" sr ON s."StafferId" = sr."StafferId"
         LEFT JOIN 
-          public."Role" r ON sr."RoleId" = r."RoleId"`;
+          public."Role" r ON sr."RoleId" = r."RoleId"
+        ORDER BY s."StafferName"`;
 
       db.query(query, (error, result) => {
         if (error) {
