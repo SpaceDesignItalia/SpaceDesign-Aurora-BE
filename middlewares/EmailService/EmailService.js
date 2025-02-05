@@ -245,8 +245,32 @@ class EmailService {
     transporter.sendMail(sendNewEventMail, (error, info) => {
       if (error) {
         return console.log(error);
-      } else {
-        console.log("Email inviata con successo a " + email);
+      }
+    });
+  }
+
+  static sendCustomerEliminationMail(email, name, surname) {
+    const emailTemplatePath = path.join(
+      __dirname,
+      "EmailTemplate/CustomerEliminationTemplate.html"
+    );
+    const emailTemplate = fs.readFileSync(emailTemplatePath, "utf-8");
+
+    let htmlContent = emailTemplate
+      .replace("${name}", name)
+      .replace("${surname}", surname);
+
+    const sendCustomerEliminationMail = {
+      from: `Space Design Italia <${mailData.mail}>`,
+      to: email,
+      subject: "Notifica di Disattivazione Account",
+      text: `Gentile ${name} ${surname}, Ti informiamo che il tuo account è stato disattivato. Per qualsiasi informazione, puoi contattare il nostro servizio clienti.`,
+      html: htmlContent,
+    };
+
+    transporter.sendMail(sendCustomerEliminationMail, (error, info) => {
+      if (error) {
+        return console.log(error);
       }
     });
   }

@@ -35,6 +35,14 @@ const stafferGET = (db) => {
     }
   );
 
+  router.get(
+    "/GetAttendanceByStafferId",
+    authenticateMiddleware,
+    (req, res) => {
+      StafferController.getAttendanceByStafferId(req, res, db);
+    }
+  );
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
