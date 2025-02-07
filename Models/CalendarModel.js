@@ -15,6 +15,7 @@ class CalendarModel {
   }
 
   static addEvent(EventData, db) {
+    console.log(EventData);
     return new Promise((resolve, reject) => {
       const eventId = uuidv4();
 
@@ -32,7 +33,7 @@ class CalendarModel {
           EventData.EventDescription,
           EventData.EventEndDate,
           EventData.EventStartDate,
-          EventData.EventTagId,
+          EventData.EventTagId ? EventData.EventTagId : null,
           EventData.EventStartTime,
           EventData.EventEndTime,
           EventData.EventLocation,
@@ -67,7 +68,7 @@ class CalendarModel {
   static getEventsByEmail(email, db) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."Event" 
-      INNER JOIN public."EventTag" ON "EventTag"."EventTagId" = "Event"."EventTagId"
+      LEFT JOIN public."EventTag" ON "EventTag"."EventTagId" = "Event"."EventTagId"
       INNER JOIN public."EventPartecipant" ON "EventPartecipant"."EventId" = "Event"."EventId"
       WHERE "EventPartecipant"."EventPartecipantEmail" = $1
       GROUP BY "Event"."EventId", "EventTag"."EventTagId", "EventPartecipant"."EventPartecipantId";`;
@@ -84,7 +85,7 @@ class CalendarModel {
   static getEventByEventId(eventId, db) {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."Event" 
-      INNER JOIN public."EventTag" ON "EventTag"."EventTagId" = "Event"."EventTagId"
+      LEFT JOIN public."EventTag" ON "EventTag"."EventTagId" = "Event"."EventTagId"
       WHERE "Event"."EventId" = $1;`;
       db.query(query, [eventId], (error, result) => {
         if (error) {
@@ -158,8 +159,8 @@ class CalendarModel {
     return new Promise((resolve, reject) => {
       const query = `UPDATE public."Event" SET "EventTitle" = $1, "EventDescription" = $2, 
       "EventEndDate" = $3, "EventStartDate" = $4, "EventStartTime" = $5, "EventEndTime" = $6, 
-      "EventLocation" = $7, "EventTagId" = $8 
-      WHERE "EventId" = $9;`;
+      "EventLocation" = $7, "EventColor" = $8, "EventTagId" = $9 
+      WHERE "EventId" = $10;`;
       db.query(
         query,
         [
@@ -170,7 +171,8 @@ class CalendarModel {
           eventData.EventStartTime,
           eventData.EventEndTime,
           eventData.EventLocation,
-          tag,
+          eventData.EventColor,
+          tag ? tag : null,
           eventData.EventId,
         ],
         (error, result) => {

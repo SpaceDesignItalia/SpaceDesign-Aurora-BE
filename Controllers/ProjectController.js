@@ -382,6 +382,8 @@ class ProjectController {
         ProjectTaskId
       );
 
+      console.log(EmailData);
+
       EmailService.sendTicketTaskStatusChangeMail(
         EmailData.CompanyEmail,
         EmailData.CompanyName,
