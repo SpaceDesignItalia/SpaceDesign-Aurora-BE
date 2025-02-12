@@ -10,6 +10,15 @@ const stafferDELETE = (db) => {
   router.delete("/DeleteStaffer", authenticateMiddleware, (req, res) => {
     StafferController.deleteStaffer(req, res, db);
   });
+
+  router.delete(
+    "/DeleteAttendanceEmail",
+    authenticateMiddleware,
+    (req, res) => {
+      StafferController.deleteAttendanceEmail(req, res, db);
+    }
+  );
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

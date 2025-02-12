@@ -9,6 +9,11 @@ const stafferPOST = (db) => {
   router.post("/AddStaffer", authenticateMiddleware, (req, res) => {
     StafferController.addNewStaffer(req, res, db);
   });
+
+  router.post("/AddAttendanceEmail", authenticateMiddleware, (req, res) => {
+    StafferController.addAttendanceEmail(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

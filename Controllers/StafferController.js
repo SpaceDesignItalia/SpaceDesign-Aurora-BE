@@ -90,6 +90,23 @@ class StafferController {
     }
   }
 
+  static async addAttendanceEmail(req, res, db) {
+    try {
+      const AttendanceEmail = req.body.AttendanceEmail;
+      await Staffer.addAttendanceEmail(db, AttendanceEmail);
+      res.status(200).send("Email di assiduità aggiunta con successo.");
+    } catch (error) {
+      console.error("Errore nell'aggiunta dell'email di assiduità:", error);
+      if (error.message === "Conflict: This email is already in use.") {
+        res
+          .status(409)
+          .send("Impossibile aggiungere la mail: Email già in uso.");
+      } else {
+        res.status(500).send("Aggiunta dell'email di notifica fallita.");
+      }
+    }
+  }
+
   static async updateStaffer(req, res, db) {
     try {
       const newEmployeeData = req.body.newEmployeeData;
@@ -192,6 +209,17 @@ class StafferController {
     }
   }
 
+  static async deleteAttendanceEmail(req, res, db) {
+    try {
+      const AttendanceEmail = req.query.AttendanceEmail;
+      await Staffer.deleteAttendanceEmail(db, AttendanceEmail);
+      res.status(200).send("Email di assiduità cancellata con successo.");
+    } catch (error) {
+      console.error("Errore nella cancellazione dell'email di assiduità:", error);
+      res.status(500).send("Cancellazione dell'email di assiduità fallita");
+    }
+  }
+
   static async getStafferProjectsForModal(req, res, db) {
     try {
       const EmployeeId = req.query.EmployeeId;
@@ -221,6 +249,16 @@ class StafferController {
         error
       );
       res.status(500).send("Recupero dell'assiduità dei dipendenti fallita");
+    }
+  }
+
+  static async getAttendanceEmails(req, res, db) {
+    try {
+      const attendanceEmails = await Staffer.getAttendanceEmails(db);
+      res.status(200).json(attendanceEmails);
+    } catch (error) {
+      console.error("Errore nel recupero delle email di assiduità:", error);
+      res.status(500).send("Recupero delle email di assiduità fallita");
     }
   }
 

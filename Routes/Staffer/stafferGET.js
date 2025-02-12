@@ -43,6 +43,10 @@ const stafferGET = (db) => {
     }
   );
 
+  router.get("/GetAttendanceEmails", authenticateMiddleware, (req, res) => {
+    StafferController.getAttendanceEmails(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

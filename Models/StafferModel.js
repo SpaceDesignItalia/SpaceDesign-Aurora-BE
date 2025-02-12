@@ -190,6 +190,35 @@ class StafferModel {
     });
   }
 
+  static addAttendanceEmail(db, AttendanceEmail) {
+    return new Promise((resolve, reject) => {
+      // Prima controlla se la mail esiste già
+      const checkQuery = `SELECT "AttendanceReportEmail" FROM public."StafferAttendanceEmail" WHERE "AttendanceReportEmail" = $1`;
+
+      db.query(checkQuery, [AttendanceEmail], (checkError, checkResult) => {
+        if (checkError) {
+          reject(checkError);
+          return;
+        }
+
+        if (checkResult.rows.length > 0) {
+          reject(new Error("Conflict: This email is already in use."));
+          return;
+        }
+
+        // Se la mail non esiste, procedi con l'inserimento
+        const insertQuery = `INSERT INTO public."StafferAttendanceEmail" ("AttendanceReportEmail") VALUES ($1)`;
+        db.query(insertQuery, [AttendanceEmail], (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+    });
+  }
+
   static updateStaffer(db, newEmployeeData, selectedRole) {
     return new Promise((resolve, reject) => {
       // First, check if another user with the same email exists
@@ -358,6 +387,19 @@ class StafferModel {
     });
   }
 
+  static deleteAttendanceEmail(db, AttendanceEmail) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."StafferAttendanceEmail" WHERE "AttendanceReportEmail" = $1`;
+      db.query(query, [AttendanceEmail], (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.affectedRows);
+        }
+      });
+    });
+  }
+
   static getStafferProjectsForModal(db, EmployeeId) {
     return new Promise((resolve, reject) => {
       const query = `
@@ -403,6 +445,19 @@ class StafferModel {
         AND sa."StafferId" = $1`;
 
       db.query(query, [StafferId], (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getAttendanceEmails(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "AttendanceReportEmail" FROM public."StafferAttendanceEmail"`;
+      db.query(query, (err, result) => {
         if (err) {
           reject(err);
         } else {
