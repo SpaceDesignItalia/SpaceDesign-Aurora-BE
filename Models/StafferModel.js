@@ -10,13 +10,15 @@ class StafferModel {
           s."StafferEmail" AS "EmployeeEmail", 
           s."StafferPhone" AS "EmployeePhone", 
           s."CreationTime" AS "EmployeeCreationTime",
-          r."RoleName" AS "RoleName"
+          r."RoleName" AS "RoleName",
+          s."StafferImageUrl" AS "EmployeeImageUrl"
         FROM 
           public."Staffer" s
         LEFT JOIN 
           public."StafferRole" sr ON s."StafferId" = sr."StafferId"
         LEFT JOIN 
-          public."Role" r ON sr."RoleId" = r."RoleId"`;
+          public."Role" r ON sr."RoleId" = r."RoleId"
+        ORDER BY s."StafferName"`;
 
       db.query(query, (error, result) => {
         if (error) {
@@ -60,13 +62,13 @@ class StafferModel {
   static getStafferById(db, StafferId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "StafferId" AS "EmployeeId", "StafferName" AS "EmployeeName", "StafferSurname" AS "EmployeeSurname", 
-      "StafferEmail" AS "EmployeeEmail", "StafferPhone" AS "EmployeePhone" FROM public."Staffer" WHERE "StafferId" = $1`;
+      "StafferEmail" AS "EmployeeEmail", "StafferPhone" AS "EmployeePhone", "StafferImageUrl" AS "EmployeeImageUrl" FROM public."Staffer" WHERE "StafferId" = $1`;
 
       db.query(query, [StafferId], (error, result) => {
         if (error) {
           reject(error);
         } else {
-          resolve(result.rows);
+          resolve(result.rows[0]);
         }
       });
     });
@@ -101,7 +103,7 @@ class StafferModel {
   static searchStafferByEmail(db, EmployeeEmail) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "StafferId" AS "EmployeeId", CONCAT("StafferName", ' ', "StafferSurname") "EmployeeFullName", "StafferEmail" AS "EmployeeEmail", 
-      "StafferPhone" AS "EmployeePhone" FROM public."Staffer" 
+      "StafferPhone" AS "EmployeePhone", "StafferImageUrl" AS "EmployeeImageUrl" FROM public."Staffer" 
       WHERE "StafferEmail" LIKE '%${EmployeeEmail}%'`;
 
       db.query(query, (err, result) => {
@@ -353,6 +355,137 @@ class StafferModel {
           resolve(result.affectedRows);
         }
       });
+    });
+  }
+
+  static getStafferProjectsForModal(db, EmployeeId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          p."ProjectId", 
+          p."ProjectName", 
+          p."ProjectDescription", 
+          p."ProjectEndDate", 
+          c."CompanyImageUrl",
+          COUNT(pt."ProjectTaskId") AS "ProjectTaskCount"
+        FROM 
+          public."Project" p
+        INNER JOIN 
+          public."Company" c ON p."CompanyId" = c."CompanyId"
+        LEFT JOIN 
+          public."ProjectTask" pt ON p."ProjectId" = pt."ProjectId"
+        LEFT JOIN 
+          public."ProjectTaskTeam" ptt ON pt."ProjectTaskId" = ptt."ProjectTaskId"
+        WHERE 
+          ptt."StafferId" = $1 AND p."StatusId" <> 3
+        GROUP BY 
+          p."ProjectId", c."CompanyImageUrl"
+      `;
+      db.query(query, [EmployeeId], (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static getAttendanceByStafferId(db, month, year, StafferId) {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT sa."AttendanceDate" AS "date", ast."AttendanceStatusName" AS "status"
+        FROM public."StafferAttendance" sa
+        INNER JOIN public."Staffer" s ON sa."StafferId" = s."StafferId"
+        INNER JOIN public."StafferAttendanceStatus" ast ON sa."AttendanceStatusId" = ast."AttendanceStatusId"
+        WHERE "AttendanceDate" >= DATE_TRUNC('month', DATE '${year}-${month}-01')
+        AND "AttendanceDate" < DATE_TRUNC('month', DATE '${year}-${month}-01') + INTERVAL '1 month'
+        AND sa."StafferId" = $1`;
+
+      db.query(query, [StafferId], (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static updateStafferAttendance(db, Status, StafferId, Date) {
+    return new Promise((resolve, reject) => {
+      if (Status === "delete") {
+        const deleteQuery = `DELETE FROM public."StafferAttendance" WHERE "StafferId" = $1 AND "AttendanceDate" = $2`;
+
+        db.query(deleteQuery, [StafferId, Date], (err, result) => {
+          resolve(result);
+        });
+      } else {
+        const selectQuery = `SELECT "AttendanceStatusId" FROM public."StafferAttendanceStatus" WHERE "AttendanceStatusName" = $1`;
+
+        db.query(selectQuery, [Status], (err, result) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          const AttendanceStatusId = result.rows[0].AttendanceStatusId;
+
+          // Check if attendance record exists for the given date
+          const checkExistingQuery = `
+          SELECT "StafferAttendanceId" 
+          FROM public."StafferAttendance" 
+          WHERE "StafferId" = $1 AND "AttendanceDate" = $2`;
+
+          db.query(
+            checkExistingQuery,
+            [StafferId, Date],
+            (err, existingResult) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+
+              if (existingResult.rows.length > 0) {
+                // Update existing record
+                const updateQuery = `
+              UPDATE public."StafferAttendance" 
+              SET "AttendanceStatusId" = $1 
+              WHERE "StafferId" = $2 AND "AttendanceDate" = $3`;
+
+                db.query(
+                  updateQuery,
+                  [AttendanceStatusId, StafferId, Date],
+                  (err, result) => {
+                    if (err) {
+                      reject(err);
+                    } else {
+                      resolve(result);
+                    }
+                  }
+                );
+              } else {
+                // Insert new record
+                const insertQuery = `
+              INSERT INTO public."StafferAttendance" ("StafferId", "AttendanceDate", "AttendanceStatusId")
+              VALUES ($1, $2, $3)`;
+
+                db.query(
+                  insertQuery,
+                  [StafferId, Date, AttendanceStatusId],
+                  (err, result) => {
+                    if (err) {
+                      reject(err);
+                    } else {
+                      resolve(result);
+                    }
+                  }
+                );
+              }
+            }
+          );
+        });
+      }
     });
   }
 }

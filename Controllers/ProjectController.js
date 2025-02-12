@@ -3,6 +3,8 @@ const Project = require("../Models/ProjectModel");
 const path = require("path");
 const fs = require("fs");
 const NotifyMiddleware = require("../middlewares/Notification/NotifyMiddelware");
+const TicketController = require("./TicketController");
+const EmailService = require("../middlewares/EmailService/EmailService");
 
 class ProjectController {
   static async getAllStatus(req, res, db) {
@@ -231,7 +233,6 @@ class ProjectController {
       const ProjectLinkData = req.body.ProjectLinkData;
       await Project.addProjectLink(db, ProjectLinkData);
       const UserId = req.session.account.StafferId;
-      console.log(UserId);
       await NotifyMiddleware.ProjectNotification(
         db,
         UserId,
@@ -375,6 +376,20 @@ class ProjectController {
       const ProjectTaskId = req.body.ProjectTaskId;
       const ProjectTaskStatusId = req.body.ProjectTaskStatusId;
       await Project.updateTaskStatus(db, ProjectTaskId, ProjectTaskStatusId);
+
+      const EmailData = await Project.getTicketTaskStatusChangeMailData(
+        db,
+        ProjectTaskId
+      );
+
+      console.log(EmailData);
+
+      EmailService.sendTicketTaskStatusChangeMail(
+        EmailData.CompanyEmail,
+        EmailData.CompanyName,
+        EmailData.ProjectTicketTitle,
+        EmailData.ProjectTaskStatusName
+      );
       res.status(200).send("Stato del task aggiornato con successo.");
     } catch (error) {
       console.error("Errore nell'aggiornamento dello stato del task:", error);
@@ -601,6 +616,16 @@ class ProjectController {
       );
       this.addMemberToTask(TaskData, Task.ProjectTaskId, db);
       this.addTagToTask(TaskData, Task.ProjectTaskId, db);
+
+      if (req.body.TicketId) {
+        await TicketController.addTaskToTicket(
+          req,
+          res,
+          db,
+          Task.ProjectTaskId,
+          req.body.TicketId
+        );
+      }
       res.status(200).json(Task.ProjectTaskId);
     } catch (error) {
       console.error("Errore nella creazione del task:", error);
@@ -1136,6 +1161,200 @@ class ProjectController {
     } catch (error) {
       console.error("Error refining text:", error);
       res.status(500).send("Text refinement failed");
+    }
+  }
+
+  static async refineEventDescription(req, res) {
+    try {
+      const { eventDescription } = req.body;
+
+      const refinedText = await Project.refineText(eventDescription);
+      res.status(200).send(refinedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
+
+  static async refineProjectDescription(req, res) {
+    try {
+      const { text } = req.body;
+
+      const refinedText = await Project.refineProjectDescription(text);
+      res.status(200).send(refinedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
+
+  static async refineRoleDescription(req, res) {
+    try {
+      const { text } = req.body;
+
+      const refinedText = await Project.refineRoleDescription(text);
+      res.status(200).send(refinedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
+
+  static async generateRoleDescription(req, res) {
+    try {
+      const { roleName } = req.body;
+
+      const generatedText = await Project.generateRoleDescription(roleName);
+      res.status(200).send(generatedText);
+    } catch (error) {
+      console.error("Error refining text:", error);
+      res.status(500).send("Text refinement failed");
+    }
+  }
+
+  static async getTaskStatusByTicketId(req, res, db) {
+    try {
+      const TicketId = req.query.ProjectTicketId;
+
+      const status = await Project.getTaskStatusByTicketId(db, TicketId);
+      res.status(200).json(status);
+    } catch (error) {
+      console.error("Error getting task status:", error);
+      res.status(500).send("Task status retrieval failed");
+    }
+  }
+
+  static async updateProjectCode(req, res, db) {
+    try {
+      const ProjectCodeShareId = req.body.ProjectCodeShareId;
+      const ProjectCode = req.body.ProjectCode;
+
+      await Project.updateProjectCode(db, ProjectCodeShareId, ProjectCode);
+      res.status(200).send("Codice del progetto aggiornato con successo.");
+    } catch (error) {
+      console.error(
+        "Errore nell'aggiornamento del codice del progetto:",
+        error
+      );
+      res.status(500).send("Aggiornamento del codice del progetto fallito");
+    }
+  }
+
+  static async getCodeShareTabs(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+
+      const tabs = await Project.getCodeShareTabs(db, ProjectId);
+      res.status(200).json(tabs);
+    } catch (error) {
+      console.error("Error getting share code tabs:", error);
+      res.status(500).send("Share code tabs retrieval failed");
+    }
+  }
+
+  static async addCodeShareTab(req, res, db) {
+    try {
+      const { ProjectId, ProjectCodeShareName } = req.body;
+
+      await Project.addCodeShareTab(db, ProjectId, ProjectCodeShareName);
+      res.status(200).send("Tab aggiunto con successo.");
+    } catch (error) {
+      console.error("Error adding code share tab:", error);
+      res.status(500).send("Code share tab addition failed");
+    }
+  }
+
+  static async getCodeShareCode(req, res, db) {
+    try {
+      const ProjectCodeShareId = req.query.ProjectCodeShareId;
+
+      const code = await Project.getCodeShareCode(db, ProjectCodeShareId);
+      res.status(200).json(code);
+    } catch (error) {
+      console.error("Error getting share code:", error);
+      res.status(500).send("Share code retrieval failed");
+    }
+  }
+
+  static async uploadCodeShareScreenshot(req, res, db) {
+    try {
+      const { ProjectCodeShareId } = req.body;
+      const file = req.file;
+      const filePath = file ? `/${file.filename}` : null;
+
+      // Recupera il vecchio percorso dell'immagine dal database
+      const oldFilePath = await Project.getOldFilePath(db, ProjectCodeShareId);
+
+      // Se c'era un vecchio file, eliminalo
+      if (oldFilePath) {
+        const oldFilePathFull = path.join(
+          __dirname,
+          "..",
+          "public/codeShare",
+          oldFilePath
+        ); // Corretta la directory
+        if (fs.existsSync(oldFilePathFull)) {
+          fs.unlinkSync(oldFilePathFull); // Elimina il file dal filesystem
+        }
+      }
+
+      // Carica il nuovo file nel database
+      await Project.uploadCodeShareScreenshot(db, ProjectCodeShareId, filePath);
+
+      res.status(200).send("Screenshot caricato con successo.");
+    } catch (error) {
+      console.error("Error uploading code share screenshot:", error);
+      res.status(500).send("Code share screenshot upload failed");
+    }
+  }
+
+  static async deleteCodeShareTab(req, res, db) {
+    try {
+      const ProjectCodeShareId = req.query.ProjectCodeShareId;
+
+      // Recupera il vecchio percorso dell'immagine dal database
+      const oldFilePath = await Project.getOldFilePath(db, ProjectCodeShareId);
+
+      // Se c'era un vecchio file, eliminalo
+      if (oldFilePath) {
+        const oldFilePathFull = path.join(
+          __dirname,
+          "..",
+          "public/codeShare",
+          oldFilePath
+        ); // Corretta la directory
+        if (fs.existsSync(oldFilePathFull)) {
+          fs.unlinkSync(oldFilePathFull); // Elimina il file dal filesystem
+        }
+      }
+
+      await Project.deleteCodeShareTab(db, ProjectCodeShareId);
+      res.status(200).send("Tab eliminato con successo.");
+    } catch (error) {
+      console.error("Error deleting code share tab:", error);
+      res.status(500).send("Code share tab deletion failed");
+    }
+  }
+
+  static async archiveTask(req, res, db) {
+    try {
+      const TaskId = req.body.ProjectTaskId;
+      await Project.archiveTask(db, TaskId);
+      res.status(200).send("Task archiviato con successo.");
+    } catch (error) {
+      console.error("Error archiving task:", error);
+      res.status(500).send("Task archiving failed");
+    }
+  }
+
+  static async getArchivedTasksByProjectId(req, res, db) {
+    try {
+      const ProjectId = req.query.ProjectId;
+      const tasks = await Project.getArchivedTasksByProjectId(db, ProjectId);
+      res.status(200).json(tasks);
+    } catch (error) {
+      console.error("Error getting archived tasks:", error);
+      res.status(500).send("Archived tasks retrieval failed");
     }
   }
 }

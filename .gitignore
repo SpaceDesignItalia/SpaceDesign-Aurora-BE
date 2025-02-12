@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Node modules and build folders
-node_modules/
+node_modules/*
 dist
 dist-ssr
 *.local
@@ -26,4 +26,4 @@ dist-ssr
 *.sw?
 
 # Ignora correttamente la cartella .SSL
-SSL/
+SSL/node_modules/

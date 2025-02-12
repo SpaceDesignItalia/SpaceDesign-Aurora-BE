@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const ProjectController = require("../../Controllers/ProjectController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const projectGET = (db) => {
   // Definisci le route GET qui
@@ -250,6 +250,26 @@ const projectGET = (db) => {
   router.get("/GetProjectByUniqueCode", authenticateMiddleware, (req, res) => {
     ProjectController.getProjectByUniqueCode(req, res, db);
   });
+
+  router.get("/GetTaskStatusByTicketId", authenticateMiddleware, (req, res) => {
+    ProjectController.getTaskStatusByTicketId(req, res, db);
+  });
+
+  router.get("/GetCodeShareTabs", authenticateMiddleware, (req, res) => {
+    ProjectController.getCodeShareTabs(req, res, db);
+  });
+
+  router.get("/GetCodeShareCode", authenticateMiddleware, (req, res) => {
+    ProjectController.getCodeShareCode(req, res, db);
+  });
+
+  router.get(
+    "/GetArchivedTasksByProjectId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getArchivedTasksByProjectId(req, res, db);
+    }
+  );
 
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };

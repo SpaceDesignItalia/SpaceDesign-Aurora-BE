@@ -58,6 +58,16 @@ class TicketController {
       res.status(500).send("Failed to update ticket status");
     }
   }
+
+  static async addTaskToTicket(req, res, db, taskId, ticketId) {
+    try {
+      await Ticket.addTaskToTicket(db, taskId, ticketId);
+      return true;
+    } catch (error) {
+      console.error("Error adding task to ticket:", error);
+      return false;
+    }
+  }
 }
 
 module.exports = TicketController;

@@ -5,7 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const router = express.Router();
 const StafferController = require("../../Controllers/StafferController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 // Ensure the upload directory exists
 const uploadDir = "./public/profileIcons";
@@ -50,6 +50,10 @@ const stafferUPDATE = (db) => {
 
   router.put("/UpdateStafferPassword", authenticateMiddleware, (req, res) => {
     StafferController.updateStafferPassword(req, res, db);
+  });
+
+  router.put("/UpdateStafferAttendance", authenticateMiddleware, (req, res) => {
+    StafferController.updateStafferAttendance(req, res, db);
   });
 
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale

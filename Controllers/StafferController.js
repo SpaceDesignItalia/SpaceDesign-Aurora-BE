@@ -195,6 +195,55 @@ class StafferController {
       res.status(500).send("Cancellazione del dipendente fallita");
     }
   }
+
+  static async getStafferProjectsForModal(req, res, db) {
+    try {
+      const EmployeeId = req.query.EmployeeId;
+      const projects = await Staffer.getStafferProjectsForModal(db, EmployeeId);
+      res.status(200).json(projects);
+    } catch (error) {
+      console.error("Errore nel recupero dei progetti del dipendente:", error);
+      res.status(500).send("Recupero dei progetti del dipendente fallita");
+    }
+  }
+
+  static async getAttendanceByStafferId(req, res, db) {
+    try {
+      const month = req.query.month;
+      const year = req.query.year;
+      const StafferId = req.query.stafferId;
+      const attendance = await Staffer.getAttendanceByStafferId(
+        db,
+        month,
+        year,
+        StafferId
+      );
+      res.status(200).json(attendance);
+    } catch (error) {
+      console.error(
+        "Errore nel recupero dell'assiduità dei dipendenti:",
+        error
+      );
+      res.status(500).send("Recupero dell'assiduità dei dipendenti fallita");
+    }
+  }
+
+  static async updateStafferAttendance(req, res, db) {
+    try {
+      const Status = req.body.Status;
+      const StafferId = req.body.StafferId;
+      const Date = req.body.Date;
+
+      await Staffer.updateStafferAttendance(db, Status, StafferId, Date);
+      res.status(200).send("Assiduità del dipendente modificata con successo.");
+    } catch (error) {
+      console.error(
+        "Errore nella modifica dell'assiduità del dipendente:",
+        error
+      );
+      res.status(500).send("Modifica dell'assiduità del dipendente fallita");
+    }
+  }
 }
 
 module.exports = StafferController;

@@ -59,7 +59,7 @@ class CompanyModel {
 
   static getCompanyMembersById(db, CompanyId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT "CustomerId", CONCAT("CustomerName",' ',"CustomerSurname") CustomerFullName, "CustomerEmail", "CustomerPhone"
+      const query = `SELECT "CustomerId", CONCAT("CustomerName",' ',"CustomerSurname") CustomerFullName, "CustomerEmail", "CustomerPhone", "CustomerImageUrl"
       FROM public."Customer"
       INNER JOIN public."CustomerCompany" USING("CustomerId")
       INNER JOIN public."Company" USING("CompanyId") 

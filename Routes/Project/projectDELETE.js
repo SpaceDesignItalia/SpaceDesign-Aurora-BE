@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const ProjectController = require("../../Controllers/ProjectController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 const projectDELETE = (db) => {
   router.delete(
@@ -59,6 +59,10 @@ const projectDELETE = (db) => {
 
   router.delete("/DeleteTaskCheckbox", authenticateMiddleware, (req, res) => {
     ProjectController.deleteTaskCheckbox(req, res, db);
+  });
+
+  router.delete("/DeleteCodeShareTab", authenticateMiddleware, (req, res) => {
+    ProjectController.deleteCodeShareTab(req, res, db);
   });
 
   return router;

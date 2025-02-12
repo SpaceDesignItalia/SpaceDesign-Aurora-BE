@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const router = express.Router();
 const ProjectController = require("../../Controllers/ProjectController");
-const authenticateMiddleware = require("../../middlewares/EmailService/Authentication/Authmiddleware");
+const authenticateMiddleware = require("../../middlewares/Authentication/Authmiddleware");
 
 // Ensure the upload directory exists
 const uploadDir = "./public/uploads/projectFiles";
@@ -23,6 +23,24 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + "-" + uniqueSuffix + ext);
   },
 });
+
+const uploadDirCodeShare = "./public/codeShare";
+if (!fs.existsSync(uploadDirCodeShare)) {
+  fs.mkdirSync(uploadDirCodeShare, { recursive: true });
+}
+
+const codeShareStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDirCodeShare);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+  },
+});
+
+const codeShareUpload = multer({ storage: codeShareStorage });
 
 const upload = multer({ storage: storage });
 
@@ -90,6 +108,46 @@ const projectPOST = (db) => {
   router.post("/RefineText", authenticateMiddleware, (req, res) => {
     ProjectController.refineText(req, res);
   });
+
+  router.post(
+    "/RefineProjectDescription",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.refineProjectDescription(req, res);
+    }
+  );
+
+  router.post("/RefineRoleDescription", authenticateMiddleware, (req, res) => {
+    ProjectController.refineRoleDescription(req, res);
+  });
+
+  router.post(
+    "/GenerateRoleDescriptionFromName",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.generateRoleDescription(req, res);
+    }
+  );
+
+  router.post("/RefineEventDescription", authenticateMiddleware, (req, res) => {
+    ProjectController.refineEventDescription(req, res);
+  });
+
+  router.post("/UpdateProjectCode", authenticateMiddleware, (req, res) => {
+    ProjectController.updateProjectCode(req, res, db);
+  });
+
+  router.post("/AddCodeShareTab", authenticateMiddleware, (req, res) => {
+    ProjectController.addCodeShareTab(req, res, db);
+  });
+
+  router.post(
+    "/UploadCodeShareScreenshot",
+    codeShareUpload.single("file"),
+    (req, res) => {
+      ProjectController.uploadCodeShareScreenshot(req, res, db);
+    }
+  );
 
   return router;
 };
