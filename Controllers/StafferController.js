@@ -25,7 +25,7 @@ class StafferController {
       if (staffers.length > 0) {
         res.status(200).json(staffers);
       } else {
-        res.status(404).send("Nessun dipendente trovato");
+        res.status(200).send("Nessun dipendente trovato");
       }
     } catch (error) {
       console.error("Errore nel recupero dei nuovi dipendenti:", error);
