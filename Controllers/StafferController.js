@@ -107,6 +107,33 @@ class StafferController {
     }
   }
 
+  static async sendAttendanceReport(req, res, db) {
+    try {
+      const month = req.body.month;
+      const year = req.body.year;
+
+      const AttendanceEmails = await Staffer.sendAttendanceReport(db);
+      console.log(AttendanceEmails);
+      AttendanceEmails.forEach((email) => {
+        EmailService.sendAttendanceReportMail(
+          email.AttendanceReportEmail,
+          month,
+          year,
+          "http://localhost:3000/attendanceReports/presenze_" +
+            month +
+            "_" +
+            year +
+            ".csv"
+        );
+      });
+
+      res.status(200).send("Email di assiduità inviata con successo.");
+    } catch (error) {
+      console.error("Errore nell'invio dell'email di assiduità:", error);
+      res.status(500).send("Invio dell'email di assiduità fallita");
+    }
+  }
+
   static async updateStaffer(req, res, db) {
     try {
       const newEmployeeData = req.body.newEmployeeData;
@@ -215,7 +242,10 @@ class StafferController {
       await Staffer.deleteAttendanceEmail(db, AttendanceEmail);
       res.status(200).send("Email di assiduità cancellata con successo.");
     } catch (error) {
-      console.error("Errore nella cancellazione dell'email di assiduità:", error);
+      console.error(
+        "Errore nella cancellazione dell'email di assiduità:",
+        error
+      );
       res.status(500).send("Cancellazione dell'email di assiduità fallita");
     }
   }

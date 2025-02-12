@@ -14,6 +14,10 @@ const stafferPOST = (db) => {
     StafferController.addAttendanceEmail(req, res, db);
   });
 
+  router.post("/SendAttendanceReport", authenticateMiddleware, (req, res) => {
+    StafferController.sendAttendanceReport(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

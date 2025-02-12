@@ -274,5 +274,49 @@ class EmailService {
       }
     });
   }
+
+  static sendAttendanceReportMail(email, month, year, attachmentPath) {
+    const emailTemplatePath = path.join(
+      __dirname,
+      "EmailTemplate/AttendanceReportTemplate.html"
+    );
+    const emailTemplate = fs.readFileSync(emailTemplatePath, "utf-8");
+
+    let htmlContent = emailTemplate
+      .replace("${email}", email)
+      .replace("${month}", month)
+      .replace("${year}", year)
+      .replace("${month}", month)
+      .replace("${year}", year)
+      .replace("${month}", month)
+      .replace("${year}", year);
+
+    const sendTicketTaskStatusChangeMail = {
+      from: `Space Design Italia <${mailData.mail}>`,
+      to: email,
+      subject: "Report presenze " + month + " " + year,
+      text:
+        "Gentile " +
+        email +
+        ", ti è stato inviato il report delle presenze del mese " +
+        month +
+        " " +
+        year +
+        ".",
+      html: htmlContent,
+      attachments: [
+        {
+          filename: "report_presenze.xlsx",
+          path: attachmentPath,
+        },
+      ],
+    };
+
+    transporter.sendMail(sendTicketTaskStatusChangeMail, (error, info) => {
+      if (error) {
+        return console.log(error);
+      }
+    });
+  }
 }
 module.exports = EmailService;

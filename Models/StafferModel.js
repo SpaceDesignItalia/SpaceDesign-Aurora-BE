@@ -219,6 +219,19 @@ class StafferModel {
     });
   }
 
+  static sendAttendanceReport(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT "AttendanceReportEmail" FROM public."StafferAttendanceEmail"`;
+      db.query(query, [], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
   static updateStaffer(db, newEmployeeData, selectedRole) {
     return new Promise((resolve, reject) => {
       // First, check if another user with the same email exists
