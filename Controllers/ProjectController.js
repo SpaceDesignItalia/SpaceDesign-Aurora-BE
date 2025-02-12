@@ -382,14 +382,14 @@ class ProjectController {
         ProjectTaskId
       );
 
-      console.log(EmailData);
-
-      EmailService.sendTicketTaskStatusChangeMail(
-        EmailData.CompanyEmail,
-        EmailData.CompanyName,
-        EmailData.ProjectTicketTitle,
-        EmailData.ProjectTaskStatusName
-      );
+      if (EmailData) {
+        EmailService.sendTicketTaskStatusChangeMail(
+          EmailData.CompanyEmail,
+          EmailData.CompanyName,
+          EmailData.ProjectTicketTitle,
+          EmailData.ProjectTaskStatusName
+        );
+      }
       res.status(200).send("Stato del task aggiornato con successo.");
     } catch (error) {
       console.error("Errore nell'aggiornamento dello stato del task:", error);
