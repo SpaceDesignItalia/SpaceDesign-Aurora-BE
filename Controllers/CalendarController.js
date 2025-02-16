@@ -17,6 +17,22 @@ class CalendarController {
   static async addEvent(req, res, db) {
     try {
       const { EventData } = req.body;
+      const UserEmail = req.session.account.StafferEmail;
+      if (
+        EventData.EventPartecipants.some(
+          (partecipant) => partecipant.EventPartecipantEmail === UserEmail
+        )
+      ) {
+        EventData.EventPartecipants = EventData.EventPartecipants.filter(
+          (partecipant) => partecipant.EventPartecipantEmail !== UserEmail
+        );
+      }
+
+      EventData.EventPartecipants.push({
+        EventPartecipantEmail: UserEmail,
+        EventPartecipantRole: "Organizzatore",
+      });
+
       const event = await Calendar.addEvent(EventData, db);
       const UserId = req.session.account.StafferId;
       const partecipants = await Calendar.getPartecipantsByEventId(
