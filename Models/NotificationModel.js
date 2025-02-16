@@ -1,7 +1,7 @@
 class NotificationModel {
   static getAllNotifications(userId, db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT public."Notification"."NotificationId", "UserId", CONCAT("StafferName", ' ', "StafferSurname") AS UserFullName, "IsRead", "NotificationMessage", "NotificationCreationDate", public."NotificationInfo"."ProjectId", "ProjectName", "CompanyName", public."NotificationInfo"."StafferId", public."NotificationInfo"."CustomerId", "NotificationTypeName", "UniqueCode" FROM "NotificationExtraData"
+      const query = `SELECT public."Notification"."NotificationId", "UserId", CONCAT("StafferName", ' ', "StafferSurname") AS UserFullName, "StafferEmail", "IsRead", "NotificationMessage", "NotificationCreationDate", public."NotificationInfo"."ProjectId", "ProjectName", "EventId", "CompanyName", public."NotificationInfo"."StafferId", public."NotificationInfo"."CustomerId", "NotificationTypeName", "UniqueCode" FROM "NotificationExtraData"
         INNER JOIN public."Notification" ON public."Notification"."NotificationId" = "NotificationExtraData"."NotificationId"
         INNER JOIN public."NotificationInfo" ON public."Notification"."NotificationId" = "NotificationInfo"."NotificationId"
         LEFT JOIN public."Staffer" ON public."NotificationInfo"."StafferId" = public."Staffer"."StafferId"

@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const Calendar = require("../Models/CalendarModel");
 const EmailService = require("../middlewares/EmailService/EmailService");
+const NotifyMiddleware = require("../middlewares/Notification/NotifyMiddelware");
 
 class CalendarController {
   static async getEventTags(req, res, db) {
@@ -17,7 +18,7 @@ class CalendarController {
     try {
       const { EventData } = req.body;
       const event = await Calendar.addEvent(EventData, db);
-
+      const UserId = req.session.account.StafferId;
       const partecipants = await Calendar.getPartecipantsByEventId(
         event.EventId,
         db
@@ -48,6 +49,13 @@ class CalendarController {
             "/reject"
         );
       }
+
+      await NotifyMiddleware.CalendarNotification(
+        db,
+        UserId,
+        event.EventId,
+        EventData.EventTitle
+      );
 
       res.status(200).json(event);
     } catch (error) {
@@ -161,6 +169,8 @@ class CalendarController {
         db
       );
 
+      const UserId = req.session.account.StafferId;
+
       for (const partecipant of Partecipants) {
         EmailService.sendUpdateEventMail(
           partecipant.EventPartecipantEmail,
@@ -186,6 +196,13 @@ class CalendarController {
             "/reject"
         );
       }
+
+      await NotifyMiddleware.CalendarNotification(
+        db,
+        UserId,
+        event.EventId,
+        EventData.EventTitle
+      );
 
       res.status(200).json(event);
     } catch (error) {
