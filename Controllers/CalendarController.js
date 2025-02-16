@@ -160,6 +160,33 @@ class CalendarController {
         EventData,
         db
       );
+
+      for (const partecipant of Partecipants) {
+        EmailService.sendUpdateEventMail(
+          partecipant.EventPartecipantEmail,
+          EventData.EventTitle,
+          EventData.EventStartDate,
+          EventData.EventEndDate,
+          EventData.EventStartTime,
+          EventData.EventEndTime,
+          EventData.EventDescription,
+          EventData.EventLocation,
+          Partecipants,
+          process.env.FRONTEND_URL +
+            "/comunications/calendar/" +
+            event.EventId +
+            "/" +
+            partecipant.EventPartecipantEmail +
+            "/accept",
+          process.env.FRONTEND_URL +
+            "/comunications/calendar/" +
+            event.EventId +
+            "/" +
+            partecipant.EventPartecipantEmail +
+            "/reject"
+        );
+      }
+
       res.status(200).json(event);
     } catch (error) {
       console.error(error);
