@@ -1,3 +1,4 @@
+// socketServer.js
 const { Server } = require("socket.io");
 
 let onlineUsers = [];
@@ -5,7 +6,23 @@ let onlineUsersOnCodeShare = [];
 const videoRoomParticipants = {}; // Track participants per project room
 const videoWindows = new Map(); // Track video windows by userId and projectId
 
-const createSocketServer = (httpServer) => {
+function handleUserLeaveVideo(projectId, userId, io) {
+  if (videoRoomParticipants[projectId]) {
+    videoRoomParticipants[projectId].delete(userId);
+    if (videoRoomParticipants[projectId].size === 0) {
+      delete videoRoomParticipants[projectId];
+    }
+    io.emit("video-participants-update", {
+      projectId: projectId,
+      count: videoRoomParticipants[projectId]?.size || 0,
+      participants: videoRoomParticipants[projectId]
+        ? Array.from(videoRoomParticipants[projectId])
+        : [],
+    });
+  }
+}
+
+function createSocketServer(httpServer) {
   const io = new Server(httpServer, {
     cors: {
       origin: [
@@ -21,7 +38,7 @@ const createSocketServer = (httpServer) => {
   });
 
   io.on("connection", (socket) => {
-    // Quando un client si connette, invia l'attuale stato delle stanze video
+    // Invia lo stato iniziale delle stanze video
     socket.emit("initial-video-participants", videoRoomParticipants);
 
     socket.on("join", (conversationId) => {
@@ -49,17 +66,11 @@ const createSocketServer = (httpServer) => {
     });
 
     socket.on("join-video-room", (projectId, userId) => {
-      // Initialize the room if it doesn't exist
       if (!videoRoomParticipants[projectId]) {
         videoRoomParticipants[projectId] = new Set();
       }
-
-      // Add the participant with their userId
       videoRoomParticipants[projectId].add(userId);
-      // Store both userId and projectId for this socket
       videoWindows.set(socket.id, { userId, projectId });
-
-      // Emit updated count to all clients
       io.emit("video-participants-update", {
         projectId: projectId,
         count: videoRoomParticipants[projectId].size,
@@ -77,7 +88,6 @@ const createSocketServer = (httpServer) => {
       const participants = videoRoomParticipants[projectId]
         ? Array.from(videoRoomParticipants[projectId])
         : [];
-
       socket.emit("video-participants-update", {
         projectId: projectId,
         count: count,
@@ -86,17 +96,10 @@ const createSocketServer = (httpServer) => {
     });
 
     socket.on("ping-video-presence", (projectId, userId) => {
-      // Aggiorna il timestamp dell'ultimo ping per questo utente
       if (videoWindows.has(socket.id)) {
         videoWindows.get(socket.id).lastPing = Date.now();
       }
     });
-
-    function sendNotification(userId) {
-      io.to(userId).emit("newNotification");
-    }
-
-    module.exports.sendNotification = sendNotification;
 
     socket.on("new-user-add", (newUserId) => {
       if (!onlineUsers.some((user) => user.userId === newUserId)) {
@@ -110,20 +113,16 @@ const createSocketServer = (httpServer) => {
     });
 
     socket.on("disconnect", () => {
-      // Gestisci la disconnessione dalla video chat
       const videoSession = videoWindows.get(socket.id);
       if (videoSession) {
         const { projectId, userId } = videoSession;
         handleUserLeaveVideo(projectId, userId, io);
         videoWindows.delete(socket.id);
       }
-
-      // Gestisci la disconnessione generale
       onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
       onlineUsersOnCodeShare = onlineUsersOnCodeShare.filter(
         (user) => user.socketId !== socket.id
       );
-
       io.emit("get-users", onlineUsers);
       io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
     });
@@ -152,7 +151,6 @@ const createSocketServer = (httpServer) => {
           socketId: socket.id,
         });
       }
-
       io.emit("get-users-on-code-share", onlineUsersOnCodeShare);
     });
 
@@ -181,7 +179,7 @@ const createSocketServer = (httpServer) => {
     });
   });
 
-  // Cleanup inattivi ogni 5 secondi
+  // Cleanup delle sessioni inattive ogni 5 secondi
   setInterval(() => {
     const now = Date.now();
     for (const [socketId, session] of videoWindows.entries()) {
@@ -194,24 +192,6 @@ const createSocketServer = (httpServer) => {
   }, 5000);
 
   return io;
-};
-
-function handleUserLeaveVideo(projectId, userId, io) {
-  if (videoRoomParticipants[projectId]) {
-    videoRoomParticipants[projectId].delete(userId);
-
-    if (videoRoomParticipants[projectId].size === 0) {
-      delete videoRoomParticipants[projectId];
-    }
-
-    io.emit("video-participants-update", {
-      projectId: projectId,
-      count: videoRoomParticipants[projectId]?.size || 0,
-      participants: videoRoomParticipants[projectId]
-        ? Array.from(videoRoomParticipants[projectId])
-        : [],
-    });
-  }
 }
 
 module.exports = createSocketServer;
