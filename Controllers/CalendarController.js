@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const Calendar = require("../Models/CalendarModel");
 const EmailService = require("../middlewares/EmailService/EmailService");
+const NotifyMiddleware = require("../middlewares/Notification/NotifyMiddelware");
 
 class CalendarController {
   static async getEventTags(req, res, db) {
@@ -16,8 +17,24 @@ class CalendarController {
   static async addEvent(req, res, db) {
     try {
       const { EventData } = req.body;
-      const event = await Calendar.addEvent(EventData, db);
+      const UserEmail = req.session.account.StafferEmail;
+      if (
+        EventData.EventPartecipants.some(
+          (partecipant) => partecipant.EventPartecipantEmail === UserEmail
+        )
+      ) {
+        EventData.EventPartecipants = EventData.EventPartecipants.filter(
+          (partecipant) => partecipant.EventPartecipantEmail !== UserEmail
+        );
+      }
 
+      EventData.EventPartecipants.push({
+        EventPartecipantEmail: UserEmail,
+        EventPartecipantRole: "Organizzatore",
+      });
+
+      const event = await Calendar.addEvent(EventData, db);
+      const UserId = req.session.account.StafferId;
       const partecipants = await Calendar.getPartecipantsByEventId(
         event.EventId,
         db
@@ -48,6 +65,13 @@ class CalendarController {
             "/reject"
         );
       }
+
+      await NotifyMiddleware.CalendarNotification(
+        db,
+        UserId,
+        event.EventId,
+        EventData.EventTitle
+      );
 
       res.status(200).json(event);
     } catch (error) {
@@ -160,6 +184,42 @@ class CalendarController {
         EventData,
         db
       );
+
+      const UserId = req.session.account.StafferId;
+
+      for (const partecipant of Partecipants) {
+        EmailService.sendUpdateEventMail(
+          partecipant.EventPartecipantEmail,
+          EventData.EventTitle,
+          EventData.EventStartDate,
+          EventData.EventEndDate,
+          EventData.EventStartTime,
+          EventData.EventEndTime,
+          EventData.EventDescription,
+          EventData.EventLocation,
+          Partecipants,
+          process.env.FRONTEND_URL +
+            "/comunications/calendar/" +
+            event.EventId +
+            "/" +
+            partecipant.EventPartecipantEmail +
+            "/accept",
+          process.env.FRONTEND_URL +
+            "/comunications/calendar/" +
+            event.EventId +
+            "/" +
+            partecipant.EventPartecipantEmail +
+            "/reject"
+        );
+      }
+
+      await NotifyMiddleware.CalendarNotification(
+        db,
+        UserId,
+        event.EventId,
+        EventData.EventTitle
+      );
+
       res.status(200).json(event);
     } catch (error) {
       console.error(error);
