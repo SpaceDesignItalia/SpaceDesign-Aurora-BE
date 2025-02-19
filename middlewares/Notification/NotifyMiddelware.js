@@ -1,5 +1,6 @@
 const createSocketServer = require("../../socket");
-
+const Calendar = require("../../Models/CalendarModel");
+const StafferModel = require("../../Models/StafferModel");
 class NotifyMiddleware {
   static async MessageNotification(db, ConversationId, StafferSenderId, Text) {
     try {
@@ -95,6 +96,53 @@ class NotifyMiddleware {
       ]);
 
       // Esegui tutte le query in parallelo
+      await Promise.all([notificationExtraDataQuery, notificationInfoQuery]);
+      createSocketServer.sendNotification(UserId); // Invia la notifica al destinatario
+      // Risolvi la promessa finale
+      return { success: true };
+    } catch (error) {
+      // Gestione degli errori
+      throw error;
+    }
+  }
+
+  static async CalendarNotification(db, UserId, EventId, Text) {
+    try {
+      // Prima query: inserimento nella tabella Notification
+      let query = `INSERT INTO public."Notification" ("NotificationMessage", "NotificationCreationDate") VALUES ($1, $2) RETURNING "NotificationId"`;
+      const notificationResult = await db.query(query, [Text, new Date()]);
+      const NotificationId = notificationResult.rows[0].NotificationId;
+
+      const Partecipants = await Calendar.getPartecipantsByEventId(EventId, db);
+      console.log(Partecipants);
+
+      let notificationExtraDataQuery;
+
+      for (const partecipant of Partecipants) {
+        const Staffer = await StafferModel.searchStafferByEmail(
+          db,
+          partecipant.EventPartecipantEmail
+        );
+
+        if (Staffer.length > 0) {
+          query = `INSERT INTO public."NotificationExtraData" ("NotificationId", "UserId", "IsRead") VALUES ($1, $2, $3)`;
+          notificationExtraDataQuery = await db.query(query, [
+            NotificationId,
+            Staffer[0].EmployeeId,
+            false,
+          ]);
+        }
+      }
+
+      const NotificationTypeName = "Evento";
+      query = `INSERT INTO public."NotificationInfo" ("NotificationId", "EventId", "StafferId", "NotificationTypeName") VALUES ($1, $2, $3, $4)`;
+      const notificationInfoQuery = db.query(query, [
+        NotificationId,
+        EventId,
+        UserId,
+        NotificationTypeName,
+      ]);
+
       await Promise.all([notificationExtraDataQuery, notificationInfoQuery]);
       createSocketServer.sendNotification(UserId); // Invia la notifica al destinatario
       // Risolvi la promessa finale
