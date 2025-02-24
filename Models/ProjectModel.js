@@ -132,7 +132,7 @@ class ProjectModel {
 
   static getAllLinkTypes(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectLinkType"`;
+      const query = `SELECT * FROM public."ProjectLinkType" ORDER BY "ProjectLinkTypeName"`;
 
       db.query(query, (error, result) => {
         if (error) {
