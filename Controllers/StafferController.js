@@ -112,18 +112,28 @@ class StafferController {
       const month = req.body.month;
       const year = req.body.year;
 
+      // Costruisci il percorso del file locale
+      const fileName = `presenze_${month}_${year}.xlsx`;
+      const filePath = path.join(
+        __dirname,
+        "..",
+        "Files",
+        "AttendanceReports",
+        fileName
+      );
+
+      // Verifica che il file esista
+      if (!fs.existsSync(filePath)) {
+        throw new Error("File del report non trovato");
+      }
+
       const AttendanceEmails = await Staffer.sendAttendanceReport(db);
-      console.log(AttendanceEmails);
       AttendanceEmails.forEach((email) => {
         EmailService.sendAttendanceReportMail(
           email.AttendanceReportEmail,
           month,
           year,
-          "http://localhost:3000/attendanceReports/presenze_" +
-            month +
-            "_" +
-            year +
-            ".csv"
+          filePath
         );
       });
 
@@ -131,6 +141,32 @@ class StafferController {
     } catch (error) {
       console.error("Errore nell'invio dell'email di assiduità:", error);
       res.status(500).send("Invio dell'email di assiduità fallita");
+    }
+  }
+
+  static async uploadAttendanceExcel(req, res, db) {
+    try {
+      if (!req.file) {
+        throw new Error("Nessun file caricato");
+      }
+
+      res.status(200).send("File caricato con successo");
+    } catch (error) {
+      // Elimina il file in caso di errore
+      if (req.file) {
+        const filePath = path.join(uploadDirCodeShare, req.file.filename);
+        fs.unlink(filePath, (unlinkError) => {
+          if (unlinkError) {
+            console.error(
+              "Errore durante l'eliminazione del file:",
+              unlinkError
+            );
+          }
+        });
+      }
+
+      console.error("Errore nel caricamento del file Excel:", error);
+      res.status(500).send("Caricamento del file Excel fallito");
     }
   }
 
