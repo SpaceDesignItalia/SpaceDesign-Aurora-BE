@@ -24,7 +24,7 @@ const leadGET = (db) => {
   router.get("/GetLeadById", authenticateMiddleware, (req, res) => {
     LeadController.getLeadById(req, res, db);
   });
-  router.get("/GetObjects", authenticateMiddleware, (req, res) => {
+  router.get("/GetObjects", (req, res) => {
     LeadController.getObjects(req, res, db);
   });
 
@@ -32,7 +32,7 @@ const leadGET = (db) => {
     LeadController.searchLeadByCompany(req, res, db);
   });
 
-  router.get("/GetRanges", authenticateMiddleware, (req, res) => {
+  router.get("/GetRanges", (req, res) => {
     LeadController.getRanges(req, res, db);
   });
   return router;

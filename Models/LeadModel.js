@@ -117,50 +117,31 @@ class LeadModel {
   }
 
   static contactFormSubmit(db, contactData) {
+    console.log(contactData);
     return new Promise((resolve, reject) => {
-      // Query per ottenere l'Id dell'oggetto
-      const getObjectQuery = `SELECT "IdObject" FROM "ContactObject" WHERE "Name" = $1`;
-      const getRangeQuery = `SELECT "IdBudget" FROM "ContactBudgetRange" WHERE "Range" = $1`;
+      if (!contactData.object || !contactData.budget) {
+        return reject(new Error("Oggetto e budget sono campi obbligatori"));
+      }
+
+      const insertQuery = `INSERT INTO "Contact" ("FirstName", "LastName", "Email", "Company", "IdBudget", "IdObject", "Message") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
 
       const values = [
         contactData.firstName,
         contactData.lastName,
         contactData.email,
         contactData.company,
+        contactData.budget,
+        contactData.object,
+        contactData.message,
       ];
 
-      // Recupera l'ID dell'oggetto
-      db.query(getObjectQuery, [contactData.object], (error, objectResult) => {
-        if (err) {
-          console.error("Errore durante il recupero dell'oggetto:", error);
+      db.query(insertQuery, values, (error, result) => {
+        if (error) {
+          console.error("Errore durante l'inserimento del contatto:", error);
           return reject(error);
         }
 
-        const objectId = objectResult.rows[0]?.IdObject;
-
-        // Recupera l'ID del budget
-        db.query(getRangeQuery, [contactData.budget], (err, budgetResult) => {
-          if (err) {
-            console.error("Errore durante il recupero del budget:", err);
-            return reject(err);
-          }
-
-          const budgetId = budgetResult.rows[0]?.IdBudget;
-
-          // Inserisce i dati nella tabella Contact
-          const insertQuery = `INSERT INTO "Contact" ("FirstName", "LastName", "Email", "Company", "IdBudget", "IdObject", "Message") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
-
-          values.push(budgetId, objectId, contactData.message);
-
-          db.query(insertQuery, values, (err, result) => {
-            if (err) {
-              console.error("Errore durante l'inserimento del contatto:", err);
-              return reject(err);
-            }
-
-            resolve(result.rows[0]);
-          });
-        });
+        resolve(result.rows[0]);
       });
     });
   }

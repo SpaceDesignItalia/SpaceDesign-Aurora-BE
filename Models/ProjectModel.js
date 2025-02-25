@@ -395,7 +395,6 @@ class ProjectModel {
         if (checkErr) {
           return reject(checkErr);
         }
-
         // If another project with the same name exists for the company, return a 409 error
         if (checkResult.rows.length > 0) {
           const conflictError = new Error(
