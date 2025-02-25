@@ -132,7 +132,7 @@ class ProjectModel {
 
   static getAllLinkTypes(db) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectLinkType"`;
+      const query = `SELECT * FROM public."ProjectLinkType" ORDER BY "ProjectLinkTypeName"`;
 
       db.query(query, (error, result) => {
         if (error) {
@@ -395,7 +395,6 @@ class ProjectModel {
         if (checkErr) {
           return reject(checkErr);
         }
-
         // If another project with the same name exists for the company, return a 409 error
         if (checkResult.rows.length > 0) {
           const conflictError = new Error(
@@ -792,13 +791,14 @@ class ProjectModel {
 
   static updateTask(db, TaskData, FormattedDate, FormattedCreationDate) {
     return new Promise((resolve, reject) => {
-      const query = `UPDATE public."ProjectTask" SET "ProjectTaskName" = $1, "ProjectTaskDescription" = $2, "ProjectTaskExpiration" = $3, "ProjectTaskCreation"= $4 WHERE "ProjectTaskId" = $5`;
+      const query = `UPDATE public."ProjectTask" SET "ProjectTaskName" = $1, "ProjectTaskDescription" = $2, "ProjectTaskExpiration" = $3, "ProjectTaskCreation"= $4, "PriorityId" = $5 WHERE "ProjectTaskId" = $6`;
 
       const values = [
         TaskData.ProjectTaskName,
         TaskData.ProjectTaskDescription,
         FormattedDate,
         FormattedCreationDate,
+        TaskData.PriorityId,
         TaskData.ProjectTaskId,
       ];
 
@@ -940,8 +940,8 @@ class ProjectModel {
     ProjectId
   ) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectTaskCreation", "ProjectId")
-      VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+      const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectTaskCreation", "ProjectId", "PriorityId")
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
 
       const values = [
         TaskData.ProjectTaskName,
@@ -949,6 +949,7 @@ class ProjectModel {
         FormattedDate,
         FormattedCreationDate,
         ProjectId,
+        TaskData.PriorityId,
       ];
 
       db.query(query, values, (error, result) => {
@@ -1861,6 +1862,19 @@ class ProjectModel {
     return new Promise((resolve, reject) => {
       const query = `SELECT * FROM public."ProjectTask" WHERE "ProjectId" = $1 AND "IsArchived" = true`;
       db.query(query, [ProjectId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
+
+  static async getAllPriorities(db) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTaskPriority"`;
+      db.query(query, (error, result) => {
         if (error) {
           reject(error);
         } else {

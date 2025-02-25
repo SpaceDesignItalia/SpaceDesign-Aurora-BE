@@ -57,7 +57,7 @@ class LeadController {
   }
 
   // Recupera tutti gli oggetti
-  static async getAllObjects(req, res, db) {
+  static async getObjects(req, res, db) {
     try {
       const objects = await Lead.getAllObjects(db);
       res.status(200).json(objects);
@@ -68,7 +68,7 @@ class LeadController {
   }
 
   // Recupera tutti gli intervalli
-  static async getAllRanges(req, res, db) {
+  static async getRanges(req, res, db) {
     try {
       const ranges = await Lead.getAllRanges(db);
       res.status(200).json(ranges);
@@ -90,18 +90,10 @@ class LeadController {
 
   // Gestisce l'invio del modulo di contatto
   static async contactFormSubmit(req, res, db) {
-    const { name, email, company, object, budget, message } = req.body;
+    const contactData = req.body;
 
     try {
-      await Lead.contactFormSubmit(
-        db,
-        name,
-        email,
-        company,
-        object,
-        budget,
-        message
-      );
+      await Lead.contactFormSubmit(db, contactData);
       res.status(200).send("Richiesta inviata con successo");
     } catch (error) {
       console.error("Errore nell'invio della richiesta:", error);
