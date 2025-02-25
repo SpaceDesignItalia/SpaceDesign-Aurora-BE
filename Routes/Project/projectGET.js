@@ -271,6 +271,10 @@ const projectGET = (db) => {
     }
   );
 
+  router.get("/GetAllPriorities", authenticateMiddleware, (req, res) => {
+    ProjectController.getAllPriorities(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

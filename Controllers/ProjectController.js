@@ -1357,6 +1357,16 @@ class ProjectController {
       res.status(500).send("Archived tasks retrieval failed");
     }
   }
+
+  static async getAllPriorities(req, res, db) {
+    try {
+      const priorities = await Project.getAllPriorities(db);
+      res.status(200).json(priorities);
+    } catch (error) {
+      console.error("Error getting priorities:", error);
+      res.status(500).send("Priorities retrieval failed");
+    }
+  }
 }
 
 module.exports = ProjectController;
