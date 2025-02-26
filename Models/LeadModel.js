@@ -119,10 +119,6 @@ class LeadModel {
   static contactFormSubmit(db, contactData) {
     console.log(contactData);
     return new Promise((resolve, reject) => {
-      if (!contactData.object || !contactData.budget) {
-        return reject(new Error("Oggetto e budget sono campi obbligatori"));
-      }
-
       const insertQuery = `INSERT INTO "Contact" ("FirstName", "LastName", "Email", "Company", "IdBudget", "IdObject", "Message") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
 
       const values = [
