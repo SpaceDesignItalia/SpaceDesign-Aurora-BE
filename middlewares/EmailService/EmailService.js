@@ -249,6 +249,59 @@ class EmailService {
     });
   }
 
+  static sendUpdateEventMail(
+    email,
+    eventName,
+    eventStartDate,
+    eventEndDate,
+    eventStartTime,
+    eventEndTime,
+    eventDescription,
+    eventLocation,
+    partecipants,
+    acceptUrl,
+    rejectUrl
+  ) {
+    const emailTemplatePath = path.join(
+      __dirname,
+      "EmailTemplate/UpdateEventTemplate.html"
+    );
+    const emailTemplate = fs.readFileSync(emailTemplatePath, "utf-8");
+
+    let partecipantsString = "";
+    for (const partecipant of partecipants) {
+      partecipantsString += partecipant.EventPartecipantEmail + "<br />";
+    }
+
+    let htmlContent = emailTemplate
+      .replace("${eventName}", eventName)
+      .replace(
+        "${eventStartDate}",
+        eventStartDate == eventEndDate
+          ? eventStartDate.split("T")[0] + " " + eventStartTime
+          : eventStartDate.split("T")[0] + " - " + eventEndDate.split("T")[0]
+      )
+      .replace("${eventDescription}", eventDescription)
+      .replace("${acceptUrl}", acceptUrl)
+      .replace("${rejectUrl}", rejectUrl)
+      .replace("${partecipants}", partecipantsString)
+      .replace("${eventLocation}", eventLocation);
+
+    const sendUpdateEventMail = {
+      from: `Space Design Italia <${mailData.mail}>`,
+      to: email,
+      subject: "Evento modificato",
+      text: "Ciao! L'evento " + eventName + " è stato modificato.",
+      html: htmlContent,
+    };
+
+    transporter.sendMail(sendUpdateEventMail, (error, info) => {
+      if (error) {
+        return console.log(error);
+      }
+    });
+  }
+
   static sendCustomerEliminationMail(email, name, surname) {
     const emailTemplatePath = path.join(
       __dirname,
