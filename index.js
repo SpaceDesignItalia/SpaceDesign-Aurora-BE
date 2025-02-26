@@ -42,6 +42,7 @@ app.use(
       "http://localhost:3001",
       "http://localhost:5173",
       "http://localhost:5174",
+      "https://spacedesign-italia.it",
       "https://app.spacedesign-italia.it",
       "https://www.spacedesign-italia.it",
     ], // Aggiorna con gli URL HTTPS
