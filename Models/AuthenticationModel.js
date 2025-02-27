@@ -155,33 +155,37 @@ class StafferModel {
     });
   }
 
-  static verifyOtp(db, Code) {
+  static verifyOtp(db, Email, Code) {
     return new Promise((resolve, reject) => {
       // Prima controlla se è uno staffer
-      const stafferQuery = `SELECT 'staffer' as type FROM public."Staffer" WHERE "RecoveryCode" = $1`;
+      const stafferQuery = `SELECT "RecoveryCode" FROM public."Staffer" WHERE "StafferEmail" = $1`;
+      const customerQuery = `
+        SELECT "RecoveryCode"
+        FROM public."Customer" 
+        WHERE "CustomerEmail" = $1 
+        AND "IsActive" = true
+      `;
 
-      db.query(stafferQuery, [Code])
-        .then((stafferResult) => {
-          if (stafferResult.rows.length === 1) {
+      Promise.all([
+        db.query(stafferQuery, [Email]),
+        db.query(customerQuery, [Email]),
+      ])
+        .then(([stafferResult, customerResult]) => {
+          const stafferMatch =
+            stafferResult.rows.length === 1 &&
+            stafferResult.rows[0].RecoveryCode === Code;
+          const customerMatch =
+            customerResult.rows.length === 1 &&
+            customerResult.rows[0].RecoveryCode === Code;
+
+          if (stafferMatch) {
             resolve({ valid: true, type: "staffer" });
-          } else {
-            // Se non è uno staffer, controlla se è un customer attivo
-            const customerQuery = `
-              SELECT 'customer' as type 
-              FROM public."Customer" 
-              WHERE "RecoveryCode" = $1 
-              AND "IsActive" = true
-            `;
-
-            return db.query(customerQuery, [Code]);
-          }
-        })
-        .then((customerResult) => {
-          if (customerResult && customerResult.rows.length === 1) {
+          } else if (customerMatch) {
             resolve({ valid: true, type: "customer" });
-          } else if (!customerResult) {
-            // Questo caso si verifica quando è già stato trovato uno staffer
-            return;
+          } else if (stafferResult.rows.length === 1) {
+            resolve({ valid: false, type: "staffer" });
+          } else if (customerResult.rows.length === 1) {
+            resolve({ valid: false, type: "customer" });
           } else {
             resolve({ valid: false, type: null });
           }

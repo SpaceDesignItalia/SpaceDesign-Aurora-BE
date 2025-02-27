@@ -129,21 +129,32 @@ class AuthenticationController {
       res.status(500).send("Aggiornamento della password fallito");
     }
   }
-
   static async verifyOtp(req, res, db) {
     try {
+      const Email = req.body.email;
       const Code = req.body.code;
 
-      const isValid = await Authentication.verifyOtp(db, Code);
+      const result = await Authentication.verifyOtp(db, Email, Code);
 
-      if (isValid) {
-        res.status(200).json({ message: "Codice OTP verificato con successo" });
+      if (result.valid) {
+        res.status(200).json({
+          valid: true,
+          type: result.type,
+          message: "Codice OTP verificato con successo",
+        });
       } else {
-        res.status(400).json({ error: "Codice OTP non valido" });
+        res.status(400).json({
+          valid: false,
+          error: "Codice OTP non valido",
+          type: result.type,
+        });
       }
     } catch (error) {
       console.error("Errore nella verifica dell'OTP:", error);
-      res.status(500).json({ error: "Errore durante la verifica dell'OTP" });
+      res.status(500).json({
+        valid: false,
+        error: "Errore durante la verifica dell'OTP",
+      });
     }
   }
 }
