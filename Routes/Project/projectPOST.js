@@ -149,6 +149,14 @@ const projectPOST = (db) => {
     }
   );
 
+  router.post("/UpdateTaskStatusName", authenticateMiddleware, (req, res) => {
+    ProjectController.updateTaskStatusName(req, res, db);
+  });
+
+  router.post("/AddTaskStatus", authenticateMiddleware, (req, res) => {
+    ProjectController.addTaskStatus(req, res, db);
+  });
+
   return router;
 };
 
