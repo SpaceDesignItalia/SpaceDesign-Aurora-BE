@@ -14,6 +14,10 @@ const authenticationPOST = (db) => {
     AuthenticationController.passwordRecovery(req, res, db);
   });
 
+  router.post("/VerifyOtp", async (req, res) => {
+    AuthenticationController.verifyOtp(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 

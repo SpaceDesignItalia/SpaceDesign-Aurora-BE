@@ -361,9 +361,10 @@ class ProjectController {
     }
   }
 
-  static async getTaskStatuses(req, res, db) {
+  static async getTaskStatusesByProjectId(req, res, db) {
     try {
-      const statuses = await Project.getTaskStatuses(db);
+      const ProjectId = req.query.ProjectId;
+      const statuses = await Project.getTaskStatusesByProjectId(db, ProjectId);
       res.status(200).json(statuses);
     } catch (error) {
       console.error("Errore nel recupero degli status dei task:", error);
@@ -1365,6 +1366,43 @@ class ProjectController {
     } catch (error) {
       console.error("Error getting priorities:", error);
       res.status(500).send("Priorities retrieval failed");
+    }
+  }
+
+  static async updateTaskStatusName(req, res, db) {
+    try {
+      const { ProjectTaskStatusId, ProjectTaskStatusName } = req.body;
+      await Project.updateTaskStatusName(
+        db,
+        ProjectTaskStatusId,
+        ProjectTaskStatusName
+      );
+      res.status(200).send("Nome del task status aggiornato con successo.");
+    } catch (error) {
+      console.error("Error updating task status name:", error);
+      res.status(500).send("Task status name update failed");
+    }
+  }
+
+  static async deleteTaskStatus(req, res, db) {
+    try {
+      const ProjectTaskStatusId = req.query.ProjectTaskStatusId;
+      await Project.deleteTaskStatus(db, ProjectTaskStatusId);
+      res.status(200).send("Task status eliminato con successo.");
+    } catch (error) {
+      console.error("Error deleting task status:", error);
+      res.status(500).send("Task status deletion failed");
+    }
+  }
+
+  static async addTaskStatus(req, res, db) {
+    try {
+      const { ProjectId, ProjectTaskStatusName } = req.body;
+      await Project.addTaskStatus(db, ProjectId, ProjectTaskStatusName);
+      res.status(200).send("Task status aggiunto con successo.");
+    } catch (error) {
+      console.error("Error adding task status:", error);
+      res.status(500).send("Task status addition failed");
     }
   }
 }
