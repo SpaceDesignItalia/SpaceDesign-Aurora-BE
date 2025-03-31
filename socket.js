@@ -11,7 +11,7 @@ const createSocketServer = (httpServer) => {
       origin: [
         "http://localhost:5173",
         "http://localhost:5174",
-        "https://app.spacedesign-italia.it",
+        "https://syllog.spacedesign-italia.it",
       ],
       methods: ["GET", "POST"],
       credentials: true,
