@@ -31,7 +31,7 @@ const credentials = {
 const app = express();
 app.use(express.static("public"));
 const PREFIX = "/API/v1";
-const PORT = 3000; // Porta standard per HTTPS
+const PORT = 3001; // Porta standard per HTTPS
 
 const db = require("./configs/Database");
 
