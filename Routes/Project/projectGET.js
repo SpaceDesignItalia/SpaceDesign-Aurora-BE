@@ -95,9 +95,13 @@ const projectGET = (db) => {
     ProjectController.getTasksByProjectId(req, res, db);
   });
 
-  router.get("/GetTaskStatuses", authenticateMiddleware, (req, res) => {
-    ProjectController.getTaskStatuses(req, res, db);
-  });
+  router.get(
+    "/GetTaskStatusesByProjectId",
+    authenticateMiddleware,
+    (req, res) => {
+      ProjectController.getTaskStatusesByProjectId(req, res, db);
+    }
+  );
 
   router.get("/GetTagsByTaskId", authenticateMiddleware, (req, res) => {
     ProjectController.getTagsByTaskId(req, res, db);

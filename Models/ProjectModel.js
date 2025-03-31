@@ -308,7 +308,25 @@ class ProjectModel {
                         return reject(folderError);
                       }
 
-                      resolve(projectId);
+                      const insertTaskStatusQuery = `
+                        INSERT INTO public."ProjectTaskStatus" ("ProjectId", "ProjectTaskStatusName")
+                        VALUES ($1, 'Da Fare'),
+                        ($1, 'In Sviluppo'),
+                        ($1, 'In Revisione'),
+                        ($1, 'Completato')
+                        RETURNING *;
+                      `;
+
+                      db.query(
+                        insertTaskStatusQuery,
+                        [projectId],
+                        (error, result) => {
+                          if (error) {
+                            return reject(error);
+                          }
+                          resolve(projectId);
+                        }
+                      );
                     }
                   );
                 }
@@ -587,11 +605,11 @@ class ProjectModel {
     });
   }
 
-  static getTaskStatuses(db) {
+  static getTaskStatusesByProjectId(db, ProjectId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectTaskStatus"`;
+      const query = `SELECT * FROM public."ProjectTaskStatus" WHERE "ProjectId" = $1 ORDER BY "ProjectTaskStatusId" ASC`;
 
-      db.query(query, (error, result) => {
+      db.query(query, [ProjectId], (error, result) => {
         if (error) {
           reject(error);
         } else {
@@ -1880,6 +1898,45 @@ class ProjectModel {
         } else {
           resolve(result.rows);
         }
+      });
+    });
+  }
+
+  static async updateTaskStatusName(
+    db,
+    ProjectTaskStatusId,
+    ProjectTaskStatusName
+  ) {
+    return new Promise((resolve, reject) => {
+      const query = `UPDATE public."ProjectTaskStatus" SET "ProjectTaskStatusName" = $1 WHERE "ProjectTaskStatusId" = $2`;
+      db.query(
+        query,
+        [ProjectTaskStatusName, ProjectTaskStatusId],
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+    });
+  }
+
+  static async deleteTaskStatus(db, ProjectTaskStatusId) {
+    return new Promise((resolve, reject) => {
+      const query = `DELETE FROM public."ProjectTaskStatus" WHERE "ProjectTaskStatusId" = $1`;
+      db.query(query, [ProjectTaskStatusId], (error, result) => {
+        resolve(result);
+      });
+    });
+  }
+
+  static async addTaskStatus(db, ProjectId, ProjectTaskStatusName) {
+    return new Promise((resolve, reject) => {
+      const query = `INSERT INTO public."ProjectTaskStatus" ("ProjectId", "ProjectTaskStatusName") VALUES ($1, $2)`;
+      db.query(query, [ProjectId, ProjectTaskStatusName], (error, result) => {
+        resolve(result);
       });
     });
   }
