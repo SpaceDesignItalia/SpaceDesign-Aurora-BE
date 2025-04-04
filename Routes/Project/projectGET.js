@@ -279,6 +279,10 @@ const projectGET = (db) => {
     ProjectController.getAllPriorities(req, res, db);
   });
 
+  router.get("/GetTicketFromCustomer", authenticateMiddleware, (req, res) => {
+    ProjectController.getTicketFromCustomer(req, res, db);
+  });
+
   return router; // Ritorna il router per consentire l'utilizzo da parte dell'app principale
 };
 
