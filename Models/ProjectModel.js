@@ -92,7 +92,7 @@ class ProjectModel {
 			INNER JOIN public."Staffer" ON "ProjectManagerId" = "StafferId"
       INNER JOIN public."StafferRole" USING("StafferId")
       INNER JOIN public."Role" USING("RoleId")
-      WHERE "ProjectId" = $1 AND "ProjectName" = $2`;
+      WHERE "ProjectId" = $1 OR "ProjectName" = $2`;
 
       db.query(query, [ProjectId, ProjectName], (error, result) => {
         if (error) {
@@ -1774,6 +1774,18 @@ class ProjectModel {
     });
   }
 
+  static async getTicketFromCustomer(db, CustomerId) {
+    return new Promise((resolve, reject) => {
+      const query = `SELECT * FROM public."ProjectTicket" WHERE "CustomerId" = $1`;
+      db.query(query, [CustomerId], (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result.rows);
+        }
+      });
+    });
+  }
   static async getCodeShareTabs(db, ProjectId) {
     return new Promise((resolve, reject) => {
       const query = `SELECT "ProjectCodeShareId", "ProjectCodeShareName", "ImageURL", "Code" FROM public."ProjectCodeShare" WHERE "ProjectId" = $1`;

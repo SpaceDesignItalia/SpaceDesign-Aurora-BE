@@ -1225,6 +1225,18 @@ class ProjectController {
     }
   }
 
+  static async getTicketFromCustomer(req, res, db) {
+    try {
+      const CustomerId = req.query.CustomerId;
+
+      const tickets = await Project.getTicketFromCustomer(db, CustomerId);
+      res.status(200).json(tickets);
+    } catch (error) {
+      console.error("Error getting tickets:", error);
+      res.status(500).send("Tickets retrieval failed");
+    }
+  }
+
   static async updateProjectCode(req, res, db) {
     try {
       const ProjectCodeShareId = req.body.ProjectCodeShareId;
