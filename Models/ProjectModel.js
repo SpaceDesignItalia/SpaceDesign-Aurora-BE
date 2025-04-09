@@ -189,7 +189,7 @@ class ProjectModel {
     return new Promise((resolve, reject) => {
       const query = `SELECT COUNT(*) AS "TasksNumber" FROM public."ProjectTask" 
       INNER JOIN public."ProjectTaskStatus" USING("ProjectTaskStatusId") 
-      WHERE "ProjectTaskStatusId" = 1  AND  "ProjectId"  =  $1`;
+      WHERE "ProjectTaskStatusId" = 1  AND  public."ProjectTask"."ProjectId"  =  $1 AND public."ProjectTask"."IsArchived" = false`;
 
       db.query(query, [ProjectId], (error, result) => {
         if (error) {
@@ -205,7 +205,7 @@ class ProjectModel {
     return new Promise((resolve, reject) => {
       const query = `SELECT COUNT(*) AS "TotalTasks" FROM public."ProjectTask" 
       INNER JOIN public."ProjectTaskStatus" USING("ProjectTaskStatusId") 
-      WHERE "ProjectTaskStatusId" <> 4  AND  "ProjectId"  =  $1`;
+      WHERE "ProjectTaskStatusId" <> 4  AND  public."ProjectTask"."ProjectId"  =  $1`;
 
       db.query(query, [ProjectId], (error, result) => {
         if (error) {
