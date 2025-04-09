@@ -45,10 +45,15 @@ app.use(
       "https://spacedesign-italia.it",
       "https://app.spacedesign-italia.it",
       "https://www.spacedesign-italia.it",
+      "https://api.spacedesign-italia.it",
+      "https://api.spacedesign-italia.it:3000",
     ], // Aggiorna con gli URL HTTPS
     credentials: true,
   })
 );
+
+// Gestisci richieste preflight OPTIONS
+app.options("*", cors());
 
 // Middleware
 app.use(bodyParser.json());
