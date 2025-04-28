@@ -1776,7 +1776,7 @@ class ProjectModel {
 
   static async getTicketFromCustomer(db, CustomerId) {
     return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM public."ProjectTicket" WHERE "CustomerId" = $1`;
+      const query = `SELECT * FROM public."ProjectTicket" JOIN public."Project" USING("ProjectId") JOIN public."TicketStatus" USING("TicketStatusId") JOIN public."TicketRequestType" USING("TicketRequestTypeId") WHERE "CustomerId" = $1`;
       db.query(query, [CustomerId], (error, result) => {
         if (error) {
           reject(error);
