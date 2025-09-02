@@ -608,12 +608,15 @@ class ProjectController {
       const FormattedDate = req.body.FormattedDate;
       const FormattedCreationDate = req.body.FormattedCreationDate;
       const ProjectId = req.body.ProjectId;
+      const StatusIds = await Project.getTaskStatusesByProjectId(db, ProjectId);
+      const StatusId = StatusIds[0].ProjectTaskStatusId;
       const Task = await Project.addTask(
         db,
         TaskData,
         FormattedDate,
         FormattedCreationDate,
-        ProjectId
+        ProjectId,
+        StatusId
       );
       this.addMemberToTask(TaskData, Task.ProjectTaskId, db);
       this.addTagToTask(TaskData, Task.ProjectTaskId, db);

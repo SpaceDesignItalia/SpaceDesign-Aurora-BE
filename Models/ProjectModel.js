@@ -957,11 +957,12 @@ class ProjectModel {
     TaskData,
     FormattedDate,
     FormattedCreationDate,
-    ProjectId
+    ProjectId,
+    StatusId
   ) {
     return new Promise((resolve, reject) => {
-      const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectTaskCreation", "ProjectId", "PriorityId")
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+      const query = `INSERT INTO public."ProjectTask"("ProjectTaskName", "ProjectTaskDescription", "ProjectTaskExpiration", "ProjectTaskCreation", "ProjectId", "PriorityId", "ProjectTaskStatusId")
+      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
 
       const values = [
         TaskData.ProjectTaskName,
@@ -970,6 +971,7 @@ class ProjectModel {
         FormattedCreationDate,
         ProjectId,
         TaskData.PriorityId,
+        StatusId,
       ];
 
       db.query(query, values, (error, result) => {
